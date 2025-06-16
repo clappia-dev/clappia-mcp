@@ -50,7 +50,7 @@ A Python-based MCP server that provides a comprehensive interface for interactin
                "command": "uv",
                "args": [
                   "--directory",
-                  "/Users/rishabhverma/Desktop/clappia-mcp",
+                  "/Users/<YOUR_DIECTORY>/Desktop/clappia-mcp",
                   "run",
                   "clappia-mcp.py"
                ]
