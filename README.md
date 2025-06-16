@@ -30,7 +30,7 @@ A Python-based MCP server that provides a comprehensive interface for interactin
 ## Prerequisites
 
 -  Python 3.8 or higher
--  pip (Python package manager) or uv (recommended)
+-  uv python package manager
 -  Access to Clappia API credentials
 -  Claude for Desktop (for local development and testing)
 -  Node.js (for running MCP servers)
@@ -46,9 +46,14 @@ A Python-based MCP server that provides a comprehensive interface for interactin
       ```json
       {
          "mcpServers": {
-            "clappia": {
-               "command": "python",
-               "args": ["clappia-mcp.py"]
+            "clappia-mcp": {
+               "command": "uv",
+               "args": [
+                  "--directory",
+                  "/Users/rishabhverma/Desktop/clappia-mcp",
+                  "run",
+                  "clappia-mcp.py"
+               ]
             }
          }
       }
@@ -72,25 +77,12 @@ A Python-based MCP server that provides a comprehensive interface for interactin
 
 4. **Set up Python Environment**:
 
-   **Option 1: Using uv (Recommended)**
-
    ```bash
    # Install uv if not already installed
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-   # Initialize project with uv
-   uv init
-
    # Install dependencies
-   uv pip install -r requirements.txt
-   ```
-
-   **Option 2: Using venv**
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
+   uv sync
    ```
 
 5. **Set up environment variables**:
@@ -121,72 +113,10 @@ clappia-mcp/
 └── .env                  # Environment variables
 ```
 
-## Development with uv
+### Usage
 
-The project uses [uv](https://docs.astral.sh/uv/guides/projects/) for dependency management and project tooling. Here are some common commands:
-
-1. **Managing Dependencies**:
-
-   ```bash
-   # Add a new dependency
-   uv add package-name
-
-   # Add with version constraint
-   uv add 'package-name==1.2.3'
-
-   # Remove a dependency
-   uv remove package-name
-
-   # Update dependencies
-   uv pip install --upgrade -r requirements.txt
-   ```
-
-2. **Running Commands**:
-
-   ```bash
-   # Run the MCP server
-   uv run python clappia-mcp.py
-
-   # Run tests
-   uv run pytest
-
-   # Run with specific Python version
-   uv run --python 3.8 python clappia-mcp.py
-   ```
-
-3. **Building Distributions**:
-
-   ```bash
-   # Build source and wheel distributions
-   uv build
-   ```
-
-4. **Environment Management**:
-
-   ```bash
-   # Sync environment with dependencies
-   uv sync
-
-   # Activate environment
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-## Usage
-
-### Starting the Server
-
-1. **Direct Python Execution**:
-
-   ```bash
-   python clappia-mcp.py
-   ```
-
-2. **Through Claude Desktop**:
-   -  The server will automatically start when Claude Desktop launches
-   -  Access tools through the Claude Desktop interface
-   -  Monitor server logs in:
-      -  macOS: `~/Library/Logs/Claude/mcp*.log`
-      -  Windows: `%APPDATA%\Claude\logs\mcp*.log`
+-  The server will automatically start when Claude Desktop launches
+-  Access tools through the Claude Desktop interface
 
 ### Troubleshooting
 
@@ -396,16 +326,6 @@ The server implements comprehensive error handling for:
 -  Server errors
 
 All errors are logged with appropriate context for debugging.
-
-## Logging
-
-Logs are stored in the `logs` directory with timestamps. Each log entry includes:
-
--  Timestamp
--  Log level
--  Module name
--  Message
--  Additional context (if applicable)
 
 ## Security
 
