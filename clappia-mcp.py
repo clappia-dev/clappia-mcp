@@ -8,11 +8,9 @@ from typing import Dict, Any, Optional, List
 
 from tools.get_submissions import get_app_submissions
 from tools.get_submissions_aggregation import get_app_submissions_aggregation
-from tools.get_definition import get_app_definition
-from tools.create_submission import create_app_submission
-from tools.edit_submission import edit_app_submission
 from tools.update_submission_status import update_app_submission_status
 from tools.update_submission_owners import update_app_submission_owners
+from clappia_tools import ClappiaClient
 from tools.create_app import create_app
 from tools.add_field import add_field_to_app
 from tools.update_field import update_field_in_app
@@ -155,8 +153,9 @@ def get_clappia_app_definition(app_id: str,
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Getting app definition for app: {app_id}")
-    return get_app_definition(app_id, requesting_user_email_address, language, strip_html, include_tags)
+    logger.info(f"Getting app definition for app: {app_id}")    
+    client = get_clappia_client()
+    return client.get_app_definition(app_id, language, strip_html, include_tags)
 
 @mcp.tool()
 def create_clappia_app_submission(app_id: str, data: Dict[str, Any], 
@@ -182,8 +181,9 @@ def create_clappia_app_submission(app_id: str, data: Dict[str, Any],
     
     logger.info(f"Creating submission for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"Data fields: {list(data.keys()) if data else 'None'}")
-    
-    result = create_app_submission(app_id, data, requesting_user_email_address)
+
+    client = get_clappia_client()
+    result = client.create_submission(app_id, data, requesting_user_email_address)
     
     logger.info(f"Submission creation result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
@@ -214,7 +214,8 @@ def edit_clappia_submission(app_id: str, submission_id: str,
     logger.info(f"Editing submission {submission_id} for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"Data fields to update: {list(data.keys()) if data else 'None'}")
     
-    result = edit_app_submission(app_id, submission_id, data, requesting_user_email_address)
+    client = get_clappia_client()
+    result = client.edit_submission(app_id, submission_id, data, requesting_user_email_address)
     
     logger.info(f"Submission edit result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
@@ -585,6 +586,13 @@ def update_field_in_clappia_app(app_id: str, requesting_user_email_address: str,
     
     logger.info(f"Update field result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
+
+def get_clappia_client():
+    return ClappiaClient(
+        api_key=os.getenv("CLAPPIA_API_KEY"),
+        base_url=os.getenv("CLAPPIA_BASE_URL"),
+        workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
+    )
 
 def main():
     """Start Clappia MCP server with error handling."""
