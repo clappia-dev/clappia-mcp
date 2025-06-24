@@ -34,23 +34,16 @@ logger = setup_logging()
 
 mcp = FastMCP()
 
-def validate_required_params(workplace_id: str, email: str) -> tuple[bool, str]:
+def validate_required_params(email: str) -> tuple[bool, str]:
     """
-    Validate required workplace ID and email parameters.
+    Validate required email parameter.
     
     Args:
-        workplace_id: Workplace ID to validate
         email: Email address to validate
         
     Returns:
         tuple[bool, str]: (is_valid, error_message)
     """
-    if not workplace_id or not workplace_id.strip():
-        return False, "Workplace ID is required. Please provide a valid workplace ID."
-    
-    if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-        return False, "Invalid workplace ID format. Must contain only uppercase letters and numbers."
-    
     if not email or not email.strip():
         return False, "Email address is required. Please provide a valid email address."
     
@@ -60,14 +53,13 @@ def validate_required_params(workplace_id: str, email: str) -> tuple[bool, str]:
     return True, ""
 
 @mcp.tool()
-def get_clappia_submissions(workplace_id: str, app_id: str, 
+def get_clappia_submissions(app_id: str, 
                            requesting_user_email_address: str,
                            page_size: int = 10, filters: Optional[dict] = None) -> str:
     """
     Retrieve Clappia form submissions with optional filtering.
 
     Required Parameters:
-        workplace_id (str): Workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application identifier (e.g., "ODT537440"). Must be uppercase letters and numbers.
 
@@ -77,17 +69,20 @@ def get_clappia_submissions(workplace_id: str, app_id: str,
 
     Returns:
         str: JSON string with submission records and metadata, or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Getting submissions for workplace: {workplace_id}, app: {app_id}")
-    return get_app_submissions(workplace_id, app_id, page_size, filters, requesting_user_email_address)
+    logger.info(f"Getting submissions for app: {app_id}")
+    return get_app_submissions(app_id, requesting_user_email_address, page_size, filters)
 
 @mcp.tool()
-def get_clappia_submissions_aggregation(workplace_id: str, app_id: str, requesting_user_email_address: str,
+def get_clappia_submissions_aggregation(app_id: str, requesting_user_email_address: str,
                                       dimensions: Optional[List[dict]] = None, 
                                       aggregation_dimensions: Optional[List[dict]] = None,
                                       x_axis_labels: Optional[List[str]] = None,
@@ -98,7 +93,6 @@ def get_clappia_submissions_aggregation(workplace_id: str, app_id: str, requesti
     Aggregate Clappia submission data for analytics.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "ODT537440"). Must be uppercase letters and numbers.
 
@@ -112,15 +106,17 @@ def get_clappia_submissions_aggregation(workplace_id: str, app_id: str, requesti
 
     Returns:
         str: JSON string with tabular data or error message.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Getting submissions aggregation for workplace: {workplace_id}, app: {app_id}")
+    logger.info(f"Getting submissions aggregation for app: {app_id}")
     return get_app_submissions_aggregation(
-        workplace_id=workplace_id,
         app_id=app_id,
         dimensions=dimensions or [],
         aggregation_dimensions=aggregation_dimensions or [],
@@ -132,7 +128,7 @@ def get_clappia_submissions_aggregation(workplace_id: str, app_id: str, requesti
     )
 
 @mcp.tool()
-def get_clappia_app_definition(app_id: str, workplace_id: str,
+def get_clappia_app_definition(app_id: str,
                               requesting_user_email_address: str,
                               language: str = "en", strip_html: bool = True,
                               include_tags: bool = True) -> str:
@@ -140,7 +136,6 @@ def get_clappia_app_definition(app_id: str, workplace_id: str,
     Fetch Clappia app structure and field definitions.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "ODT537440"). Must be uppercase letters and numbers.
 
@@ -151,51 +146,55 @@ def get_clappia_app_definition(app_id: str, workplace_id: str,
 
     Returns:
         JSON string with app metadata, fields, and structure or error message.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Getting app definition for app: {app_id}, workplace: {workplace_id}")
-    return get_app_definition(app_id, workplace_id, requesting_user_email_address, language, strip_html, include_tags)
+    logger.info(f"Getting app definition for app: {app_id}")
+    return get_app_definition(app_id, requesting_user_email_address, language, strip_html, include_tags)
 
 @mcp.tool()
-def create_clappia_app_submission(app_id: str, workplace_id: str, data: Dict[str, Any], 
+def create_clappia_app_submission(app_id: str, data: Dict[str, Any], 
                                  requesting_user_email_address: str) -> str:
     """
     Create a new submission in a Clappia application.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         data (Dict[str, Any]): Dictionary of field key-value pairs to submit.
 
     Returns:
         Success message with submission details or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
     logger.info(f"Creating submission for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"Data fields: {list(data.keys()) if data else 'None'}")
     
-    result = create_app_submission(app_id, workplace_id, data, requesting_user_email_address)
+    result = create_app_submission(app_id, data, requesting_user_email_address)
     
     logger.info(f"Submission creation result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
 
 @mcp.tool()
-def edit_clappia_submission(app_id: str, workplace_id: str, submission_id: str, 
+def edit_clappia_submission(app_id: str, submission_id: str, 
                            data: Dict[str, Any], requesting_user_email_address: str) -> str:
     """
     Edit an existing submission in a Clappia application.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         submission_id (str): ID of the submission to be edited.
@@ -203,29 +202,31 @@ def edit_clappia_submission(app_id: str, workplace_id: str, submission_id: str,
 
     Returns:
         Success message with updated submission details or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Editing submission {submission_id} for app: {app_id}, workplace: {workplace_id}, user: {requesting_user_email_address}")
+    logger.info(f"Editing submission {submission_id} for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"Data fields to update: {list(data.keys()) if data else 'None'}")
     
-    result = edit_app_submission(app_id, workplace_id, submission_id, data, requesting_user_email_address)
+    result = edit_app_submission(app_id, submission_id, data, requesting_user_email_address)
     
     logger.info(f"Submission edit result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
 
 @mcp.tool()
-def update_clappia_submission_status(app_id: str, workplace_id: str, submission_id: str, 
+def update_clappia_submission_status(app_id: str, submission_id: str, 
                                    status_name: str, requesting_user_email_address: str, 
                                    comments: Optional[str] = None) -> str:
     """
     Update the status of an existing submission in a Clappia application.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         submission_id (str): ID of the submission to update status.
@@ -236,29 +237,31 @@ def update_clappia_submission_status(app_id: str, workplace_id: str, submission_
 
     Returns:
         Success message with updated status details or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Updating status for submission {submission_id} to '{status_name}' for app: {app_id}, workplace: {workplace_id}, user: {requesting_user_email_address}")
+    logger.info(f"Updating status for submission {submission_id} to '{status_name}' for app: {app_id}, user: {requesting_user_email_address}")
     if comments:
         logger.info(f"Status update comments: {comments[:100]}{'...' if len(comments) > 100 else ''}")
     
-    result = update_app_submission_status(app_id, workplace_id, submission_id, status_name, requesting_user_email_address, comments)
+    result = update_app_submission_status(app_id, submission_id, status_name, requesting_user_email_address, comments)
     
     logger.info(f"Status update result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
 
 @mcp.tool()
-def update_clappia_submission_owners(app_id: str, workplace_id: str, submission_id: str, 
+def update_clappia_submission_owners(app_id: str, submission_id: str, 
                                    email_ids: List[str], requesting_user_email_address: str) -> str:
     """
     Update the owners of an existing submission in a Clappia application.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         submission_id (str): ID of the submission to update owners.
@@ -266,41 +269,46 @@ def update_clappia_submission_owners(app_id: str, workplace_id: str, submission_
 
     Returns:
         Success message with updated ownership details or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Updating owners for submission {submission_id} for app: {app_id}, workplace: {workplace_id}, user: {requesting_user_email_address}")
+    logger.info(f"Updating owners for submission {submission_id} for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"New owners: {email_ids}")
     
-    result = update_app_submission_owners(app_id, workplace_id, submission_id, email_ids, requesting_user_email_address)
+    result = update_app_submission_owners(app_id, submission_id, email_ids, requesting_user_email_address)
     
     logger.info(f"Owners update result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
 
 @mcp.tool()
-def create_clappia_app(workplace_id: str, app_name: str, requesting_user_email_address: str, 
+def create_clappia_app(app_name: str, requesting_user_email_address: str, 
                       sections: List[Dict[str, Any]]) -> str:
     """
     Create a new Clappia application with specified sections and fields.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_name (str): Name of the new application (e.g., "Employee Survey"). Minimum 3 characters.
         sections (List[Dict[str, Any]]): List of section dictionaries that define the app's structure.
 
     Returns:
         Success message with app ID and URL or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Creating app '{app_name}' in workplace: {workplace_id} for user: {requesting_user_email_address}")
+    logger.info(f"Creating app '{app_name}' for user: {requesting_user_email_address}")
     logger.info(f"Sections count: {len(sections) if sections else 0}")
     
     try:
@@ -321,7 +329,7 @@ def create_clappia_app(workplace_id: str, app_name: str, requesting_user_email_a
             )
             section_objects.append(section)
         
-        result = create_app(workplace_id, app_name, requesting_user_email_address, section_objects)
+        result = create_app(app_name, requesting_user_email_address, section_objects)
         
     except Exception as e:
         result = f"Error converting sections: {str(e)}"
@@ -330,7 +338,7 @@ def create_clappia_app(workplace_id: str, app_name: str, requesting_user_email_a
     return result
 
 @mcp.tool()
-def add_field_to_clappia_app(app_id: str, workplace_id: str, requesting_user_email_address: str,
+def add_field_to_clappia_app(app_id: str, requesting_user_email_address: str,
                             section_index: int, field_index: int, field_type: str, label: str,
                             description: Optional[str] = None,
                             required: bool = False,
@@ -356,7 +364,6 @@ def add_field_to_clappia_app(app_id: str, workplace_id: str, requesting_user_ema
     Add a new field to an existing Clappia application at a specific position.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         section_index (int): Index of the section to add the field to (starts from 0).
@@ -388,9 +395,12 @@ def add_field_to_clappia_app(app_id: str, workplace_id: str, requesting_user_ema
 
     Returns:
         Success message with generated field name or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
@@ -440,7 +450,6 @@ def add_field_to_clappia_app(app_id: str, workplace_id: str, requesting_user_ema
     
     result = add_field_to_app(
         app_id=app_id,
-        workplace_id=workplace_id,
         requesting_user_email_address=requesting_user_email_address,
         section_index=section_index,
         field_index=field_index,
@@ -453,7 +462,7 @@ def add_field_to_clappia_app(app_id: str, workplace_id: str, requesting_user_ema
     return result
 
 @mcp.tool()
-def update_field_in_clappia_app(app_id: str, workplace_id: str, requesting_user_email_address: str,
+def update_field_in_clappia_app(app_id: str, requesting_user_email_address: str,
                                field_name: str,
                                label: Optional[str] = None,
                                description: Optional[str] = None,
@@ -480,7 +489,6 @@ def update_field_in_clappia_app(app_id: str, workplace_id: str, requesting_user_
     Update an existing field in a Clappia application with new configuration.
 
     Required Parameters:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user. Must be a valid email format.
         app_id (str): Application ID (e.g., "MFX093412"). Must be uppercase letters and numbers.
         field_name (str): Variable name of the existing field to update.
@@ -510,13 +518,16 @@ def update_field_in_clappia_app(app_id: str, workplace_id: str, requesting_user_
 
     Returns:
         Success message with field name confirmation or error message if the request fails.
+
+    Notes:
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     """
     # Validate required parameters
-    is_valid, error_msg = validate_required_params(workplace_id, requesting_user_email_address)
+    is_valid, error_msg = validate_required_params(requesting_user_email_address)
     if not is_valid:
         return f"Error: {error_msg}"
     
-    logger.info(f"Updating field '{field_name}' in app: {app_id}, workplace: {workplace_id}, user: {requesting_user_email_address}")
+    logger.info(f"Updating field '{field_name}' in app: {app_id}, user: {requesting_user_email_address}")
     
     kwargs = {}
     if label is not None:
@@ -567,7 +578,6 @@ def update_field_in_clappia_app(app_id: str, workplace_id: str, requesting_user_
     
     result = update_field_in_app(
         app_id=app_id,
-        workplace_id=workplace_id,
         requesting_user_email_address=requesting_user_email_address,
         field_name=field_name,
         **kwargs
@@ -580,10 +590,10 @@ def main():
     """Start Clappia MCP server with error handling."""
     try:
         logger.info("Starting Clappia MCP server")
-        logger.info("IMPORTANT: All tools require workplace_id and requesting_user_email_address to be explicitly provided")
-        logger.info("Do not use default values for these parameters")
-        logger.info("workplace_id must be uppercase letters and numbers (e.g., 'ON83542')")
+        logger.info("IMPORTANT: All tools require requesting_user_email_address to be explicitly provided")
+        logger.info("Do not use default values for this parameter")
         logger.info("requesting_user_email_address must be a valid email format")
+        logger.info("CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID must be set as environment variables")
         mcp.run(transport='stdio')
     except KeyboardInterrupt:
         logger.info("Server shutdown requested by user")

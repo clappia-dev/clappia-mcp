@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -153,15 +154,15 @@ class ClappiaValidator:
 
 class ClappiaAPIClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -189,11 +190,8 @@ class ClappiaAPIClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def get_app_submissions(self, workplace_id: str, app_id: str, requesting_user_email_address: str,
+    def get_app_submissions(self, app_id: str, requesting_user_email_address: str,
                        page_size: int = 10, filters: Optional[Filters] = None) -> str:
-        
-        if not workplace_id or not workplace_id.strip():
-            return "Error: workplace_id is required and cannot be empty"
         
         if not app_id or not app_id.strip():
             return "Error: app_id is required and cannot be empty"
@@ -220,11 +218,11 @@ class ClappiaAPIClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/submissions/getSubmissions"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/submissions/getSubmissions"
             headers = self._get_headers()
             
             payload = {
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "appId": app_id.strip(),
                 "requestingUserEmailAddress": requesting_user_email_address.strip(),
                 "pageSize": page_size,
@@ -250,13 +248,12 @@ class ClappiaAPIClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def get_app_submissions(workplace_id: str, app_id: str, requesting_user_email_address: str, 
+def get_app_submissions(app_id: str, requesting_user_email_address: str, 
                    page_size: int = 10, filters: Optional[Filters] = None) -> str:
     """
     Retrieve Clappia form submissions with optional filtering.
 
     Args:
-        workplace_id (str): Workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
         app_id (str): Application identifier (e.g., "ODT537440"). Must be uppercase letters and numbers.
         requesting_user_email_address (str): Email address of the requesting user (must have access to the app).
         page_size (int, optional): Number of results to retrieve (1-1000, default: 10).
@@ -274,7 +271,7 @@ def get_app_submissions(workplace_id: str, app_id: str, requesting_user_email_ad
         str: JSON string with submission records and metadata, or error message if the request fails.
 
     Notes:
-        - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
         - Validates workplace_id and app_id format (uppercase letters/numbers).
         - Page size is limited to 1000 records per request for performance.
         - Filters support various operators for flexible querying.
@@ -283,4 +280,4 @@ def get_app_submissions(workplace_id: str, app_id: str, requesting_user_email_ad
         - Standard fields available for filtering: $submissionId, $owner, $status, $createdAt, $updatedAt, $state
     """
     client = ClappiaAPIClient()
-    return client.get_app_submissions(workplace_id, app_id, requesting_user_email_address, page_size, filters)
+    return client.get_app_submissions(app_id, requesting_user_email_address, page_size, filters)
