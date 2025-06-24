@@ -6,6 +6,7 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -67,16 +68,6 @@ class ClappiaAddFieldValidator:
         return True, ""
     
     @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
     def validate_email(email: str) -> tuple[bool, str]:
         if not email or not email.strip():
             return False, "Email is required and cannot be empty"
@@ -128,21 +119,21 @@ class ClappiaAddFieldValidator:
 
 class ClappiaAddFieldClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
-    def _get_headers(self, workplace_id: str) -> dict:
+    def _get_headers(self) -> dict:
         return {
             "x-api-key": self.api_key,
-            "workplaceId": workplace_id,
+            "workplaceId": self.workplace_id,
             "Content-Type": "application/json"
         }
     
@@ -226,7 +217,7 @@ class ClappiaAddFieldClient:
         
         return payload
     
-    def add_field(self, app_id: str, workplace_id: str, requesting_user_email_address: str,
+    def add_field(self, app_id: str, requesting_user_email_address: str,
                   section_index: int, field_index: int, field_type: str, label: str,
                   **kwargs) -> str:
         
@@ -234,10 +225,6 @@ class ClappiaAddFieldClient:
         is_valid, error_msg = ClappiaAddFieldValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaAddFieldValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaAddFieldValidator.validate_email(requesting_user_email_address)
         if not is_valid:
@@ -271,7 +258,7 @@ class ClappiaAddFieldClient:
             # Create request object
             request = AddFieldRequest(
                 app_id=app_id,
-                workplace_id=workplace_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 section_index=section_index,
                 field_index=field_index,
@@ -280,8 +267,8 @@ class ClappiaAddFieldClient:
                 **kwargs
             )
             
-            url = f"{self.base_url}/appdefinitionv2/addField"
-            headers = self._get_headers(workplace_id)
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/appdefinitionv2/addField"
+            headers = self._get_headers()
             payload = self._build_payload(request)
             
             response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=self.timeout)
@@ -299,7 +286,7 @@ class ClappiaAddFieldClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def add_field_to_app(app_id: str, workplace_id: str, requesting_user_email_address: str,
+def add_field_to_app(app_id: str, requesting_user_email_address: str,
                      section_index: int, field_index: int, field_type: str, label: str,
                      **kwargs) -> str:
     """
@@ -309,7 +296,6 @@ def add_field_to_app(app_id: str, workplace_id: str, requesting_user_email_addre
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Workplace identifier (e.g., "DEV161318"). Must be uppercase letters and numbers.
     - `requesting_user_email_address`: Email address of the user adding the field (must have app edit permissions).
     - `section_index`: Index of the section to add the field to (starts from 0).
     - `field_index`: Position within the section where the field should be inserted (starts from 0).
@@ -352,33 +338,33 @@ def add_field_to_app(app_id: str, workplace_id: str, requesting_user_email_addre
     **Usage Examples**:
     1. **Add Text Field**:
        ```python
-       add_field_to_app("APP123", "WS456", "user@company.com", 0, 2, 
+       add_field_to_app("APP123", "user@company.com", 0, 2, 
                        "singleLineText", "Employee ID", required=True)
        ```
 
     2. **Add Dropdown with Options**:
        ```python
-       add_field_to_app("APP123", "WS456", "user@company.com", 1, 0,
+       add_field_to_app("APP123", "user@company.com", 1, 0,
                        "dropDown", "Department", 
                        options=["HR", "IT", "Finance", "Marketing"], required=True)
        ```
 
     3. **Add File Upload**:
        ```python
-       add_field_to_app("APP123", "WS456", "user@company.com", 0, 1,
+       add_field_to_app("APP123", "user@company.com", 0, 1,
                        "file", "Resume Upload",
                        allowed_file_types=["documents"], max_file_allowed=1)
        ```
 
     4. **Add Calculation Field**:
        ```python
-       add_field_to_app("APP123", "WS456", "user@company.com", 2, 0,
+       add_field_to_app("APP123", "user@company.com", 2, 0,
                        "calculationsAndLogic", "Total Amount",
                        formula="quantity * price", hidden=False)
        ```
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY, CLAPPIA_WORKPLACE_ID, and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
     - User must have edit permissions on the target app.
     - Section and field indices start from 0.
     - Field is inserted at the specified position, shifting existing fields down.
@@ -386,5 +372,5 @@ def add_field_to_app(app_id: str, workplace_id: str, requesting_user_email_addre
     - Returns auto-generated field name for use in submissions and API calls.
     """
     client = ClappiaAddFieldClient()
-    return client.add_field(app_id, workplace_id, requesting_user_email_address,
+    return client.add_field(app_id, requesting_user_email_address,
                            section_index, field_index, field_type, label, **kwargs)

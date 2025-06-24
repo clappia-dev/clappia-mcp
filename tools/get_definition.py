@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -65,16 +66,6 @@ class ClappiaAppDefinitionValidator:
         return True, ""
     
     @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
     def validate_language(language: str) -> tuple[bool, str]:
         if language not in ClappiaAppDefinitionValidator.VALID_LANGUAGES:
             return False, f"Language must be one of: {', '.join(ClappiaAppDefinitionValidator.VALID_LANGUAGES)}"
@@ -83,15 +74,15 @@ class ClappiaAppDefinitionValidator:
 
 class ClappiaAppDefinitionClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     
@@ -131,17 +122,13 @@ class ClappiaAppDefinitionClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def get_app_definition(self, app_id: str, workplace_id: str, requesting_user_email_address: str,
+    def get_app_definition(self, app_id: str, requesting_user_email_address: str,
                           language: str = "en", strip_html: bool = True,
                           include_tags: bool = True) -> str:
         
         is_valid, error_msg = ClappiaAppDefinitionValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaAppDefinitionValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaAppDefinitionValidator.validate_language(language)
         if not is_valid:
@@ -152,12 +139,12 @@ class ClappiaAppDefinitionClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/appdefinition-external/getAppDefinition"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/appdefinition-external/getAppDefinition"
             headers = self._get_headers()
             
             params = {
                 "appId": app_id.strip(),
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "requestingUserEmailAddress": requesting_user_email_address,
                 "language": language,
                 "stripHtml": str(strip_html).lower(),
@@ -180,7 +167,7 @@ class ClappiaAppDefinitionClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def get_app_definition(app_id: str, workplace_id: str, requesting_user_email_address: str,
+def get_app_definition(app_id: str, requesting_user_email_address: str,
                       language: str = "en", strip_html: bool = True,
                       include_tags: bool = True) -> str:
     """
@@ -196,7 +183,6 @@ def get_app_definition(app_id: str, workplace_id: str, requesting_user_email_add
     
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "QGU236634"). Must be uppercase letters and numbers.
-    - `workplace_id`: Parent workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `language`: Language code for translations ("en" [default], "es", "fr", "de").
     - `strip_html`: If True (default), removes HTML from text fields; if False, preserves HTML.
     - `include_tags`: If True (default), includes metadata tags; if False, returns basic structure.
@@ -215,9 +201,10 @@ def get_app_definition(app_id: str, workplace_id: str, requesting_user_email_add
     - For planning integrations or mapping data to other systems.
 
     **Notes**:
-    - Requires DEV_API_KEY environment variable and CLAPPIA_EXTERNAL_API_BASE_URL environment variable
+    - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     - Validates inputs: app_id/workplace_id (uppercase letters/numbers), language (en/es/fr/de).
     - Handles API errors, timeouts, and invalid responses.
     """
     client = ClappiaAppDefinitionClient()
-    return client.get_app_definition(app_id, workplace_id, requesting_user_email_address, language, strip_html, include_tags)
+    return client.get_app_definition(app_id, requesting_user_email_address,
+                                     language, strip_html, include_tags)

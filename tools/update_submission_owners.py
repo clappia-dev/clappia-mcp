@@ -6,6 +6,7 @@ from typing import List
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -26,16 +27,6 @@ class ClappiaUpdateOwnersValidator:
         
         if not re.match(r'^[A-Z0-9]+$', app_id.strip()):
             return False, "App ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
         
         return True, ""
     
@@ -75,15 +66,16 @@ class ClappiaUpdateOwnersValidator:
 
 class ClappiaUpdateOwnersClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
+        self.base_url = CLAPPIA_EXTERNAL_API_BASE_URL
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -110,16 +102,12 @@ class ClappiaUpdateOwnersClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def update_app_submission_owners(self, app_id: str, workplace_id: str, submission_id: str, 
+    def update_app_submission_owners(self, app_id: str, submission_id: str, 
                                email_ids: List[str], email: str) -> str:
         
         is_valid, error_msg = ClappiaUpdateOwnersValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaUpdateOwnersValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaUpdateOwnersValidator.validate_submission_id(submission_id)
         if not is_valid:
@@ -145,7 +133,7 @@ class ClappiaUpdateOwnersClient:
             
             payload = {
                 "appId": app_id.strip(),
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "submissionId": submission_id.strip(),
                 "requestingUserEmailAddress": email.strip(),
                 "emailIds": cleaned_email_ids
@@ -167,7 +155,7 @@ class ClappiaUpdateOwnersClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def update_app_submission_owners(app_id: str, workplace_id: str, submission_id: str, 
+def update_app_submission_owners(app_id: str, submission_id: str, 
                                    email_ids: List[str], email: str) -> str:
     """
     Update the owners of an existing submission in a Clappia application.
@@ -176,7 +164,6 @@ def update_app_submission_owners(app_id: str, workplace_id: str, submission_id: 
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `submission_id`: ID of the submission to update owners (obtained from get_submissions or create response).
     - `email_ids`: List of email addresses to set as new owners (e.g., ["john@company.com", "jane@company.com"]).
     - `email`: Email address of the requesting user (must have Submit permissions on the app).
@@ -191,7 +178,7 @@ def update_app_submission_owners(app_id: str, workplace_id: str, submission_id: 
     - **Backup Ownership**: Add secondary owners for continuity and coverage.
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     - Requesting user must have Submit permissions on the target app.
     - All email addresses in `email_ids` must be valid and have access to the app.
     - This replaces existing owners with the new list (not additive).
@@ -199,4 +186,4 @@ def update_app_submission_owners(app_id: str, workplace_id: str, submission_id: 
     - Handles API errors, timeouts, and invalid responses.
     """
     client = ClappiaUpdateOwnersClient()
-    return client.update_app_submission_owners(app_id, workplace_id, submission_id, email_ids, email)
+    return client.update_app_submission_owners(app_id, submission_id, email_ids, email)

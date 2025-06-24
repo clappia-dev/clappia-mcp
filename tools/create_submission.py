@@ -6,6 +6,7 @@ from typing import Dict, Any
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -29,16 +30,6 @@ class ClappiaSubmissionValidator:
         return True, ""
     
     @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
     def validate_email(email: str) -> tuple[bool, str]:
         if not email or not email.strip():
             return False, "Email is required and cannot be empty"
@@ -58,15 +49,15 @@ class ClappiaSubmissionValidator:
 
 class ClappiaSubmissionClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -93,7 +84,7 @@ class ClappiaSubmissionClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def create_app_submission(self, app_id: str, workplace_id: str, data: Dict[str, Any], email: str) -> str:
+    def create_app_submission(self, app_id: str, data: Dict[str, Any], email: str) -> str:
         
         is_valid, error_msg = ClappiaSubmissionValidator.validate_app_id(app_id)
         if not is_valid:
@@ -104,10 +95,6 @@ class ClappiaSubmissionClient:
         if not is_valid:
             return f"Error: Invalid email - {error_msg}"
     
-        is_valid, error_msg = ClappiaSubmissionValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
-        
         is_valid, error_msg = ClappiaSubmissionValidator.validate_data(data)
         if not is_valid:
             return f"Error: Invalid data - {error_msg}"
@@ -117,14 +104,14 @@ class ClappiaSubmissionClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/submissions/create"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/submissions/create"
             headers = self._get_headers()
             
             payload = {
                 "appId": app_id.strip(),
                 "requestingUserEmailAddress": email.strip(),
                 "data": data,
-                "workplaceId": workplace_id.strip()
+                "workplaceId": self.workplace_id
             }
 
             
@@ -143,7 +130,7 @@ class ClappiaSubmissionClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def create_app_submission(app_id: str, workplace_id: str, data: Dict[str, Any], email: str) -> str:
+def create_app_submission(app_id: str, data: Dict[str, Any], email: str) -> str:
     """
     Creates a new submission in a Clappia application with the provided data.
 
@@ -151,7 +138,6 @@ def create_app_submission(app_id: str, workplace_id: str, data: Dict[str, Any], 
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Unique workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `data`: Dictionary of field key-value pairs to submit (e.g., {"name": "John", "age": 30}).
     - `email`: Email address of the user creating the submission (becomes the submission owner).
 
@@ -163,10 +149,10 @@ def create_app_submission(app_id: str, workplace_id: str, data: Dict[str, Any], 
     - **Integration**: Push data from external systems into Clappia apps.
 
     **Notes**:
-    - Requires DEV_API_KEY, CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     - Validates inputs: app_id (uppercase letters/numbers), email format, and data structure.
     - Handles API errors, timeouts, and invalid responses.
     - For bulk processing: process Excel rows sequentially, skip file upload fields if errors occur.
     """
     client = ClappiaSubmissionClient()
-    return client.create_app_submission(app_id,workplace_id, data, email)
+    return client.create_app_submission(app_id, data, email)

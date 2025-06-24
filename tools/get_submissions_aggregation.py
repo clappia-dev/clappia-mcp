@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -173,15 +174,15 @@ class ClappiaValidator:
 
 class ClappiaAggregationAPIClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -208,7 +209,7 @@ class ClappiaAggregationAPIClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def get_app_submissions_aggregation(self, workplace_id: str, app_id: str,
+    def get_app_submissions_aggregation(self, app_id: str,
                                   dimensions: List[Dimension], 
                                   aggregation_dimensions: List[AggregationDimension],
                                   x_axis_labels: List[str],
@@ -216,9 +217,6 @@ class ClappiaAggregationAPIClient:
                                   forward: bool = True,
                                   page_size: int = 1000,
                                   filters: Optional[Filters] = None) -> str:
-        
-        if not workplace_id or not workplace_id.strip():
-            return "Error: workplace_id is required and cannot be empty"
         
         if not app_id or not app_id.strip():
             return "Error: app_id is required and cannot be empty"
@@ -231,11 +229,11 @@ class ClappiaAggregationAPIClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/submissions/getSubmissionsAggregation"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/submissions/getSubmissionsAggregation"
             headers = self._get_headers()
             
             payload = {
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "appId": app_id.strip(),
                 "requestingUserEmailAddress": requesting_user_email_address,
                 "forward": forward,
@@ -264,7 +262,7 @@ class ClappiaAggregationAPIClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def get_app_submissions_aggregation(workplace_id: str, app_id: str,
+def get_app_submissions_aggregation(app_id: str,
                                     dimensions: List[Dimension] = None, 
                                     aggregation_dimensions: List[AggregationDimension] = None,
                                     x_axis_labels: List[str] = None,
@@ -276,7 +274,6 @@ def get_app_submissions_aggregation(workplace_id: str, app_id: str,
     Aggregate Clappia submission data for analytics and reporting.
 
     Args:
-        workplace_id (str): Workplace ID (e.g., "ON83542"). Uppercase letters/numbers.
         app_id (str): Application ID (e.g., "ODT537440"). Uppercase letters/numbers.
         dimensions (List[Dimension], optional): Fields to group by. Each Dimension should have:
             - fieldName (str): Name of the field to group by
@@ -312,7 +309,7 @@ def get_app_submissions_aggregation(workplace_id: str, app_id: str,
         str: JSON string with tabular data (e.g., '[["Region", "Count"], ["North", 10], ["South", 15]]') or error message.
 
     Notes:
-        - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+        - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
         - At least one dimension or aggregation_dimension is required.
         - The response format is a 2D array where the first row contains headers and subsequent rows contain data.
     """
@@ -325,6 +322,6 @@ def get_app_submissions_aggregation(workplace_id: str, app_id: str,
     
     client = ClappiaAggregationAPIClient()
     return client.get_app_submissions_aggregation(
-        workplace_id, app_id, dimensions, aggregation_dimensions, 
+        app_id, dimensions, aggregation_dimensions, 
         x_axis_labels, requesting_user_email_address, forward, page_size, filters
     )

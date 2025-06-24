@@ -6,6 +6,7 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -26,16 +27,6 @@ class ClappiaUpdateStatusValidator:
         
         if not re.match(r'^[A-Z0-9]+$', app_id.strip()):
             return False, "App ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
         
         return True, ""
     
@@ -72,15 +63,15 @@ class ClappiaUpdateStatusValidator:
 
 class ClappiaUpdateStatusClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -107,16 +98,12 @@ class ClappiaUpdateStatusClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def update_app_submission_status(self, app_id: str, workplace_id: str, submission_id: str, 
+    def update_app_submission_status(self, app_id: str, submission_id: str, 
                                 status_name: str, email: str, comments: Optional[str] = None) -> str:
         
         is_valid, error_msg = ClappiaUpdateStatusValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaUpdateStatusValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaUpdateStatusValidator.validate_submission_id(submission_id)
         if not is_valid:
@@ -139,12 +126,12 @@ class ClappiaUpdateStatusClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/submissions/updateStatus"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/submissions/updateStatus"
             headers = self._get_headers()
             
             payload = {
                 "appId": app_id.strip(),
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "submissionId": submission_id.strip(),
                 "requestingUserEmailAddress": email.strip(),
                 "status": status
@@ -166,7 +153,7 @@ class ClappiaUpdateStatusClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def update_app_submission_status(app_id: str, workplace_id: str, submission_id: str, 
+def update_app_submission_status(app_id: str, submission_id: str, 
                                    status_name: str, email: str, comments: Optional[str] = None) -> str:
     """
     Update the status of an existing submission in a Clappia application.
@@ -175,7 +162,6 @@ def update_app_submission_status(app_id: str, workplace_id: str, submission_id: 
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `submission_id`: ID of the submission to update status (obtained from get_submissions or create response).
     - `status_name`: New status name (e.g., "Approved", "Rejected", "In Progress", "Completed").
     - `email`: Email address of the requesting user (must have status update permissions on the app).
@@ -190,11 +176,11 @@ def update_app_submission_status(app_id: str, workplace_id: str, submission_id: 
     - **Rejection Handling**: Set status to "Rejected" with detailed rejection reasons.
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     - User must have status update permissions on the target app.
     - Status names must match those defined in the app's workflow configuration.
     - Comments are optional but recommended for audit trail and transparency.
     - Validates all inputs: IDs (uppercase letters/numbers), email format, and status structure.
     """
     client = ClappiaUpdateStatusClient()
-    return client.update_app_submission_status(app_id, workplace_id, submission_id, status_name, email, comments)
+    return client.update_app_submission_status(app_id, submission_id, status_name, email, comments)
