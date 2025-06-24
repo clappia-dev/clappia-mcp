@@ -6,6 +6,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -98,21 +99,21 @@ class ClappiaCreateAppValidator:
 
 class ClappiaCreateAppClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
-    def _get_headers(self, workplace_id: str) -> dict:
+    def _get_headers(self) -> dict:
         return {
             "x-api-key": self.api_key,
-            "workplaceId": workplace_id,
+            "workplaceId": self.workplace_id,
             "Content-Type": "application/json"
         }
     
@@ -134,7 +135,7 @@ class ClappiaCreateAppClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def create_app(self, workplace_id: str, app_name: str, requesting_user_email_address: str, 
+    def create_app(self, app_name: str, requesting_user_email_address: str, 
                   sections: List[Section]) -> str:
         
         is_valid, error_msg = ClappiaCreateAppValidator.validate_app_name(app_name)
@@ -154,8 +155,8 @@ class ClappiaCreateAppClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/appdefinitionv2/createApp"
-            headers = self._get_headers(workplace_id)
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/appdefinitionv2/createApp"
+            headers = self._get_headers()
             
             payload = {
                 "appName": app_name.strip(),
@@ -179,7 +180,7 @@ class ClappiaCreateAppClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def create_app(workplace_id: str, app_name: str, requesting_user_email_address: str, 
+def create_app(app_name: str, requesting_user_email_address: str, 
                       sections: List[Section]) -> str:
     """
     Create a new Clappia application with specified sections and fields.
@@ -187,7 +188,6 @@ def create_app(workplace_id: str, app_name: str, requesting_user_email_address: 
     **Purpose**: Build a new Clappia application from scratch with custom form structure, field types, and sections for business process automation.
 
     **Parameters**:
-    - `workplace_id`: Workplace identifier where the app will be created (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `app_name`: Name of the new application (e.g., "Employee Survey", "Inventory Management"). Minimum 3 characters.
     - `requesting_user_email_address`: Email address of the user creating the app (becomes the app owner).
     - `sections`: List of Section objects defining the app structure. Each section contains fields with specific types and properties.
@@ -291,7 +291,7 @@ def create_app(workplace_id: str, app_name: str, requesting_user_email_address: 
        ```
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
     - App name must be at least 3 characters long and unique within the workplace.
     - Each section must have at least one field.
     - Selection fields require a non-empty options array.
@@ -299,4 +299,4 @@ def create_app(workplace_id: str, app_name: str, requesting_user_email_address: 
     - Returns app ID and URL for immediate access to the created application.
     """
     client = ClappiaCreateAppClient()
-    return client.create_app(workplace_id, app_name, requesting_user_email_address, sections)
+    return client.create_app(app_name, requesting_user_email_address, sections)
