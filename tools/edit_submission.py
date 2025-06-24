@@ -6,6 +6,7 @@ from typing import Dict, Any
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -26,16 +27,6 @@ class ClappiaEditSubmissionValidator:
         
         if not re.match(r'^[A-Z0-9]+$', app_id.strip()):
             return False, "App ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
         
         return True, ""
     
@@ -66,15 +57,15 @@ class ClappiaEditSubmissionValidator:
 
 class ClappiaEditSubmissionClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
     def _get_headers(self) -> dict:
@@ -101,16 +92,12 @@ class ClappiaEditSubmissionClient:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
     
-    def edit_app_submission(self, app_id: str, workplace_id: str, submission_id: str, 
+    def edit_app_submission(self, app_id: str, submission_id: str, 
                        data: Dict[str, Any], email: str) -> str:
         
         is_valid, error_msg = ClappiaEditSubmissionValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaEditSubmissionValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaEditSubmissionValidator.validate_submission_id(submission_id)
         if not is_valid:
@@ -129,12 +116,12 @@ class ClappiaEditSubmissionClient:
             return f"Error: {env_error}"
         
         try:
-            url = f"{self.base_url}/submissions/edit"
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/submissions/edit"
             headers = self._get_headers()
             
             payload = {
                 "appId": app_id.strip(),
-                "workplaceId": workplace_id.strip(),
+                "workplaceId": self.workplace_id,
                 "submissionId": submission_id.strip(),
                 "requestingUserEmailAddress": email.strip(),
                 "data": data
@@ -155,7 +142,7 @@ class ClappiaEditSubmissionClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def edit_app_submission(app_id: str, workplace_id: str, submission_id: str, 
+def edit_app_submission(app_id: str, submission_id: str, 
                            data: Dict[str, Any], email: str) -> str:
     """
     Edit an existing submission in a Clappia application with updated field values.
@@ -164,7 +151,6 @@ def edit_app_submission(app_id: str, workplace_id: str, submission_id: str,
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Workplace identifier (e.g., "ON83542"). Must be uppercase letters and numbers.
     - `submission_id`: ID of the submission to be edited (obtained from get_submissions or create response).
     - `data`: Dictionary of field key-value pairs to update (e.g., {"status": "approved", "notes": "Reviewed"}).
     - `email`: Email address of the requesting user (must have Submit permissions on the app).
@@ -178,11 +164,11 @@ def edit_app_submission(app_id: str, workplace_id: str, submission_id: str,
     - **Workflow Updates**: Update assigned reviewers, priority levels, or completion dates.
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY, CLAPPIA_WORKPLACE_ID, and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
     - User must have Submit permissions on the target app.
     - Only specified fields in `data` will be updated; other fields remain unchanged.
     - Validates all inputs: IDs (uppercase letters/numbers), email format, and data structure.
     - Handles API errors, timeouts, and invalid responses.
     """
     client = ClappiaEditSubmissionClient()
-    return client.edit_app_submission(app_id, workplace_id, submission_id, data, email)
+    return client.edit_app_submission(app_id, submission_id, data, email)

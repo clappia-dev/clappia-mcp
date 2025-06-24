@@ -4,16 +4,15 @@ A Python-based MCP server that provides a comprehensive interface for interactin
 
 ## Features
 
--  **Application Management**
+-  **App Management**
 
-   -  Create new Clappia applications with customizable sections and fields
-   -  Add new fields to existing applications with advanced configuration options
-   -  Update field properties and configurations
-   -  Retrieve detailed application definitions with field metadata
+   -  Create new Clappia apps with customizable sections and fields
+
+   -  Retrieve detailed app definitions with field metadata
 
 -  **Submission Management**
 
-   -  Create new form submissions with field data
+   -  Create new submissions with field data
    -  Edit existing submissions with validation
    -  Update submission status with optional comments
    -  Manage submission owners with email-based assignments
@@ -31,13 +30,18 @@ A Python-based MCP server that provides a comprehensive interface for interactin
 
 -  Python 3.8 or higher
 -  uv python package manager
--  Access to Clappia API credentials
--  Claude for Desktop (for local development and testing)
--  Node.js (for running MCP servers)
+-  Access to Clappia API Key and Workplace ID
+-  Claude for Desktop (or any other MCP Clients)
 
 ## Installation
 
-1. **Set up Claude for Desktop**:
+
+1. **Set up Clappia API Access**:
+
+   -  Visit your Workplace in Clappia (https://<your_workplace>.clappia.com), you need to have Workplace Manager Access to this Workplace.
+   -  Visit Workplace Settings. Note your Workplace ID.
+   -  Visit Workplace Settings -> Preferences -> API Keys. Note your API Key, generate one if it is not yet generated.
+2. **Set up Claude for Desktop**:
 
    -  Download Claude for Desktop for [macOS](https://claude.ai/download) or [Windows](https://claude.ai/download)
    -  Install and launch Claude for Desktop
@@ -53,20 +57,17 @@ A Python-based MCP server that provides a comprehensive interface for interactin
                   "/Users/<YOUR_DIECTORY>/Desktop/clappia-mcp",
                   "run",
                   "clappia-mcp.py"
-               ]
+               ],
+               "env": {
+                  "CLAPPIA_API_KEY": "<ENTER_YOUR_WORKPLACE_API_KEY_HERE>",
+                  "CLAPPIA_WORKPLACE_ID": "<ENTER_YOUR_WORKPLACE_ID_HERE>"
+               }
             }
          }
       }
       ```
    -  Restart Claude for Desktop
    -  Verify the MCP server is running by checking for the tools icon in the input box
-
-2. **Set up Clappia API Access**:
-
-   -  Visit [Clappia Developer Portal](https://developer.clappia.com/)
-   -  Create an account or sign in
-   -  Generate API credentials
-   -  Note your API key and base URL
 
 3. **Clone the repository**:
 
@@ -83,13 +84,6 @@ A Python-based MCP server that provides a comprehensive interface for interactin
 
    # Install dependencies
    uv sync
-   ```
-
-5. **Set up environment variables**:
-   Create a `.env` file in the root directory with the following variables:
-   ```
-   DEV_API_KEY=your_api_key_here
-   CLAPPIA_EXTERNAL_API_BASE_URL=your_api_base_url_here
    ```
 
 ## Project Structure
@@ -129,9 +123,8 @@ clappia-mcp/
 
 2. **API Connection Issues**:
 
-   -  Verify API credentials in `.env` file
+   -  Verify API credentials in `claude_desktop_config.json` file
    -  Check network connectivity
-   -  Validate API base URL format
    -  Review API rate limits
 
 3. **Tool Execution Failures**:
@@ -147,7 +140,6 @@ clappia-mcp/
    from tools.create_app import create_app, Section, Field
 
    result = create_app(
-       workplace_id="ON83542",
        app_name="Employee Survey",
        requesting_user_email_address="user@company.com",
        sections=[
@@ -172,7 +164,6 @@ clappia-mcp/
 
    result = add_field_to_app(
        app_id="APP123",
-       workplace_id="ON83542",
        requesting_user_email_address="user@company.com",
        section_index=0,
        field_index=1,
@@ -192,7 +183,6 @@ clappia-mcp/
 
    result = update_field_in_app(
        app_id="APP123",
-       workplace_id="ON83542",
        requesting_user_email_address="user@company.com",
        field_name="employeeName",
        label="Full Employee Name",
@@ -209,7 +199,6 @@ clappia-mcp/
 
    result = create_app_submission(
        app_id="APP123",
-       workplace_id="ON83542",
        data={"employeeName": "John Doe", "employeeId": "12345"},
        email="user@company.com"
    )
@@ -237,7 +226,6 @@ clappia-mcp/
    ])
 
    result = get_app_submissions(
-       workplace_id="ON83542",
        app_id="APP123",
        requesting_user_email_address="user@company.com",
        page_size=10,

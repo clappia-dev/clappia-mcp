@@ -6,6 +6,7 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 
@@ -53,16 +54,6 @@ class ClappiaUpdateFieldValidator:
         
         if not re.match(r'^[A-Z0-9]+$', app_id.strip()):
             return False, "App ID must contain only uppercase letters and numbers"
-        
-        return True, ""
-    
-    @staticmethod
-    def validate_workplace_id(workplace_id: str) -> tuple[bool, str]:
-        if not workplace_id or not workplace_id.strip():
-            return False, "Workplace ID is required and cannot be empty"
-        
-        if not re.match(r'^[A-Z0-9]+$', workplace_id.strip()):
-            return False, "Workplace ID must contain only uppercase letters and numbers"
         
         return True, ""
     
@@ -123,21 +114,21 @@ class ClappiaUpdateFieldValidator:
 
 class ClappiaUpdateFieldClient:
     def __init__(self):
-        self.api_key = os.environ.get("DEV_API_KEY")
-        self.base_url = os.environ.get('CLAPPIA_EXTERNAL_API_BASE_URL')
+        self.api_key = os.environ.get("CLAPPIA_API_KEY")
+        self.workplace_id = os.environ.get("CLAPPIA_WORKPLACE_ID")
         self.timeout = 30
     
     def _validate_environment(self) -> tuple[bool, str]:
         if not self.api_key:
-            return False, "DEV_API_KEY environment variable is not set"
-        if not self.base_url:
-            return False, "CLAPPIA_EXTERNAL_API_BASE_URL environment variable is not set"
+            return False, "CLAPPIA_API_KEY environment variable is not set"
+        if not self.workplace_id:
+            return False, "CLAPPIA_WORKPLACE_ID environment variable is not set"
         return True, ""
     
-    def _get_headers(self, workplace_id: str) -> dict:
+    def _get_headers(self) -> dict:
         return {
             "x-api-key": self.api_key,
-            "workplaceId": workplace_id,
+            "workplaceId": self.workplace_id,
             "Content-Type": "application/json"
         }
     
@@ -240,17 +231,13 @@ class ClappiaUpdateFieldClient:
         
         return payload
     
-    def update_field(self, app_id: str, workplace_id: str, requesting_user_email_address: str,
+    def update_field(self, app_id: str, requesting_user_email_address: str,
                      field_name: str, **kwargs) -> str:
         
         # Validate required parameters
         is_valid, error_msg = ClappiaUpdateFieldValidator.validate_app_id(app_id)
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
-        
-        is_valid, error_msg = ClappiaUpdateFieldValidator.validate_workplace_id(workplace_id)
-        if not is_valid:
-            return f"Error: Invalid workplace_id - {error_msg}"
         
         is_valid, error_msg = ClappiaUpdateFieldValidator.validate_email(requesting_user_email_address)
         if not is_valid:
@@ -294,14 +281,14 @@ class ClappiaUpdateFieldClient:
             # Create request object
             request = UpdateFieldRequest(
                 app_id=app_id,
-                workplace_id=workplace_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 field_name=field_name,
                 **kwargs
             )
             
-            url = f"{self.base_url}/appdefinitionv2/updateField"
-            headers = self._get_headers(workplace_id)
+            url = f"{CLAPPIA_EXTERNAL_API_BASE_URL}/appdefinitionv2/updateField"
+            headers = self._get_headers()
             payload = self._build_payload(request)
             
             response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=self.timeout)
@@ -319,7 +306,7 @@ class ClappiaUpdateFieldClient:
         except Exception as e:
             return f"Error: An internal error occurred - {str(e)}"
 
-def update_field_in_app(app_id: str, workplace_id: str, requesting_user_email_address: str,
+def update_field_in_app(app_id: str, requesting_user_email_address: str,
                         field_name: str, **kwargs) -> str:
     """
     Update an existing field in a Clappia application with new configuration.
@@ -328,7 +315,6 @@ def update_field_in_app(app_id: str, workplace_id: str, requesting_user_email_ad
 
     **Parameters**:
     - `app_id`: Unique app identifier (e.g., "MFX093412"). Must be uppercase letters and numbers.
-    - `workplace_id`: Workplace identifier (e.g., "DEV161318"). Must be uppercase letters and numbers.
     - `requesting_user_email_address`: Email address of the user updating the field (must have app edit permissions).
     - `field_name`: Variable name of the existing field to update (e.g., "employeeName", "department").
 
@@ -412,7 +398,7 @@ def update_field_in_app(app_id: str, workplace_id: str, requesting_user_email_ad
     - **Workflow Optimization**: Adjust field visibility and editability conditions.
 
     **Notes**:
-    - Requires DEV_API_KEY and CLAPPIA_EXTERNAL_API_BASE_URL environment variables.
+    - Requires CLAPPIA_API_KEY and CLAPPIA_WORKPLACE_ID environment variables.
     - User must have edit permissions on the target app.
     - Only specify parameters you want to change; omitted parameters remain unchanged.
     - Field name must match an existing field's variable name in the app.
@@ -420,5 +406,5 @@ def update_field_in_app(app_id: str, workplace_id: str, requesting_user_email_ad
     - Use `get_app_definition()` to find existing field names before updating.
     """
     client = ClappiaUpdateFieldClient()
-    return client.update_field(app_id, workplace_id, requesting_user_email_address,
-                              field_name, **kwargs)
+    return client.update_field(app_id, requesting_user_email_address,
+                               field_name, **kwargs)
