@@ -5,11 +5,8 @@ import os
 import re
 from datetime import datetime
 from typing import Dict, Any, Optional, List
-
 from tools.get_submissions import get_app_submissions
 from tools.get_submissions_aggregation import get_app_submissions_aggregation
-from tools.update_submission_status import update_app_submission_status
-from tools.update_submission_owners import update_app_submission_owners
 from clappia_tools import ClappiaClient
 from tools.create_app import create_app
 from tools.add_field import add_field_to_app
@@ -251,7 +248,9 @@ def update_clappia_submission_status(app_id: str, submission_id: str,
     if comments:
         logger.info(f"Status update comments: {comments[:100]}{'...' if len(comments) > 100 else ''}")
     
-    result = update_app_submission_status(app_id, submission_id, status_name, requesting_user_email_address, comments)
+    client = get_clappia_client()   
+
+    result = client.update_submission_status(app_id,submission_id,requesting_user_email_address,status_name,comments)
     
     logger.info(f"Status update result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
@@ -282,8 +281,8 @@ def update_clappia_submission_owners(app_id: str, submission_id: str,
     logger.info(f"Updating owners for submission {submission_id} for app: {app_id}, user: {requesting_user_email_address}")
     logger.info(f"New owners: {email_ids}")
     
-    result = update_app_submission_owners(app_id, submission_id, email_ids, requesting_user_email_address)
-    
+    client = get_clappia_client()
+    result = client.update_submission_owners(app_id, submission_id, requesting_user_email_address,email_ids)
     logger.info(f"Owners update result: {'Success' if 'successfully' in result.lower() else 'Failed'}")
     return result
 
