@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
-from .constants import CLAPPIA_EXTERNAL_API_BASE_URL
+from utils.constants import CLAPPIA_EXTERNAL_API_BASE_URL
 
 load_dotenv()
 

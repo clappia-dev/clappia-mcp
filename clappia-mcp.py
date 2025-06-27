@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional, List
 from tools.get_submissions_aggregation import get_app_submissions_aggregation
 from tools.get_submissions import get_app_submissions
-
+from utils.constants import CLAPPIA_EXTERNAL_API_BASE_URL
 from clappia_tools import SubmissionClient, AppManagementClient, AppDefinitionClient
 
 def setup_logging():
@@ -25,21 +25,21 @@ def setup_logging():
 def get_submission_client():
     return SubmissionClient(
         api_key=os.getenv("CLAPPIA_API_KEY"),
-        base_url=os.getenv("CLAPPIA_BASE_URL"),
+        base_url=CLAPPIA_EXTERNAL_API_BASE_URL,
         workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
     )
 
 def get_app_definition_client():
     return AppDefinitionClient(
         api_key=os.getenv("CLAPPIA_API_KEY"),
-        base_url=os.getenv("CLAPPIA_BASE_URL"),
+        base_url=CLAPPIA_EXTERNAL_API_BASE_URL      ,
         workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
     )
     
 def get_app_management_client():
     return AppManagementClient(
         api_key=os.getenv("CLAPPIA_API_KEY"),
-        base_url=os.getenv("CLAPPIA_BASE_URL"),
+        base_url=CLAPPIA_EXTERNAL_API_BASE_URL,
         workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
     )
 
