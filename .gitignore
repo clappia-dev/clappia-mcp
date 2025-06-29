@@ -2,4 +2,4 @@
 .venv
 uv.lock
 logs
-tools/__pycache__
+__pycache__/
