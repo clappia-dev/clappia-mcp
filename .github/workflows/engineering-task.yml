@@ -1,0 +1,120 @@
+name: Engineering Task Handler
+
+# Controls when the workflow will run
+on:
+    # Trigger only on pull request merge to master
+    pull_request:
+        types: [closed]
+        branches: [master]
+
+    # Manual trigger for testing
+    workflow_dispatch:
+
+# A workflow run is made up of one or more jobs
+jobs:
+    handle-engineering-task:
+        runs-on: ubuntu-latest
+        # Only run if PR was actually merged (not just closed)
+        if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        permissions:
+            contents: read
+            pull-requests: read
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            - name: Send Engineering Task Webhook
+              run: |
+                  echo "Processing merged PR to master branch..."
+
+                  # Get the complete GitHub event payload
+                  EVENT_PAYLOAD='${{ toJson(github.event) }}'
+
+                  # Extract key information for logging
+                  PR_NUMBER="${{ github.event.pull_request.number }}"
+                  PR_TITLE="${{ github.event.pull_request.title }}"
+                  PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+                  REPO="${{ github.repository }}"
+
+                  echo "PR #${PR_NUMBER}: ${PR_TITLE}"
+                  echo "Author: ${PR_AUTHOR}"
+                  echo "Repository: ${REPO}"
+                  echo "Sending complete event payload to webhook..."
+
+                  # Send POST request to the engineering task webhook with complete event data
+                  HTTP_STATUS=$(curl -w "%{http_code}" -s -o /tmp/webhook_response.txt \
+                    -X POST \
+                    -H "Content-Type: application/json" \
+                    -H "User-Agent: GitHub-Actions-AI-Agent-Service" \
+                    -H "X-GitHub-Event: pull_request" \
+                    -H "X-GitHub-Repository: ${{ github.repository }}" \
+                    --data "$EVENT_PAYLOAD" \
+                    "${{ secrets.ENGINEERING_TASK_WEBHOOK_URL }}")
+
+                  echo "HTTP Status Code: $HTTP_STATUS"
+                  echo "Response body:"
+                  cat /tmp/webhook_response.txt
+
+                  # Check if the request was successful
+                  if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
+                    echo "✅ Engineering task webhook sent successfully"
+                    echo "PR merge event processed for engineering tasks"
+                  else
+                    echo "❌ Engineering task webhook failed with status: $HTTP_STATUS"
+                    echo "Response:"
+                    cat /tmp/webhook_response.txt
+                    exit 1
+                  fi
+
+            # Handle webhook failures
+            - name: Handle Webhook Failure
+              if: failure()
+              run: |
+                  echo "🚨 Engineering task webhook failed!"
+                  echo "PR #${{ github.event.pull_request.number }} merge event could not be processed"
+                  echo "Repository: ${{ github.repository }}"
+                  echo "Author: ${{ github.event.pull_request.user.login }}"
+                  echo "Please check the webhook endpoint manually or contact the engineering team"
+
+                  # Optional: Send a fallback notification (if you have Slack webhook configured)
+                  if [[ -n "${{ secrets.DEV_CHANNEL_SLACK_WEBHOOK_URL }}" ]]; then
+                    echo "Sending failure notification to Slack..."
+                    curl -X POST -H 'Content-type: application/json' \
+                      --data '{
+                        "text": "🚨 AI Agent Service: Engineering Task Webhook Failed",
+                        "attachments": [{
+                          "color": "#d73a49",
+                          "blocks": [
+                            {
+                              "type": "header",
+                              "text": {
+                                "type": "plain_text",
+                                "text": "Engineering Task Alert"
+                              }
+                            },
+                            {
+                              "type": "section",
+                              "text": {
+                                "type": "mrkdwn",
+                                "text": "*Webhook Failure*\nFailed to process PR merge event for engineering tasks.\n\n*PR:* #${{ github.event.pull_request.number }}\n*Repository:* ${{ github.repository }}\n*Author:* ${{ github.event.pull_request.user.login }}"
+                              }
+                            },
+                            {
+                              "type": "actions",
+                              "elements": [
+                                {
+                                  "type": "button",
+                                  "text": {
+                                    "type": "plain_text",
+                                    "text": "View PR"
+                                  },
+                                  "url": "${{ github.event.pull_request.html_url }}",
+                                  "style": "primary"
+                                }
+                              ]
+                            }
+                          ]
+                        }]
+                      }' \
+                      ${{ secrets.DEV_CHANNEL_SLACK_WEBHOOK_URL }} || echo "Slack notification also failed"
+                  fi
