@@ -2,283 +2,283 @@ name: Code Changes Slack Notifications
 
 # Controls when the workflow will run
 on:
-    # Trigger on all pull request activities
-    pull_request:
-        types: [opened, closed, edited, synchronize, reopened]
+   # Trigger on all pull request activities
+   pull_request:
+      types: [opened, closed, edited, synchronize, reopened]
 
-    # Trigger on PR comments and reviews
-    pull_request_review:
-        types: [submitted]
-    pull_request_review_comment:
-        types: [created, edited]
-    issue_comment:
-        types: [created, edited]
+   # Trigger on PR comments and reviews
+   pull_request_review:
+      types: [submitted]
+   pull_request_review_comment:
+      types: [created, edited]
+   issue_comment:
+      types: [created, edited]
 
-    # Push to master branch
-    push:
-        branches: ['master']
+   # Push to master branch
+   push:
+      branches: ["master"]
 
-    # Manual trigger
-    workflow_dispatch:
+   # Manual trigger
+   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs
 jobs:
-    notify:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            pull-requests: read
-            issues: read
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+   notify:
+      runs-on: ubuntu-latest
+      permissions:
+         contents: read
+         pull-requests: read
+         issues: read
+      steps:
+         - name: Checkout Code
+           uses: actions/checkout@v4
+           with:
+              fetch-depth: 0
 
-            - name: Send AI Agent Service Code Notification
-              run: |
-                  # Get commit count for push events
-                  if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_COUNT=$(git rev-list --count ${{ github.event.before }}..${{ github.event.after }} 2>/dev/null || echo "1")
-                  else
-                    COMMIT_COUNT="0"
-                  fi
+         - name: Send AI Agent Service Code Notification
+           run: |
+              # Get commit count for push events
+              if [[ "${{ github.event_name }}" == "push" ]]; then
+                COMMIT_COUNT=$(git rev-list --count ${{ github.event.before }}..${{ github.event.after }} 2>/dev/null || echo "1")
+              else
+                COMMIT_COUNT="0"
+              fi
 
-                  # Set variables from GitHub context
-                  EVENT_TYPE="${{ github.event_name }}"
-                  ACTION="${{ github.event.action }}"
-                  ACTOR="${{ github.actor }}"
-                  REPO="${{ github.repository }}"
-                  BRANCH="${{ github.ref_name }}"
+              # Set variables from GitHub context
+              EVENT_TYPE="${{ github.event_name }}"
+              ACTION="${{ github.event.action }}"
+              ACTOR="${{ github.actor }}"
+              REPO="${{ github.repository }}"
+              BRANCH="${{ github.ref_name }}"
 
-                  # Initialize variables
-                  TITLE=""
-                  SIDEBAR_COLOR=""
-                  DESCRIPTION=""
-                  FINAL_URL=""
-                  FINAL_AUTHOR=""
-                  BUTTON_TEXT=""
-                  EXTRA_FIELDS=""
-                  FILES_BUTTON=""
+              # Initialize variables
+              TITLE=""
+              SIDEBAR_COLOR=""
+              DESCRIPTION=""
+              FINAL_URL=""
+              FINAL_AUTHOR=""
+              BUTTON_TEXT=""
+              EXTRA_FIELDS=""
+              FILES_BUTTON=""
 
-                  echo "Processing $EVENT_TYPE event with action: $ACTION"
+              echo "Processing $EVENT_TYPE event with action: $ACTION"
 
-                  # Handle different event types
-                  if [[ "$EVENT_TYPE" == "pull_request" ]]; then
-                    PR_NUMBER="${{ github.event.pull_request.number }}"
-                    PR_TITLE="${{ github.event.pull_request.title }}"
-                    PR_URL="${{ github.event.pull_request.html_url }}"
-                    PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-                    PR_BASE="${{ github.event.pull_request.base.ref }}"
-                    PR_HEAD="${{ github.event.pull_request.head.ref }}"
-                    PR_MERGED="${{ github.event.pull_request.merged }}"
+              # Handle different event types
+              if [[ "$EVENT_TYPE" == "pull_request" ]]; then
+                PR_NUMBER="${{ github.event.pull_request.number }}"
+                PR_TITLE="${{ github.event.pull_request.title }}"
+                PR_URL="${{ github.event.pull_request.html_url }}"
+                PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+                PR_BASE="${{ github.event.pull_request.base.ref }}"
+                PR_HEAD="${{ github.event.pull_request.head.ref }}"
+                PR_MERGED="${{ github.event.pull_request.merged }}"
 
-                    case "$ACTION" in
-                      "opened")
-                        TITLE="New Pull Request Opened"
-                        SIDEBAR_COLOR="#28a745"
-                        DESCRIPTION="PR #${PR_NUMBER}: ${PR_TITLE}"
-                        FILES_BUTTON=",{\"type\":\"button\",\"text\":{\"type\":\"plain_text\",\"text\":\"View Files\"},\"url\":\"${PR_URL}/files\"}"
-                        ;;
-                      "synchronize")
-                        TITLE="Pull Request Updated"
-                        SIDEBAR_COLOR="#0366d6"
-                        DESCRIPTION="New commits pushed to PR #${PR_NUMBER}"
-                        ;;
-                      "closed")
-                        if [[ "$PR_MERGED" == "true" ]]; then
-                          TITLE="Pull Request Merged"
-                          SIDEBAR_COLOR="#28a745"
-                          DESCRIPTION="PR #${PR_NUMBER} successfully merged to ${PR_BASE}"
-                        else
-                          TITLE="Pull Request Closed"
-                          SIDEBAR_COLOR="#d73a49"
-                          DESCRIPTION="PR #${PR_NUMBER} closed without merging"
-                        fi
-                        ;;
-                      "reopened")
-                        TITLE="Pull Request Reopened"
-                        SIDEBAR_COLOR="#0366d6"
-                        DESCRIPTION="PR #${PR_NUMBER} has been reopened"
-                        ;;
-                      *)
-                        TITLE="Pull Request Updated"
-                        SIDEBAR_COLOR="#0366d6"
-                        DESCRIPTION="PR #${PR_NUMBER} was ${ACTION}"
-                        ;;
-                    esac
-
-                    FINAL_URL="$PR_URL"
-                    FINAL_AUTHOR="$PR_AUTHOR"
-                    BUTTON_TEXT="View Pull Request"
-
-                    if [[ "$ACTION" != "closed" ]]; then
-                      EXTRA_FIELDS=",{\"type\":\"mrkdwn\",\"text\":\"*Source Branch:*\\n\`${PR_HEAD}\`\"},{\"type\":\"mrkdwn\",\"text\":\"*Target Branch:*\\n\`${PR_BASE}\`\"}"
-                    fi
-
-                  elif [[ "$EVENT_TYPE" == "pull_request_review" ]]; then
-                    PR_NUMBER="${{ github.event.pull_request.number }}"
-                    REVIEW_STATE="${{ github.event.review.state }}"
-                    REVIEW_URL="${{ github.event.review.html_url }}"
-                    REVIEW_AUTHOR="${{ github.event.review.user.login }}"
-
-                    TITLE="Code Review Submitted"
-                    case "$REVIEW_STATE" in
-                      "approved")
-                        SIDEBAR_COLOR="#28a745"
-                        DESCRIPTION="Review approved on PR #${PR_NUMBER}"
-                        ;;
-                      "changes_requested")
-                        SIDEBAR_COLOR="#d73a49"
-                        DESCRIPTION="Changes requested on PR #${PR_NUMBER}"
-                        ;;
-                      *)
-                        SIDEBAR_COLOR="#0366d6"
-                        DESCRIPTION="Review comment submitted on PR #${PR_NUMBER}"
-                        ;;
-                    esac
-                    FINAL_URL="$REVIEW_URL"
-                    FINAL_AUTHOR="$REVIEW_AUTHOR"
-                    BUTTON_TEXT="View Review"
-
-                  elif [[ "$EVENT_TYPE" == "pull_request_review_comment" ]]; then
-                    PR_NUMBER="${{ github.event.pull_request.number }}"
-                    COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
-                    COMMENT_URL="${{ github.event.comment.html_url }}"
-
-                    TITLE="Code Review Comment"
-                    SIDEBAR_COLOR="#0366d6"
-                    DESCRIPTION="Comment by ${COMMENT_AUTHOR} on PR #${PR_NUMBER}"
-                    FINAL_URL="$COMMENT_URL"
-                    FINAL_AUTHOR="$COMMENT_AUTHOR"
-                    BUTTON_TEXT="View Comment"
-
-                  elif [[ "$EVENT_TYPE" == "issue_comment" ]]; then
-                    ISSUE_NUMBER="${{ github.event.issue.number }}"
-                    COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
-                    COMMENT_URL="${{ github.event.comment.html_url }}"
-
-                    TITLE="Pull Request Comment"
-                    SIDEBAR_COLOR="#0366d6"
-                    DESCRIPTION="Comment by ${COMMENT_AUTHOR} on PR #${ISSUE_NUMBER}"
-                    FINAL_URL="$COMMENT_URL"
-                    FINAL_AUTHOR="$COMMENT_AUTHOR"
-                    BUTTON_TEXT="View Comment"
-
-                  elif [[ "$EVENT_TYPE" == "push" ]]; then
-                    COMMIT_SHA="${{ github.sha }}"
-
-                    TITLE="Code Push"
+                case "$ACTION" in
+                  "opened")
+                    TITLE="New Pull Request Opened"
                     SIDEBAR_COLOR="#28a745"
-                    DESCRIPTION="${COMMIT_COUNT} new commit(s) pushed to ${BRANCH}"
-                    FINAL_URL="https://github.com/${REPO}/commit/${COMMIT_SHA}"
-                    FINAL_AUTHOR="$ACTOR"
-                    BUTTON_TEXT="View Commit"
-                    EXTRA_FIELDS=",{\"type\":\"mrkdwn\",\"text\":\"*Branch:*\\n\`${BRANCH}\`\"},{\"type\":\"mrkdwn\",\"text\":\"*Commits:*\\n${COMMIT_COUNT} new\"}"
-                  fi
+                    DESCRIPTION="PR #${PR_NUMBER}: ${PR_TITLE}"
+                    FILES_BUTTON=",{\"type\":\"button\",\"text\":{\"type\":\"plain_text\",\"text\":\"View Files\"},\"url\":\"${PR_URL}/files\"}"
+                    ;;
+                  "synchronize")
+                    TITLE="Pull Request Updated"
+                    SIDEBAR_COLOR="#0366d6"
+                    DESCRIPTION="New commits pushed to PR #${PR_NUMBER}"
+                    ;;
+                  "closed")
+                    if [[ "$PR_MERGED" == "true" ]]; then
+                      TITLE="Pull Request Merged"
+                      SIDEBAR_COLOR="#28a745"
+                      DESCRIPTION="PR #${PR_NUMBER} successfully merged to ${PR_BASE}"
+                    else
+                      TITLE="Pull Request Closed"
+                      SIDEBAR_COLOR="#d73a49"
+                      DESCRIPTION="PR #${PR_NUMBER} closed without merging"
+                    fi
+                    ;;
+                  "reopened")
+                    TITLE="Pull Request Reopened"
+                    SIDEBAR_COLOR="#0366d6"
+                    DESCRIPTION="PR #${PR_NUMBER} has been reopened"
+                    ;;
+                  *)
+                    TITLE="Pull Request Updated"
+                    SIDEBAR_COLOR="#0366d6"
+                    DESCRIPTION="PR #${PR_NUMBER} was ${ACTION}"
+                    ;;
+                esac
 
-                  # Create user profile link
-                  AUTHOR_PROFILE_LINK="<https://github.com/${FINAL_AUTHOR}|${FINAL_AUTHOR}>"
+                FINAL_URL="$PR_URL"
+                FINAL_AUTHOR="$PR_AUTHOR"
+                BUTTON_TEXT="View Pull Request"
 
-                  echo "Sending Slack notification: $TITLE"
+                if [[ "$ACTION" != "closed" ]]; then
+                  EXTRA_FIELDS=",{\"type\":\"mrkdwn\",\"text\":\"*Source Branch:*\\n\`${PR_HEAD}\`\"},{\"type\":\"mrkdwn\",\"text\":\"*Target Branch:*\\n\`${PR_BASE}\`\"}"
+                fi
 
-                  # Send the professional Slack notification
-                  curl -X POST -H 'Content-type: application/json' \
-                    --data "{
-                      \"text\": \"AI Agent Service Notifications: $TITLE\",
-                      \"attachments\": [
+              elif [[ "$EVENT_TYPE" == "pull_request_review" ]]; then
+                PR_NUMBER="${{ github.event.pull_request.number }}"
+                REVIEW_STATE="${{ github.event.review.state }}"
+                REVIEW_URL="${{ github.event.review.html_url }}"
+                REVIEW_AUTHOR="${{ github.event.review.user.login }}"
+
+                TITLE="Code Review Submitted"
+                case "$REVIEW_STATE" in
+                  "approved")
+                    SIDEBAR_COLOR="#28a745"
+                    DESCRIPTION="Review approved on PR #${PR_NUMBER}"
+                    ;;
+                  "changes_requested")
+                    SIDEBAR_COLOR="#d73a49"
+                    DESCRIPTION="Changes requested on PR #${PR_NUMBER}"
+                    ;;
+                  *)
+                    SIDEBAR_COLOR="#0366d6"
+                    DESCRIPTION="Review comment submitted on PR #${PR_NUMBER}"
+                    ;;
+                esac
+                FINAL_URL="$REVIEW_URL"
+                FINAL_AUTHOR="$REVIEW_AUTHOR"
+                BUTTON_TEXT="View Review"
+
+              elif [[ "$EVENT_TYPE" == "pull_request_review_comment" ]]; then
+                PR_NUMBER="${{ github.event.pull_request.number }}"
+                COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
+                COMMENT_URL="${{ github.event.comment.html_url }}"
+
+                TITLE="Code Review Comment"
+                SIDEBAR_COLOR="#0366d6"
+                DESCRIPTION="Comment by ${COMMENT_AUTHOR} on PR #${PR_NUMBER}"
+                FINAL_URL="$COMMENT_URL"
+                FINAL_AUTHOR="$COMMENT_AUTHOR"
+                BUTTON_TEXT="View Comment"
+
+              elif [[ "$EVENT_TYPE" == "issue_comment" ]]; then
+                ISSUE_NUMBER="${{ github.event.issue.number }}"
+                COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
+                COMMENT_URL="${{ github.event.comment.html_url }}"
+
+                TITLE="Pull Request Comment"
+                SIDEBAR_COLOR="#0366d6"
+                DESCRIPTION="Comment by ${COMMENT_AUTHOR} on PR #${ISSUE_NUMBER}"
+                FINAL_URL="$COMMENT_URL"
+                FINAL_AUTHOR="$COMMENT_AUTHOR"
+                BUTTON_TEXT="View Comment"
+
+              elif [[ "$EVENT_TYPE" == "push" ]]; then
+                COMMIT_SHA="${{ github.sha }}"
+
+                TITLE="Code Push"
+                SIDEBAR_COLOR="#28a745"
+                DESCRIPTION="${COMMIT_COUNT} new commit(s) pushed to ${BRANCH}"
+                FINAL_URL="https://github.com/${REPO}/commit/${COMMIT_SHA}"
+                FINAL_AUTHOR="$ACTOR"
+                BUTTON_TEXT="View Commit"
+                EXTRA_FIELDS=",{\"type\":\"mrkdwn\",\"text\":\"*Branch:*\\n\`${BRANCH}\`\"},{\"type\":\"mrkdwn\",\"text\":\"*Commits:*\\n${COMMIT_COUNT} new\"}"
+              fi
+
+              # Create user profile link
+              AUTHOR_PROFILE_LINK="<https://github.com/${FINAL_AUTHOR}|${FINAL_AUTHOR}>"
+
+              echo "Sending Slack notification: $TITLE"
+
+              # Send the professional Slack notification
+              curl -X POST -H 'Content-type: application/json' \
+                --data "{
+                  \"text\": \"Clappia MCP Service Notifications: $TITLE\",
+                  \"attachments\": [
+                    {
+                      \"color\": \"$SIDEBAR_COLOR\",
+                      \"blocks\": [
                         {
-                          \"color\": \"$SIDEBAR_COLOR\",
-                          \"blocks\": [
+                          \"type\": \"header\",
+                          \"text\": {
+                            \"type\": \"plain_text\",
+                            \"text\": \"Clappia MCP Service Notifications\"
+                          }
+                        },
+                        {
+                          \"type\": \"section\",
+                          \"text\": {
+                            \"type\": \"mrkdwn\",
+                            \"text\": \"*$TITLE*\\n$DESCRIPTION\"
+                          }
+                        },
+                        {
+                          \"type\": \"section\",
+                          \"fields\": [
                             {
-                              \"type\": \"header\",
+                              \"type\": \"mrkdwn\",
+                              \"text\": \"*Repository:*\\n\`$REPO\`\"
+                            },
+                            {
+                              \"type\": \"mrkdwn\",
+                              \"text\": \"*Developer:*\\n$AUTHOR_PROFILE_LINK\"
+                            }$EXTRA_FIELDS
+                          ]
+                        },
+                        {
+                          \"type\": \"actions\",
+                          \"elements\": [
+                            {
+                              \"type\": \"button\",
                               \"text\": {
                                 \"type\": \"plain_text\",
-                                \"text\": \"AI Agent Service Notifications\"
-                              }
-                            },
-                            {
-                              \"type\": \"section\",
-                              \"text\": {
-                                \"type\": \"mrkdwn\",
-                                \"text\": \"*$TITLE*\\n$DESCRIPTION\"
-                              }
-                            },
-                            {
-                              \"type\": \"section\",
-                              \"fields\": [
-                                {
-                                  \"type\": \"mrkdwn\",
-                                  \"text\": \"*Repository:*\\n\`$REPO\`\"
-                                },
-                                {
-                                  \"type\": \"mrkdwn\",
-                                  \"text\": \"*Developer:*\\n$AUTHOR_PROFILE_LINK\"
-                                }$EXTRA_FIELDS
-                              ]
-                            },
-                            {
-                              \"type\": \"actions\",
-                              \"elements\": [
-                                {
-                                  \"type\": \"button\",
-                                  \"text\": {
-                                    \"type\": \"plain_text\",
-                                    \"text\": \"$BUTTON_TEXT\"
-                                  },
-                                  \"url\": \"$FINAL_URL\",
-                                  \"style\": \"primary\"
-                                }$FILES_BUTTON
-                              ]
-                            }
+                                \"text\": \"$BUTTON_TEXT\"
+                              },
+                              \"url\": \"$FINAL_URL\",
+                              \"style\": \"primary\"
+                            }$FILES_BUTTON
                           ]
                         }
                       ]
-                    }" \
-                    "${{ secrets.CLAIGENT_CHANNEL_SLACK_WEBHOOK_URL }}"
+                    }
+                  ]
+                }" \
+                "${{ secrets.CLAIGENT_CHANNEL_SLACK_WEBHOOK_URL }}"
 
-                  echo "Notification sent successfully"
+              echo "Notification sent successfully"
 
-            # Handle errors gracefully
-            - name: Handle Notification Failure
-              if: failure()
-              run: |
-                  echo "Slack notification failed, sending fallback message..."
-                  curl -X POST -H 'Content-type: application/json' \
-                    --data '{
-                      "text": "AI Agent Service Notifications: System Alert",
-                      "attachments": [{
-                        "color": "#d73a49",
-                        "blocks": [
+         # Handle errors gracefully
+         - name: Handle Notification Failure
+           if: failure()
+           run: |
+              echo "Slack notification failed, sending fallback message..."
+              curl -X POST -H 'Content-type: application/json' \
+                --data '{
+                  "text": "Clappia MCP Service Notifications: System Alert",
+                  "attachments": [{
+                    "color": "#d73a49",
+                    "blocks": [
+                      {
+                        "type": "header",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Clappia MCP Service Notifications"
+                        }
+                      },
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "*System Alert*\nNotification system experienced an issue, but activity was detected in repository ${{ github.repository }}. Please check GitHub directly."
+                        }
+                      },
+                      {
+                        "type": "actions",
+                        "elements": [
                           {
-                            "type": "header",
+                            "type": "button",
                             "text": {
                               "type": "plain_text",
-                              "text": "AI Agent Service Notifications"
-                            }
-                          },
-                          {
-                            "type": "section",
-                            "text": {
-                              "type": "mrkdwn",
-                              "text": "*System Alert*\nNotification system experienced an issue, but activity was detected in repository ${{ github.repository }}. Please check GitHub directly."
-                            }
-                          },
-                          {
-                            "type": "actions",
-                            "elements": [
-                              {
-                                "type": "button",
-                                "text": {
-                                  "type": "plain_text",
-                                  "text": "View Repository"
-                                },
-                                "url": "https://github.com/${{ github.repository }}",
-                                "style": "primary"
-                              }
-                            ]
+                              "text": "View Repository"
+                            },
+                            "url": "https://github.com/${{ github.repository }}",
+                            "style": "primary"
                           }
                         ]
-                      }]
-                    }' \
-                    "${{ secrets.CLAIGENT_CHANNEL_SLACK_WEBHOOK_URL }}" || echo "Complete notification failure"
+                      }
+                    ]
+                  }]
+                }' \
+                "${{ secrets.CLAIGENT_CHANNEL_SLACK_WEBHOOK_URL }}" || echo "Complete notification failure"
