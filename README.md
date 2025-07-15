@@ -7,39 +7,29 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
 ## Features
 
 -  **App Management**
-
-   -  Create new Clappia apps with customizable sections and fields
-
+   -  Create new Clappia apps with customizable sections and fields (via MCP tools)
    -  Retrieve detailed app definitions with field metadata
-
 -  **Submission Management**
-
    -  Create new submissions with field data
    -  Edit existing submissions with validation
    -  Update submission status with optional comments
    -  Manage submission owners with email-based assignments
    -  Retrieve submissions with advanced filtering and pagination
    -  Get submission aggregations for analytics with customizable dimensions
-
 -  **Field Management**
    -  Add new fields with comprehensive configuration options
    -  Update field properties including validation, display conditions, and layout
-   -  Configure field validations (number, email, URL, custom)
-   -  Set up conditional logic for field display and editability
-   -  Manage field layouts with responsive design options
 
 ## Prerequisites
 
--  Python 3.8 or higher
--  uv python package manager
+-  Python 3.10 or higher
+-  [uv](https://github.com/astral-sh/uv) python package manager
 -  Access to Clappia API Key and Workplace ID
 -  Claude for Desktop (or any other MCP Clients)
 
 ## Installation
 
-
 1. **Set up Clappia API Access**:
-
    -  Visit your Workplace in Clappia (https://<your_workplace>.clappia.com), you need to have Workplace Manager Access to this Workplace.
    -  Visit Workplace Settings. Note your Workplace ID.
    -  Visit Workplace Settings -> Preferences -> API Keys. Note your API Key, generate one if it is not yet generated.
@@ -56,7 +46,7 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
                "command": "uv",
                "args": [
                   "--directory",
-                  "/Users/<YOUR_DIECTORY>/Desktop/clappia-mcp",
+                  "/Users/<YOUR_DIRECTORY>/Desktop/clappia-mcp",
                   "run",
                   "clappia-mcp.py"
                ],
@@ -92,177 +82,95 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
 
 ```
 clappia-mcp/
-├── clappia-mcp.py          # Main MCP server implementation
+├── clappia-mcp.py          # Main MCP server implementation and tool definitions
 ├── tools/                  # Core functionality modules
-│   ├── add_field.py        # Field addition functionality
-│   ├── create_app.py       # App creation functionality
-│   ├── create_submission.py # Submission creation
-│   ├── edit_submission.py  # Submission editing
-│   ├── get_definition.py   # App definition retrieval
-│   ├── get_submissions.py  # Submission retrieval
-│   ├── get_submissions_aggregation.py # Analytics functionality
-│   ├── update_field.py     # Field update functionality
-│   ├── update_submission_owners.py # Owner management
-│   └── update_submission_status.py # Status management
+│   ├── get_submissions.py  # Submission retrieval logic
+│   └── get_submissions_aggregation.py # Analytics functionality
 ├── pyproject.toml         # Project metadata and dependencies
-├── uv.lock               # Dependency lock file (if using uv)
-└── .env                  # Environment variables
+├── uv.lock                # Dependency lock file (if using uv)
+└── .env                   # Environment variables
 ```
+
+All main tool logic is exposed via `clappia-mcp.py`, which uses the `clappia_api_tools` package for Clappia API operations. The `tools/` directory contains helper modules for submissions and analytics.
 
 ### Usage
 
 -  The server will automatically start when Claude Desktop launches
 -  Access tools through the Claude Desktop interface
+-  All tool invocations are handled via the MCP protocol and do not require direct Python imports
 
 ### Troubleshooting
 
 1. **Server Not Starting**:
-
    -  Check Claude Desktop logs for errors
    -  Verify Python environment is activated
    -  Ensure all dependencies are installed
    -  Check environment variables are set correctly
-
 2. **API Connection Issues**:
-
    -  Verify API credentials in `claude_desktop_config.json` file
    -  Check network connectivity
    -  Review API rate limits
-
 3. **Tool Execution Failures**:
    -  Check server logs for detailed error messages
    -  Verify input parameters match API requirements
    -  Ensure proper permissions for API operations
 
-### Example API Calls
+### Example Tool Usage
 
-1. **Create a New Application**
+All tool usage is via the MCP server interface (e.g., Claude Desktop). Here are the main tools exposed:
 
-   ```python
-   from tools.create_app import create_app, Section, Field
+-  **get_clappia_submissions**: Retrieve Clappia form submissions with optional filtering.
+-  **get_clappia_submissions_aggregation**: Aggregate Clappia submission data for analytics.
+-  **get_clappia_app_definition**: Retrieve the definition of a Clappia app.
+-  **create_clappia_app_submission**: Create a new submission for a Clappia app.
+-  **edit_clappia_submission**: Edit an existing submission.
+-  **update_clappia_submission_status**: Update the status of a submission.
+-  **update_clappia_submission_owners**: Update the owners of a submission.
+-  **create_clappia_app**: Create a new Clappia app.
+-  **add_field_to_clappia_app**: Add a field to a Clappia app.
+-  **update_field_in_clappia_app**: Update a field in a Clappia app.
 
-   result = create_app(
-       app_name="Employee Survey",
-       requesting_user_email_address="user@company.com",
-       sections=[
-           Section(
-               sectionName="Personal Information",
-               fields=[
-                   Field(
-                       fieldType="singleLineText",
-                       label="Full Name",
-                       required=True
-                   )
-               ]
-           )
-       ]
-   )
-   ```
+**Parameters and expected formats for each tool are documented in the code (`clappia-mcp.py`).**
 
-2. **Add a Field to an Application**
+#### Example: Retrieve Submissions (via MCP tool)
 
-   ```python
-   from tools.add_field import add_field_to_app
+You can use the `get_clappia_submissions` tool with parameters like:
 
-   result = add_field_to_app(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       section_index=0,
-       field_index=1,
-       field_type="singleLineText",
-       label="Employee ID",
-       required=True,
-       validation="number",
-       block_width_percentage_desktop=50,
-       block_width_percentage_mobile=100
-   )
-   ```
+```
+app_id: "APP123"
+requesting_user_email_address: "user@company.com"
+page_size: 10
+filters: { ... }  # Optional filtering conditions
+```
 
-3. **Update a Field**
+#### Example: Create a Submission (via MCP tool)
 
-   ```python
-   from tools.update_field import update_field_in_app
-
-   result = update_field_in_app(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       field_name="employeeName",
-       label="Full Employee Name",
-       required=True,
-       validation="none",
-       display_condition="status == 'active'"
-   )
-   ```
-
-4. **Create a Submission**
-
-   ```python
-   from tools.create_submission import create_app_submission
-
-   result = create_app_submission(
-       app_id="APP123",
-       data={"employeeName": "John Doe", "employeeId": "12345"},
-       email="user@company.com"
-   )
-   ```
-
-5. **Get Submissions with Filtering**
-
-   ```python
-   from tools.get_submissions import get_app_submissions, Filters, QueryGroup, Query, Condition
-
-   filters = Filters(queries=[
-       QueryGroup(queries=[
-           Query(
-               conditions=[
-                   Condition(
-                       operator="EQ",
-                       filterKeyType="STANDARD",
-                       key="status",
-                       value="active"
-                   )
-               ],
-               operator="AND"
-           )
-       ])
-   ])
-
-   result = get_app_submissions(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       page_size=10,
-       filters=filters
-   )
-   ```
+```
+app_id: "APP123"
+data: {"employeeName": "John Doe", "employeeId": "12345"}
+requesting_user_email_address: "user@company.com"
+```
 
 ## API Documentation
 
 ### Field Types
 
 -  **Text Fields**
-
    -  `singleLineText`: Single line text input
    -  `multiLineText`: Multi-line text input
    -  `richTextEditor`: Rich text editor with formatting
-
 -  **Selector Fields**
-
    -  `singleSelector`: Single choice selection
    -  `multiSelector`: Multiple choice selection
    -  `dropDown`: Dropdown selection
-
 -  **Date/Time Fields**
-
    -  `dateSelector`: Date selection
    -  `timeSelector`: Time selection
    -  `dateTime`: Combined date and time selection
-
 -  **File Fields**
-
    -  `file`: File upload with configurable types
    -  `camera`: Direct camera capture
    -  `signature`: Digital signature capture
-
 -  **Advanced Fields**
    -  `calculationsAndLogic`: Formula-based calculations
    -  `gpsLocation`: Location tracking
@@ -282,23 +190,17 @@ clappia-mcp/
 ### Field Properties
 
 -  **Layout**
-
    -  `block_width_percentage_desktop`: Width on desktop (25, 50, 75, 100)
    -  `block_width_percentage_mobile`: Width on mobile (50, 100)
    -  `number_of_cols`: Number of columns for selector fields
-
 -  **Behavior**
-
    -  `required`: Whether field is mandatory
    -  `is_editable`: Whether field can be edited
    -  `hidden`: Whether field is hidden
    -  `retain_values`: Whether to retain values when hidden
-
 -  **Conditions**
-
    -  `display_condition`: Condition for field visibility
    -  `editability_condition`: Condition for field editability
-
 -  **File Settings**
    -  `allowed_file_types`: List of allowed file types
    -  `max_file_allowed`: Maximum files allowed (1-10)
@@ -352,28 +254,22 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 The MCP server integrates with Clappia's public API to provide the following capabilities:
 
 1. **Authentication**:
-
    -  API key-based authentication
    -  Secure credential management
    -  Rate limiting support
-
 2. **Endpoints**:
-
    -  Application management
    -  Form submissions
    -  Field operations
    -  User management
    -  Analytics and reporting
-
 3. **API Documentation**:
-
    -  Visit [Clappia Developer Portal](https://developer.clappia.com/) for:
       -  API reference
       -  Authentication guide
       -  Rate limits
       -  Best practices
       -  Example implementations
-
 4. **API Versioning**:
    -  Current stable version: v1
    -  Backward compatibility maintained
