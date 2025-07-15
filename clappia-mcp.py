@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List
 from tools.get_submissions_aggregation import get_app_submissions_aggregation
 from tools.get_submissions import get_app_submissions
 from utils.constants import CLAPPIA_EXTERNAL_API_BASE_URL
-from clappia_tools import SubmissionClient, AppManagementClient, AppDefinitionClient
+from clappia_api_tools import SubmissionClient, AppDefinitionClient
 
 def setup_logging():
     """Configure file-only logging to avoid JSON-RPC interference."""
@@ -35,14 +35,6 @@ def get_app_definition_client():
         base_url=CLAPPIA_EXTERNAL_API_BASE_URL      ,
         workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
     )
-    
-def get_app_management_client():
-    return AppManagementClient(
-        api_key=os.getenv("CLAPPIA_API_KEY"),
-        base_url=CLAPPIA_EXTERNAL_API_BASE_URL,
-        workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID")
-    )
-
 
 logger = setup_logging()
 
@@ -184,7 +176,7 @@ def update_clappia_submission_owners(app_id: str, submission_id: str,
 @mcp.tool()
 def create_clappia_app(app_name: str, requesting_user_email_address: str, 
                       sections: List[Dict[str, Any]]) -> str:
-    client = get_app_management_client()
+    client = get_app_definition_client()
     return client.create_app(app_name, requesting_user_email_address, sections)
 
 @mcp.tool()
@@ -209,7 +201,7 @@ def add_field_to_clappia_app(app_id: str, requesting_user_email_address: str, se
                             file_name_prefix: Optional[str] = None,
                             formula: Optional[str] = None,
                             hidden: Optional[bool] = None) -> str:
-    client = get_app_management_client()
+    client = get_app_definition_client()
     return client.add_field(app_id=app_id, requesting_user_email_address=requesting_user_email_address, section_index=section_index, field_index=field_index, field_type=field_type, label=label,
                             description=description, required=required, block_width_percentage_desktop=block_width_percentage_desktop, block_width_percentage_mobile=block_width_percentage_mobile,
                             display_condition=display_condition, retain_values=retain_values, is_editable=is_editable, editability_condition=editability_condition, validation=validation,
@@ -240,7 +232,7 @@ def update_field_in_clappia_app(app_id: str, requesting_user_email_address: str,
                                file_name_prefix: Optional[str] = None,
                                formula: Optional[str] = None,
                                hidden: Optional[bool] = None) -> str:
-    client = get_app_management_client()
+    client = get_app_definition_client()
     return client.update_field(app_id=app_id, requesting_user_email_address=requesting_user_email_address, field_name=field_name, label=label,
                                description=description, required=required, block_width_percentage_desktop=block_width_percentage_desktop, block_width_percentage_mobile=block_width_percentage_mobile,
                                display_condition=display_condition, retain_values=retain_values, is_editable=is_editable, editability_condition=editability_condition, validation=validation,

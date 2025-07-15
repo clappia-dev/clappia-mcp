@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+clappia_mcp.egg-info/PKG-INFO
+clappia_mcp.egg-info/SOURCES.txt
+clappia_mcp.egg-info/dependency_links.txt
+clappia_mcp.egg-info/requires.txt
+clappia_mcp.egg-info/top_level.txt
