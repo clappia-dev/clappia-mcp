@@ -1,2 +1,0 @@
-mcp[cli]>=1.8.0
-modelcontextprotocol>=0.1.0
