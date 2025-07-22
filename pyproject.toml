@@ -8,4 +8,8 @@ dependencies = [
     "clappia-api-tools",
     "mcp[cli]>=1.8.0",
     "modelcontextprotocol>=0.1.0",
+    "pydantic[email]>=2.11.7",
 ]
+
+[tool.uv.sources]
+clappia-api-tools = { path = "../clappia-tools" }
