@@ -4,7 +4,7 @@ Handles all submission management operations with clean Pydantic models
 """
 
 from mcp.server.fastmcp import FastMCP
-from clappia_api_tools import GetSubmissionsRequest, GetSubmissionsAggregationRequest, CreateSubmissionRequest, EditSubmissionRequest, UpdateSubmissionStatusRequest, UpdateSubmissionOwnersRequest, SubmissionResponse, SubmissionsResponse, GetSubmissionsInExcelRequest, SubmissionsExcelResponse
+from clappia_api_tools.models import GetSubmissionsRequest, GetSubmissionsAggregationRequest, CreateSubmissionRequest, EditSubmissionRequest, UpdateSubmissionStatusRequest, UpdateSubmissionOwnersRequest, GetSubmissionsInExcelRequest, SubmissionsExcelResponse, SubmissionsResponse, SubmissionResponse
 from utils import get_logger, submission_client
 
 logger = get_logger(__name__)
