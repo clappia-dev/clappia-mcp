@@ -5,7 +5,7 @@ Handles all app definition and field management operations with clean Pydantic m
 
 from mcp.server.fastmcp import FastMCP
 from utils import get_logger, app_definition_client
-from clappia_api_tools import GetAppDefinitionRequest, CreateAppRequest, AddFieldRequest, UpdateFieldRequest, AppDefinitionResponse, AppCreationResponse, FieldOperationResponse
+from clappia_api_tools.models import GetAppDefinitionRequest, CreateAppRequest, AddFieldRequest, UpdateFieldRequest, AppDefinitionResponse, AppCreationResponse, FieldOperationResponse
 logger = get_logger(__name__)
 
 def register_definition_tools(mcp: FastMCP):

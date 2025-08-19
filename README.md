@@ -37,12 +37,12 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
 
 ## Installation
 
-
 1. **Set up Clappia API Access**:
 
    -  Visit your Workplace in Clappia (https://<your_workplace>.clappia.com), you need to have Workplace Manager Access to this Workplace.
    -  Visit Workplace Settings. Note your Workplace ID.
    -  Visit Workplace Settings -> Preferences -> API Keys. Note your API Key, generate one if it is not yet generated.
+
 2. **Set up Claude for Desktop**:
 
    -  Download Claude for Desktop for [macOS](https://claude.ai/download) or [Windows](https://claude.ai/download)
@@ -56,13 +56,12 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
                "command": "uv",
                "args": [
                   "--directory",
-                  "/Users/<YOUR_DIECTORY>/Desktop/clappia-mcp",
+                  "/Users/<YOUR_DIECTORY>/<PATH_OF_THE_MCP_FOLDER>",
                   "run",
-                  "clappia-mcp.py"
+                  "server.py"
                ],
                "env": {
-                  "CLAPPIA_API_KEY": "<ENTER_YOUR_WORKPLACE_API_KEY_HERE>",
-                  "CLAPPIA_WORKPLACE_ID": "<ENTER_YOUR_WORKPLACE_ID_HERE>"
+                  "CLAPPIA_API_KEY": "<ENTER_YOUR_WORKPLACE_API_KEY_HERE>"
                }
             }
          }
@@ -92,7 +91,7 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
 
 ```
 clappia-mcp/
-├── clappia-mcp.py          # Main MCP server implementation
+├── server.py          # Main MCP server implementation
 ├── tools/                  # Core functionality modules
 │   ├── add_field.py        # Field addition functionality
 │   ├── create_app.py       # App creation functionality
