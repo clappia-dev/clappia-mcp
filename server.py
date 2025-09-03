@@ -6,11 +6,13 @@ from tools.definitions import register_definition_tools
 from tools.workflows import register_workflow_tools
 from tools.analytics import register_analytics_tools
 from tools.workplace import register_workplace_tools
+
 logger = get_logger(__name__)
 
 app = FastMCP("clappia-mcp-server")
 
 def register_all_tools():
+    """Register all tools"""
     register_submission_tools(app)
     register_definition_tools(app)
     register_workflow_tools(app)
@@ -35,10 +37,11 @@ def main():
 def list_tools():
     register_all_tools()
     try:
-        tool_infos = app._tool_manager.list_tools()
-        print(f"\n=== Clappia MCP Tools ({len(tool_infos)}) ===")
-        for tool_info in tool_infos:
-            print(f"• {tool_info.name}")
+        # Access tools from FastMCP instance
+        tools = app._tool_manager._tools if hasattr(app, '_tool_manager') and hasattr(app._tool_manager, '_tools') else {}
+        print(f"\n=== Clappia MCP Tools ({len(tools)}) ===")
+        for tool_name in tools.keys():
+            print(f"• {tool_name}")
     except Exception as e:
         print(f"Error listing tools: {e}")
 
@@ -49,15 +52,15 @@ if __name__ == "__main__":
         list_tools()
     elif "--help" in args or "-h" in args:
         print("""
-                Clappia MCP Server
-
-                Usage:
-                    python server.py              # Run server (default)
-                    python server.py --list-tools # List all tools
-                    python server.py --help       # Show help
-
-                Required Environment Variables:
-                    CLAPPIA_API_KEY
-            """)
+        Clappia MCP Server
+        
+        Usage:
+            python server.py                # Run server (default)
+            python server.py --list-tools   # List all tools
+            python server.py --help         # Show help
+        
+        Required Environment Variables:
+            CLAPPIA_API_KEY
+        """)
     else:
         main()

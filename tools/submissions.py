@@ -23,7 +23,6 @@ def register_submission_tools(mcp: FastMCP):
         try:
             return submission_client.get_submissions(
                 app_id=request.app_id,
-                requesting_user_email_address=str(request.requesting_user_email_address),
                 page_size=request.page_size,
                 forward=request.forward,
                 filters=request.filters
@@ -49,7 +48,6 @@ def register_submission_tools(mcp: FastMCP):
             
             return submission_client.get_submissions_aggregation(
                 app_id=request.app_id,
-                requesting_user_email_address=str(request.requesting_user_email_address),
                 dimensions=request.dimensions,
                 aggregation_dimensions=request.aggregation_dimensions,
                 x_axis_labels=request.x_axis_labels,
@@ -76,7 +74,6 @@ def register_submission_tools(mcp: FastMCP):
             return submission_client.create_submission(
                 app_id=request.app_id,
                 data=request.data,
-                requesting_user_email_address=str(request.requesting_user_email_address)
             )
                 
         except Exception as e:
@@ -98,7 +95,6 @@ def register_submission_tools(mcp: FastMCP):
                 app_id=request.app_id,
                 submission_id=request.submission_id,
                 data=request.data,
-                requesting_user_email_address=str(request.requesting_user_email_address)
             )
                 
         except Exception as e:
@@ -121,7 +117,6 @@ def register_submission_tools(mcp: FastMCP):
             return submission_client.update_status(
                 app_id=request.app_id,
                 submission_id=request.submission_id,
-                requesting_user_email_address=str(request.requesting_user_email_address),
                 status_name=request.status_name,
                 comments=request.comments
             )
@@ -169,7 +164,6 @@ def register_submission_tools(mcp: FastMCP):
             return submission_client.update_owners(
                 app_id=request.app_id,
                 submission_id=request.submission_id,
-                requesting_user_email_address=str(request.requesting_user_email_address),
                 email_ids=email_ids
             )
                 

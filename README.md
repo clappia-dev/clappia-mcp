@@ -165,7 +165,6 @@ clappia-mcp/
 
    result = add_field_to_app(
        app_id="APP123",
-       requesting_user_email_address="user@company.com",
        section_index=0,
        field_index=1,
        field_type="singleLineText",
@@ -184,7 +183,6 @@ clappia-mcp/
 
    result = update_field_in_app(
        app_id="APP123",
-       requesting_user_email_address="user@company.com",
        field_name="employeeName",
        label="Full Employee Name",
        required=True,
@@ -228,7 +226,6 @@ clappia-mcp/
 
    result = get_app_submissions(
        app_id="APP123",
-       requesting_user_email_address="user@company.com",
        page_size=10,
        filters=filters
    )
