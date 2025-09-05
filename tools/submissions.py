@@ -13,7 +13,7 @@ def register_submission_tools(mcp: FastMCP):
     """Register all submission-related tools with the FastMCP server"""
     
     @mcp.tool()
-    async def get_clappia_submissions(request: GetSubmissionsRequest) -> SubmissionsResponse:
+    def get_clappia_submissions(request: GetSubmissionsRequest) -> SubmissionsResponse:
         """
         Retrieve submissions from a Clappia app with optional filtering.
         
@@ -35,7 +35,7 @@ def register_submission_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def get_clappia_submissions_aggregation(
+    def get_clappia_submissions_aggregation(
         request: GetSubmissionsAggregationRequest
     ) -> SubmissionResponse:
         """
@@ -64,7 +64,7 @@ def register_submission_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def create_clappia_submission(request: CreateSubmissionRequest) -> SubmissionResponse:
+    def create_clappia_submission(request: CreateSubmissionRequest) -> SubmissionResponse:
         """
         Create a new submission in a Clappia app.
         
@@ -84,7 +84,7 @@ def register_submission_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def edit_clappia_submission(request: EditSubmissionRequest) -> SubmissionResponse:
+    def edit_clappia_submission(request: EditSubmissionRequest) -> SubmissionResponse:
         """
         Edit an existing submission in a Clappia app.
         
@@ -105,7 +105,7 @@ def register_submission_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_submission_status(
+    def update_clappia_submission_status(
         request: UpdateSubmissionStatusRequest
     ) -> SubmissionResponse:
         """
@@ -129,7 +129,7 @@ def register_submission_tools(mcp: FastMCP):
             )
     
     @mcp.tool()
-    async def get_clappia_submissions_in_excel(request: GetSubmissionsInExcelRequest) -> SubmissionsExcelResponse:
+    def get_clappia_submissions_in_excel(request: GetSubmissionsInExcelRequest) -> SubmissionsExcelResponse:
         """
         Get submissions in Excel format from a Clappia app with optional filtering.
         
@@ -152,7 +152,7 @@ def register_submission_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_submission_owners(
+    def update_clappia_submission_owners(
         request: UpdateSubmissionOwnersRequest
     ) -> SubmissionResponse:
         """
