@@ -11,7 +11,7 @@ def register_analytics_tools(mcp: FastMCP):
    
     
     @mcp.tool()
-    async def add_chart_to_clappia_app(request: AddChartRequest) -> ChartResponse:
+    def add_chart_to_clappia_app(request: AddChartRequest) -> ChartResponse:
         """Add a new chart to a Clappia app's analytics dashboard.
         """
         try:
@@ -35,7 +35,7 @@ def register_analytics_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_chart_in_clappia_app(request: UpdateChartRequest) -> ChartResponse:
+    def update_chart_in_clappia_app(request: UpdateChartRequest) -> ChartResponse:
         """Update an existing chart in a Clappia app's analytics dashboard."""
         try:
             
@@ -62,7 +62,7 @@ def register_analytics_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def reorder_chart_in_clappia_app(request: ReorderChartRequest) -> ChartResponse:
+    def reorder_chart_in_clappia_app(request: ReorderChartRequest) -> ChartResponse:
         """Reorder charts in a Clappia app's analytics dashboard."""
         try:
             return analytics_client.reorder_chart(
@@ -80,7 +80,7 @@ def register_analytics_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def get_app_charts(request: GetAppChartsRequest) -> GetAppChartsResponse:
+    def get_app_charts(request: GetAppChartsRequest) -> GetAppChartsResponse:
         """Get all charts for a Clappia app's analytics dashboard."""
         try:
             return analytics_client.get_charts(

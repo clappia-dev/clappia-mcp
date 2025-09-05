@@ -141,7 +141,7 @@ clappia-mcp/
    from tools.create_app import create_app, Section, Field
 
    result = create_app(
-       app_name="Employee Survey",
+       name="Employee Survey",
        requesting_user_email_address="user@company.com",
        sections=[
            Section(

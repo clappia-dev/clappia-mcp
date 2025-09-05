@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 def register_workplace_tools(mcp: FastMCP):
     
     @mcp.tool()
-    async def add_user_to_clappia_workplace(request: AddUserToWorkplaceRequest) -> WorkplaceUserResponse:
+    def add_user_to_clappia_workplace(request: AddUserToWorkplaceRequest) -> WorkplaceUserResponse:
         """
         Add a new user to the Clappia workplace.
         
@@ -46,7 +46,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_workplace_user_details(request: UpdateWorkplaceUserDetailsRequest) -> WorkplaceUserDetailsResponse:
+    def update_clappia_workplace_user_details(request: UpdateWorkplaceUserDetailsRequest) -> WorkplaceUserDetailsResponse:
         """
         Update workplace user details in Clappia.
         
@@ -70,7 +70,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_workplace_user_attributes(request: UpdateWorkplaceUserAttributesRequest) -> WorkplaceUserAttributesResponse:
+    def update_clappia_workplace_user_attributes(request: UpdateWorkplaceUserAttributesRequest) -> WorkplaceUserAttributesResponse:
         """
         Update workplace user attributes in Clappia.
         
@@ -94,7 +94,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_workplace_user_role(request: UpdateWorkplaceUserRoleRequest) -> WorkplaceUserRoleResponse:
+    def update_clappia_workplace_user_role(request: UpdateWorkplaceUserRoleRequest) -> WorkplaceUserRoleResponse:
         """
         Update workplace user role in Clappia.
         
@@ -118,7 +118,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def update_clappia_workplace_user_groups(request: UpdateWorkplaceUserGroupsRequest) -> WorkplaceUserGroupsResponse:
+    def update_clappia_workplace_user_groups(request: UpdateWorkplaceUserGroupsRequest) -> WorkplaceUserGroupsResponse:
         """
         Update workplace user groups in Clappia.
         
@@ -142,7 +142,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def add_user_to_clappia_app(request: AddUserToAppRequest) -> AppUserResponse:
+    def add_user_to_clappia_app(request: AddUserToAppRequest) -> AppUserResponse:
         """
         Add a user to a specific Clappia app with permissions.
         
@@ -169,7 +169,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def get_clappia_workplace_apps(request: GetWorkplaceAppsRequest) -> WorkplaceAppResponse:
+    def get_clappia_workplace_apps(request: GetWorkplaceAppsRequest) -> WorkplaceAppResponse:
         """
         Get all apps available in the Clappia workplace.
         
@@ -188,7 +188,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def get_clappia_workplace_user_apps(request: GetWorkplaceUserAppsRequest) -> WorkplaceUserAppsResponse:
+    def get_clappia_workplace_user_apps(request: GetWorkplaceUserAppsRequest) -> WorkplaceUserAppsResponse:
         """
         Get apps accessible to a specific workplace user.
         
@@ -212,7 +212,7 @@ def register_workplace_tools(mcp: FastMCP):
             )
 
     @mcp.tool()
-    async def get_clappia_workplace_users(request: GetWorkplaceUsersRequest) -> WorkplaceUsersResponse:
+    def get_clappia_workplace_users(request: GetWorkplaceUsersRequest) -> WorkplaceUsersResponse:
         """
         Get workplace users with pagination support.
         
