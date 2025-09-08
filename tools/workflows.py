@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger, workflow_definition_client   
-from clappia_api_tools.models import (  
+from utils import get_logger, workflow_definition_client
+from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
     UpsertCodeWorkflowStepRequest,
@@ -18,9 +18,8 @@ from clappia_api_tools.models import (
     UpsertDeleteSubmissionWorkflowStepRequest,
     UpsertFindSubmissionWorkflowStepRequest,
     UpsertEditSubmissionWorkflowStepRequest,
-
     WorkflowResponse,
-    WorkflowStepResponse
+    WorkflowStepResponse,
 )
 
 from typing import Optional
@@ -28,13 +27,14 @@ from typing import Optional
 
 logger = get_logger(__name__)
 
+
 def register_workflow_tools(mcp: FastMCP):
     """Register all workflow-related tools with the FastMCP server"""
-  
+
     @mcp.tool()
     def get_clappia_workflow(app_id: str, trigger_type: str) -> WorkflowResponse:
         """Retrieve the workflow configuration for a Clappia app.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -44,14 +44,19 @@ def register_workflow_tools(mcp: FastMCP):
         """
 
         return workflow_definition_client.get_workflow(
-            app_id=app_id,
-            trigger_type=trigger_type
+            app_id=app_id, trigger_type=trigger_type
         )
-    
+
     @mcp.tool()
-    def add_ai_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertAiWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_ai_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertAiWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add an AI step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -66,13 +71,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_ai_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertAiWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_ai_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertAiWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update an AI step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -83,13 +93,18 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     @mcp.tool()
-    def reorder_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, parent_variable_name: str) -> WorkflowStepResponse:
+    def reorder_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        parent_variable_name: str,
+    ) -> WorkflowStepResponse:
         """Reorder steps in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -100,14 +115,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     # Approval Workflow Step Tools
     @mcp.tool()
-    def add_approval_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertApprovalWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_approval_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertApprovalWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add an approval step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -120,13 +141,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_approval_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertApprovalWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_approval_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertApprovalWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update an approval step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -137,14 +163,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Code Workflow Step Tools
     @mcp.tool()
-    def add_code_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertCodeWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_code_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertCodeWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a code step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -157,13 +189,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_code_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertCodeWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_code_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertCodeWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a code step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -174,14 +211,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Condition Workflow Step Tools
     @mcp.tool()
-    def add_condition_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertConditionWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_condition_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertConditionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a condition step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -194,13 +237,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_condition_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertConditionWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_condition_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertConditionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a condition step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -211,14 +259,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Database Workflow Step Tools
     @mcp.tool()
-    def add_database_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertDatabaseWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_database_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertDatabaseWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a database step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -231,13 +285,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_database_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertDatabaseWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_database_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertDatabaseWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a database step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -248,14 +307,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Email Workflow Step Tools
     @mcp.tool()
-    def add_email_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertEmailWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_email_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertEmailWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add an email step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -268,13 +333,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_email_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertEmailWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_email_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertEmailWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update an email step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -285,14 +355,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Loop Workflow Step Tools
     @mcp.tool()
-    def add_loop_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertLoopWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_loop_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertLoopWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a loop step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -305,13 +381,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_loop_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertLoopWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_loop_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertLoopWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a loop step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -322,14 +403,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Mobile Notification Workflow Step Tools
     @mcp.tool()
-    def add_mobile_notification_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertMobileNotificationWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_mobile_notification_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertMobileNotificationWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a mobile notification step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -342,13 +429,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_mobile_notification_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertMobileNotificationWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_mobile_notification_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertMobileNotificationWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a mobile notification step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -359,14 +451,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # REST API Workflow Step Tools
     @mcp.tool()
-    def add_rest_api_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertRestApiWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_rest_api_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertRestApiWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a REST API step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -379,13 +477,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_rest_api_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertRestApiWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_rest_api_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertRestApiWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a REST API step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -396,14 +499,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Slack Workflow Step Tools
     @mcp.tool()
-    def add_slack_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertSlackWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_slack_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertSlackWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a Slack step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -416,13 +525,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_slack_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertSlackWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_slack_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertSlackWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a Slack step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -433,14 +547,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # SMS Workflow Step Tools
     @mcp.tool()
-    def add_sms_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertSmsWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_sms_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertSmsWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add an SMS step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -453,13 +573,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_sms_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertSmsWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_sms_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertSmsWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update an SMS step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -470,14 +595,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Wait Workflow Step Tools
     @mcp.tool()
-    def add_wait_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertWaitWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_wait_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertWaitWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a wait step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -490,13 +621,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_wait_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertWaitWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_wait_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertWaitWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a wait step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -507,14 +643,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # WhatsApp Workflow Step Tools
     @mcp.tool()
-    def add_whatsapp_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertWhatsAppWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_whatsapp_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertWhatsAppWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a WhatsApp step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -527,13 +669,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_whatsapp_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertWhatsAppWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_whatsapp_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertWhatsAppWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a WhatsApp step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -544,14 +691,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Create Submission Workflow Step Tools
     @mcp.tool()
-    def add_create_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertCreateSubmissionWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_create_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertCreateSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a create submission step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -564,13 +717,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_create_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertCreateSubmissionWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_create_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertCreateSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a create submission step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -581,14 +739,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Delete Submission Workflow Step Tools
     @mcp.tool()
-    def add_delete_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertDeleteSubmissionWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_delete_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertDeleteSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a delete submission step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -601,13 +765,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_delete_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertDeleteSubmissionWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_delete_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertDeleteSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a delete submission step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -618,14 +787,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Find Submission Workflow Step Tools
     @mcp.tool()
-    def add_find_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertFindSubmissionWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_find_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertFindSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add a find submission step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -638,13 +813,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_find_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertFindSubmissionWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_find_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertFindSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update a find submission step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -655,14 +835,20 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )
-    
+
     # Edit Submission Workflow Step Tools
     @mcp.tool()
-    def add_edit_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, request: UpsertEditSubmissionWorkflowStepRequest, step_variable_name: Optional[str] = None, parent_variable_name: Optional[str] = None) -> WorkflowStepResponse:
+    def add_edit_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        request: UpsertEditSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
         """Add an edit submission step to a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -675,13 +861,18 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             request=request,
             step_variable_name=step_variable_name,
-            parent_variable_name=parent_variable_name
+            parent_variable_name=parent_variable_name,
         )
-    
+
     @mcp.tool()
-    def update_edit_submission_workflow_step_in_clappia_app(app_id: str, trigger_type: str, step_variable_name: str, request: UpsertEditSubmissionWorkflowStepRequest) -> WorkflowStepResponse:
+    def update_edit_submission_workflow_step_in_clappia_app(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertEditSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
         """Update an edit submission step in a Clappia app's workflow.
-        
+
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
@@ -692,5 +883,5 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
-            request=request
+            request=request,
         )

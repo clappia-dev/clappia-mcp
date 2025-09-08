@@ -1,5 +1,11 @@
 import os
-from clappia_api_tools import SubmissionClient, AppDefinitionClient, WorkflowDefinitionClient, AnalyticsClient, WorkplaceClient
+from clappia_api_tools import (
+    SubmissionClient,
+    AppDefinitionClient,
+    WorkflowDefinitionClient,
+    AnalyticsClient,
+    WorkplaceClient,
+)
 
 CLAPPIA_EXTERNAL_API_BASE_URL = "https://preprod-public.clappia.com"
 
