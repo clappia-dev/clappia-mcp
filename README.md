@@ -91,27 +91,125 @@ Clappia is a no-code platform that allows businesses, operations teams, and non-
 
 ```
 clappia-mcp/
-├── server.py          # Main MCP server implementation
-├── tools/                  # Core functionality modules
-│   ├── add_field.py        # Field addition functionality
-│   ├── create_app.py       # App creation functionality
-│   ├── create_submission.py # Submission creation
-│   ├── edit_submission.py  # Submission editing
-│   ├── get_definition.py   # App definition retrieval
-│   ├── get_submissions.py  # Submission retrieval
-│   ├── get_submissions_aggregation.py # Analytics functionality
-│   ├── update_field.py     # Field update functionality
-│   ├── update_submission_owners.py # Owner management
-│   └── update_submission_status.py # Status management
+├── server.py              # Legacy main MCP server (all tools)
+├── main_server.py         # New main server with module selection
+├── submissions_server.py  # Submissions-focused MCP server
+├── definitions_server.py  # App definitions-focused MCP server
+├── workflows_server.py    # Workflows-focused MCP server
+├── analytics_server.py    # Analytics-focused MCP server
+├── workplace_server.py    # Workplace management-focused MCP server
+├── test_servers.py        # Test script for all servers
+├── tools/                 # Core functionality modules
+│   ├── submissions.py     # Submission management tools
+│   ├── definitions.py     # App definition tools
+│   ├── workflows.py       # Workflow management tools
+│   ├── analytics.py       # Analytics and chart tools
+│   └── workplace.py       # Workplace user management tools
+├── utils/                 # Utility modules
+│   ├── clients.py         # API client configurations
+│   └── logging_utils.py   # Logging utilities
 ├── pyproject.toml         # Project metadata and dependencies
 ├── uv.lock               # Dependency lock file (if using uv)
 └── .env                  # Environment variables
 ```
 
+## Running Different MCP Servers
+
+You can now run different MCP servers based on your specific needs:
+
+### 1. All-in-One Server (Legacy)
+
+```bash
+# Run all tools in one server
+uv run server.py
+```
+
+### 2. Main Server with Module Selection
+
+```bash
+# Run all modules
+uv run main_server.py
+
+# Run specific modules only
+uv run main_server.py --modules submissions definitions
+
+# List available tools
+uv run main_server.py --list-tools
+```
+
+### 3. Specialized Servers
+
+```bash
+# Submissions-focused server
+uv run submissions_server.py
+
+# App definitions-focused server
+uv run definitions_server.py
+
+# Workflows-focused server
+uv run workflows_server.py
+
+# Analytics-focused server
+uv run analytics_server.py
+
+# Workplace management-focused server
+uv run workplace_server.py
+```
+
+### Claude Desktop Configuration
+
+Update your `claude_desktop_config.json` to use any of these servers:
+
+```json
+{
+   "mcpServers": {
+      "clappia-submissions": {
+         "command": "uv",
+         "args": [
+            "--directory",
+            "/path/to/clappia-mcp",
+            "run",
+            "submissions_server.py"
+         ],
+         "env": {
+            "CLAPPIA_API_KEY": "your_api_key_here"
+         }
+      },
+      "clappia-definitions": {
+         "command": "uv",
+         "args": [
+            "--directory",
+            "/path/to/clappia-mcp",
+            "run",
+            "definitions_server.py"
+         ],
+         "env": {
+            "CLAPPIA_API_KEY": "your_api_key_here"
+         }
+      }
+   }
+}
+```
+
+### Testing Servers
+
+You can test all servers to ensure they're working correctly:
+
+```bash
+# Test all servers
+uv run test_servers.py
+
+# Or run directly
+./test_servers.py
+```
+
+This will verify that each server can be imported and tools can be registered successfully.
+
 ### Usage
 
 -  The server will automatically start when Claude Desktop launches
 -  Access tools through the Claude Desktop interface
+-  Each specialized server provides focused functionality for specific use cases
 
 ### Troubleshooting
 
