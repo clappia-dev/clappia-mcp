@@ -21,7 +21,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Summary Chart Tools
     @mcp.tool()
-    def add_summary_chart_to_clappia_app(
+    def add_summary_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -43,7 +43,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_summary_chart_in_clappia_app(
+    def update_summary_chart(
         app_id: str, chart_index: int, request: UpsertSummaryChartDefinitionRequest
     ) -> ChartResponse:
         """Update a summary chart in a Clappia app's analytics dashboard.
@@ -59,7 +59,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Bar Chart Tools
     @mcp.tool()
-    def add_bar_chart_to_clappia_app(
+    def add_bar_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -81,7 +81,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_bar_chart_in_clappia_app(
+    def update_bar_chart(
         app_id: str, chart_index: int, request: UpsertBarChartDefinitionRequest
     ) -> ChartResponse:
         """Update a bar chart in a Clappia app's analytics dashboard.
@@ -97,7 +97,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Pie Chart Tools
     @mcp.tool()
-    def add_pie_chart_to_clappia_app(
+    def add_pie_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -119,7 +119,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_pie_chart_in_clappia_app(
+    def update_pie_chart(
         app_id: str, chart_index: int, request: UpsertPieChartDefinitionRequest
     ) -> ChartResponse:
         """Update a pie chart in a Clappia app's analytics dashboard.
@@ -135,7 +135,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Doughnut Chart Tools
     @mcp.tool()
-    def add_doughnut_chart_to_clappia_app(
+    def add_doughnut_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -157,7 +157,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_doughnut_chart_in_clappia_app(
+    def update_doughnut_chart(
         app_id: str, chart_index: int, request: UpsertDoughnutChartDefinitionRequest
     ) -> ChartResponse:
         """Update a doughnut chart in a Clappia app's analytics dashboard.
@@ -173,7 +173,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Line Chart Tools
     @mcp.tool()
-    def add_line_chart_to_clappia_app(
+    def add_line_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -195,7 +195,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_line_chart_in_clappia_app(
+    def update_line_chart(
         app_id: str, chart_index: int, request: UpsertLineChartDefinitionRequest
     ) -> ChartResponse:
         """Update a line chart in a Clappia app's analytics dashboard.
@@ -211,7 +211,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Data Table Chart Tools
     @mcp.tool()
-    def add_data_table_chart_to_clappia_app(
+    def add_data_table_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -233,7 +233,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_data_table_chart_in_clappia_app(
+    def update_data_table_chart(
         app_id: str, chart_index: int, request: UpsertDataTableChartDefinitionRequest
     ) -> ChartResponse:
         """Update a data table chart in a Clappia app's analytics dashboard.
@@ -249,7 +249,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Map Chart Tools
     @mcp.tool()
-    def add_map_chart_to_clappia_app(
+    def add_map_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -271,7 +271,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_map_chart_in_clappia_app(
+    def update_map_chart(
         app_id: str, chart_index: int, request: UpsertMapChartDefinitionRequest
     ) -> ChartResponse:
         """Update a map chart in a Clappia app's analytics dashboard.
@@ -287,7 +287,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     # Gantt Chart Tools
     @mcp.tool()
-    def add_gantt_chart_to_clappia_app(
+    def add_gantt_chart(
         app_id: str,
         chart_index: int,
         chart_title: str,
@@ -309,7 +309,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_gantt_chart_in_clappia_app(
+    def update_gantt_chart(
         app_id: str, chart_index: int, request: UpsertGanttChartDefinitionRequest
     ) -> ChartResponse:
         """Update a Gantt chart in a Clappia app's analytics dashboard.
@@ -324,7 +324,7 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def reorder_chart_in_clappia_app(
+    def reorder_chart(
         app_id: str, source_index: int, target_index: int
     ) -> ChartResponse:
         """Reorder charts in a Clappia app's analytics dashboard.
