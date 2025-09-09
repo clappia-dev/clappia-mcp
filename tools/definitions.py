@@ -67,7 +67,7 @@ logger = get_logger(__name__)
 def register_definition_tools(mcp: FastMCP):
 
     @mcp.tool()
-    def add_section_to_clappia_app(
+    def add_section(
         request: UpsertSectionRequest,
     ) -> UpsertSectionOperationResponse:
         """
@@ -86,7 +86,7 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.add_section(request=request)
 
     @mcp.tool()
-    def update_section_in_clappia_app(
+    def update_section(
         request: UpsertSectionRequest,
     ) -> UpsertSectionOperationResponse:
         """
@@ -105,7 +105,7 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.update_section(request=request)
 
     @mcp.tool()
-    def reorder_section_in_clappia_app(
+    def reorder_section(
         request: ReorderSectionRequest,
     ) -> ReorderSectionOperationResponse:
         """
@@ -124,7 +124,7 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.reorder_section(request=request)
 
     @mcp.tool()
-    def add_text_field_to_clappia_app(
+    def add_text_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -159,7 +159,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_text_field_in_clappia_app(
+    def update_text_field(
         app_id: str, field_name: str, request: UpsertFieldTextRequest
     ) -> FieldOperationResponse:
         """
@@ -181,7 +181,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_textarea_field_to_clappia_app(
+    def add_textarea_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -216,7 +216,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_textarea_field_in_clappia_app(
+    def update_textarea_field(
         app_id: str, field_name: str, request: UpsertFieldTextAreaRequest
     ) -> FieldOperationResponse:
         """
@@ -238,7 +238,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_dependency_app_field_to_clappia_app(
+    def add_dependency_app_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -273,7 +273,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_dependency_app_field_in_clappia_app(
+    def update_dependency_app_field(
         app_id: str, field_name: str, request: UpsertFieldDependencyAppRequest
     ) -> FieldOperationResponse:
         """
@@ -295,7 +295,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_rest_api_field_to_clappia_app(
+    def add_rest_api_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -330,7 +330,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_rest_api_field_in_clappia_app(
+    def update_rest_api_field(
         app_id: str, field_name: str, request: UpsertFieldRestApiRequest
     ) -> FieldOperationResponse:
         """
@@ -352,7 +352,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_address_field_to_clappia_app(
+    def add_address_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -387,7 +387,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_address_field_in_clappia_app(
+    def update_address_field(
         app_id: str, field_name: str, request: UpsertFieldAddressRequest
     ) -> FieldOperationResponse:
         """
@@ -410,7 +410,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_database_field_to_clappia_app(
+    def add_database_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -447,7 +447,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_database_field_in_clappia_app(
+    def update_database_field(
         app_id: str, field_name: str, request: UpsertFieldDatabaseRequest
     ) -> FieldOperationResponse:
         """
@@ -470,7 +470,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_date_field_to_clappia_app(
+    def add_date_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -506,7 +506,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_date_field_in_clappia_app(
+    def update_date_field(
         app_id: str, field_name: str, request: UpsertFieldDateRequest
     ) -> FieldOperationResponse:
         """
@@ -529,7 +529,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_ai_field_to_clappia_app(
+    def add_ai_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -565,7 +565,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_ai_field_in_clappia_app(
+    def update_ai_field(
         app_id: str, field_name: str, request: UpsertFieldAIRequest
     ) -> FieldOperationResponse:
         """
@@ -587,7 +587,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_code_field_to_clappia_app(
+    def add_code_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -623,7 +623,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_code_field_in_clappia_app(
+    def update_code_field(
         app_id: str, field_name: str, request: UpsertFieldCodeRequest
     ) -> FieldOperationResponse:
         """
@@ -645,7 +645,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_code_reader_field_to_clappia_app(
+    def add_code_reader_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -681,7 +681,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_code_reader_field_in_clappia_app(
+    def update_code_reader_field(
         app_id: str, field_name: str, request: UpsertFieldCodeReaderRequest
     ) -> FieldOperationResponse:
         """
@@ -703,7 +703,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_email_input_field_to_clappia_app(
+    def add_email_input_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -737,7 +737,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_email_input_field_in_clappia_app(
+    def update_email_input_field(
         app_id: str, field_name: str, request: UpsertFieldEmailInputRequest
     ) -> FieldOperationResponse:
         """
@@ -759,7 +759,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_emoji_field_to_clappia_app(
+    def add_emoji_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -794,7 +794,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_emoji_field_in_clappia_app(
+    def update_emoji_field(
         app_id: str, field_name: str, request: UpsertFieldEmojiRequest
     ) -> FieldOperationResponse:
         """
@@ -816,7 +816,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_file_field_to_clappia_app(
+    def add_file_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -851,7 +851,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_file_field_in_clappia_app(
+    def update_file_field(
         app_id: str, field_name: str, request: UpsertFieldFileRequest
     ) -> FieldOperationResponse:
         """
@@ -873,7 +873,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_gps_location_field_to_clappia_app(
+    def add_gps_location_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -908,7 +908,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_gps_location_field_in_clappia_app(
+    def update_gps_location_field(
         app_id: str, field_name: str, request: UpsertFieldGpsLocationRequest
     ) -> FieldOperationResponse:
         """
@@ -930,7 +930,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_live_tracking_field_to_clappia_app(
+    def add_live_tracking_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -965,7 +965,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_live_tracking_field_in_clappia_app(
+    def update_live_tracking_field(
         app_id: str, field_name: str, request: UpsertFieldLiveTrackingRequest
     ) -> FieldOperationResponse:
         """
@@ -987,7 +987,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_manual_address_field_to_clappia_app(
+    def add_manual_address_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1018,13 +1018,13 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id,
             section_index=section_index,
             field_index=field_index,
-            field_type=FieldType.ADDRESS.value,
             field_name=field_name,
+            page_index=page_index,
             request=request,
         )
 
     @mcp.tool()
-    def update_manual_address_field_in_clappia_app(
+    def update_manual_address_field(
         app_id: str, field_name: str, request: UpsertFieldManualAddressRequest
     ) -> FieldOperationResponse:
         """
@@ -1046,7 +1046,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_phone_number_field_to_clappia_app(
+    def add_phone_number_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1081,7 +1081,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_phone_number_field_in_clappia_app(
+    def update_phone_number_field(
         app_id: str, field_name: str, request: UpsertFieldPhoneNumberRequest
     ) -> FieldOperationResponse:
         """
@@ -1103,7 +1103,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_progress_bar_field_to_clappia_app(
+    def add_progress_bar_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1138,7 +1138,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_progress_bar_field_in_clappia_app(
+    def update_progress_bar_field(
         app_id: str, field_name: str, request: UpsertFieldProgressBarRequest
     ) -> FieldOperationResponse:
         """
@@ -1160,7 +1160,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_signature_field_to_clappia_app(
+    def add_signature_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1195,7 +1195,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_signature_field_in_clappia_app(
+    def update_signature_field(
         app_id: str, field_name: str, request: UpsertFieldSignatureRequest
     ) -> FieldOperationResponse:
         """
@@ -1217,7 +1217,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_counter_field_to_clappia_app(
+    def add_counter_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1252,7 +1252,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_counter_field_in_clappia_app(
+    def update_counter_field(
         app_id: str, field_name: str, request: UpsertFieldCounterRequest
     ) -> FieldOperationResponse:
         """
@@ -1274,7 +1274,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_slider_field_to_clappia_app(
+    def add_slider_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1309,7 +1309,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_slider_field_in_clappia_app(
+    def update_slider_field(
         app_id: str, field_name: str, request: UpsertFieldSliderRequest
     ) -> FieldOperationResponse:
         """
@@ -1331,7 +1331,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_time_field_to_clappia_app(
+    def add_time_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1366,7 +1366,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_time_field_in_clappia_app(
+    def update_time_field(
         app_id: str, field_name: str, request: UpsertFieldTimeRequest
     ) -> FieldOperationResponse:
         """
@@ -1388,7 +1388,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_toggle_field_to_clappia_app(
+    def add_toggle_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1423,7 +1423,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_toggle_field_in_clappia_app(
+    def update_toggle_field(
         app_id: str, field_name: str, request: UpsertFieldToggleRequest
     ) -> FieldOperationResponse:
         """
@@ -1445,7 +1445,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_validation_field_to_clappia_app(
+    def add_validation_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1480,7 +1480,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_validation_field_in_clappia_app(
+    def update_validation_field(
         app_id: str, field_name: str, request: UpsertFieldValidationRequest
     ) -> FieldOperationResponse:
         """
@@ -1502,7 +1502,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_video_viewer_field_to_clappia_app(
+    def add_video_viewer_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1537,7 +1537,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_video_viewer_field_in_clappia_app(
+    def update_video_viewer_field(
         app_id: str, field_name: str, request: UpsertFieldVideoViewerRequest
     ) -> FieldOperationResponse:
         """
@@ -1559,7 +1559,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_voice_field_to_clappia_app(
+    def add_voice_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1594,7 +1594,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_voice_field_in_clappia_app(
+    def update_voice_field(
         app_id: str, field_name: str, request: UpsertFieldVoiceRequest
     ) -> FieldOperationResponse:
         """
@@ -1616,7 +1616,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_formula_field_to_clappia_app(
+    def add_formula_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1653,7 +1653,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_formula_field_in_clappia_app(
+    def update_formula_field(
         app_id: str, field_name: str, request: UpsertFieldFormulaRequest
     ) -> FieldOperationResponse:
         """
@@ -1675,7 +1675,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_image_field_to_clappia_app(
+    def add_image_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1710,7 +1710,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_image_field_in_clappia_app(
+    def update_image_field(
         app_id: str, field_name: str, request: UpsertFieldImageViewerRequest
     ) -> FieldOperationResponse:
         """
@@ -1732,7 +1732,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_rich_text_editor_field_to_clappia_app(
+    def add_rich_text_editor_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1767,7 +1767,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_rich_text_editor_field_in_clappia_app(
+    def update_rich_text_editor_field(
         app_id: str, field_name: str, request: UpsertFieldRichTextEditorRequest
     ) -> FieldOperationResponse:
         """
@@ -1789,7 +1789,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_nfc_reader_field_to_clappia_app(
+    def add_nfc_reader_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1824,7 +1824,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_nfc_reader_field_in_clappia_app(
+    def update_nfc_reader_field(
         app_id: str, field_name: str, request: UpsertFieldNfcReaderRequest
     ) -> FieldOperationResponse:
         """
@@ -1846,7 +1846,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_number_field_to_clappia_app(
+    def add_number_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1881,7 +1881,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_number_field_in_clappia_app(
+    def update_number_field(
         app_id: str, field_name: str, request: UpsertFieldNumberInputRequest
     ) -> FieldOperationResponse:
         """
@@ -1903,7 +1903,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_pdf_viewer_field_to_clappia_app(
+    def add_pdf_viewer_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1938,7 +1938,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_pdf_viewer_field_in_clappia_app(
+    def update_pdf_viewer_field(
         app_id: str, field_name: str, request: UpsertFieldPdfViewerRequest
     ) -> FieldOperationResponse:
         """
@@ -1960,7 +1960,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_read_only_file_field_to_clappia_app(
+    def add_read_only_file_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -1985,7 +1985,7 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.add_read_only_file_field`.
         """
-        return app_definition_client.add_read_only_file_field(
+        return app_definition_client.add_read_only_field(
             app_id=app_id,
             section_index=section_index,
             field_index=field_index,
@@ -1995,7 +1995,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_read_only_file_field_in_clappia_app(
+    def update_read_only_file_field(
         app_id: str, field_name: str, request: UpsertFieldReadOnlyFileRequest
     ) -> FieldOperationResponse:
         """
@@ -2012,12 +2012,12 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_read_only_file_field`.
         """
-        return app_definition_client.update_read_only_file_field(
+        return app_definition_client.update_read_only_field(
             app_id=app_id, field_name=field_name, request=request
         )
 
     @mcp.tool()
-    def add_read_only_text_field_to_clappia_app(
+    def add_read_only_text_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2052,7 +2052,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_read_only_text_field_in_clappia_app(
+    def update_read_only_text_field(
         app_id: str, field_name: str, request: UpsertFieldReadOnlyTextRequest
     ) -> FieldOperationResponse:
         """
@@ -2074,7 +2074,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_tag_field_to_clappia_app(
+    def add_tag_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2109,7 +2109,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_tag_field_in_clappia_app(
+    def update_tag_field(
         app_id: str, field_name: str, request: UpsertFieldTagsRequest
     ) -> FieldOperationResponse:
         """
@@ -2131,7 +2131,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_unique_sequential_field_to_clappia_app(
+    def add_unique_sequential_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2166,7 +2166,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_unique_sequential_field_in_clappia_app(
+    def update_unique_sequential_field(
         app_id: str, field_name: str, request: UpsertFieldUniqueSequentialRequest
     ) -> FieldOperationResponse:
         """
@@ -2188,7 +2188,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_drop_down_field_to_clappia_app(
+    def add_drop_down_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2223,7 +2223,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_drop_down_field_in_clappia_app(
+    def update_drop_down_field(
         app_id: str, field_name: str, request: UpsertFieldDropdownRequest
     ) -> FieldOperationResponse:
         """
@@ -2245,7 +2245,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_radio_field_to_clappia_app(
+    def add_radio_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2280,7 +2280,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_radio_field_in_clappia_app(
+    def update_radio_field(
         app_id: str, field_name: str, request: UpsertFieldRadioRequest
     ) -> FieldOperationResponse:
         """
@@ -2302,7 +2302,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_url_input_field_to_clappia_app(
+    def add_url_input_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2337,7 +2337,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_url_input_field_in_clappia_app(
+    def update_url_input_field(
         app_id: str, field_name: str, request: UpsertFieldUrlInputRequest
     ) -> FieldOperationResponse:
         """
@@ -2359,7 +2359,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_checkbox_field_to_clappia_app(
+    def add_checkbox_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2394,7 +2394,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_checkbox_field_in_clappia_app(
+    def update_checkbox_field(
         app_id: str, field_name: str, request: UpsertFieldCheckboxRequest
     ) -> FieldOperationResponse:
         """
@@ -2416,7 +2416,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_razorpay_payment_gateway_field_to_clappia_app(
+    def add_razorpay_payment_gateway_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2451,7 +2451,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_razorpay_payment_gateway_field_in_clappia_app(
+    def update_razorpay_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldRazorpayPaymentGatewayRequest
     ) -> FieldOperationResponse:
         """
@@ -2473,7 +2473,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_eazypay_payment_gateway_field_to_clappia_app(
+    def add_eazypay_payment_gateway_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2508,7 +2508,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_eazypay_payment_gateway_field_in_clappia_app(
+    def update_eazypay_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldEazypayPaymentGatewayRequest
     ) -> FieldOperationResponse:
         """
@@ -2530,7 +2530,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_paypal_payment_gateway_field_to_clappia_app(
+    def add_paypal_payment_gateway_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2566,7 +2566,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_paypal_payment_gateway_field_in_clappia_app(
+    def update_paypal_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldPaypalPaymentGatewayRequest
     ) -> FieldOperationResponse:
         """
@@ -2588,7 +2588,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_stripe_payment_gateway_field_to_clappia_app(
+    def add_stripe_payment_gateway_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2623,7 +2623,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_stripe_payment_gateway_field_in_clappia_app(
+    def update_stripe_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldStripePaymentGatewayRequest
     ) -> FieldOperationResponse:
         """
@@ -2645,7 +2645,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_button_field_to_clappia_app(
+    def add_button_field(
         app_id: str,
         section_index: int,
         field_index: int,
@@ -2680,7 +2680,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def update_button_field_in_clappia_app(
+    def update_button_field(
         app_id: str, field_name: str, request: UpsertFieldButtonRequest
     ) -> FieldOperationResponse:
         """
@@ -2702,7 +2702,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def add_page_break_to_clappia_app(
+    def add_page_break(
         request: AddPageBreakRequest,
     ) -> PageBreakOperationResponse:
         """
@@ -2721,7 +2721,7 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.add_page_break(request=request)
 
     @mcp.tool()
-    def update_page_break_in_clappia_app(
+    def update_page_break(
         request: UpdatePageBreakRequest,
     ) -> PageBreakOperationResponse:
         """
@@ -2740,7 +2740,7 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.update_page(request=request)
 
     @mcp.tool()
-    def get_clappia_app_definition(app_id: str) -> AppDefinitionResponse:
+    def get_app_definition(app_id: str) -> AppDefinitionResponse:
         """
         Fetches the complete definition of a Clappia application, including forms, fields, sections, and metadata.
 
@@ -2758,7 +2758,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def create_clappia_app(request: CreateAppRequest) -> AppCreationResponse:
+    def create_app(request: CreateAppRequest) -> AppCreationResponse:
         """
         Creates a new Clappia application with specified sections and fields.
 

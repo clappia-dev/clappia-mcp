@@ -30,7 +30,7 @@ def register_all_tools():
             logger.info(f"Registered {module_name} tools")
         except Exception as e:
             logger.error(f"Failed to register {module_name} tools: {str(e)}")
-    
+
     logger.info("All Clappia MCP tools registered successfully")
 
 
@@ -45,7 +45,7 @@ def register_specific_tools(modules):
                 logger.error(f"Failed to register {module} tools: {str(e)}")
         else:
             logger.warning(f"Unknown module: {module}")
-    
+
     logger.info(f"Registered tools from modules: {', '.join(modules)}")
 
 
@@ -56,30 +56,28 @@ def main():
         nargs="+",
         choices=list(AVAILABLE_MODULES.keys()) + ["all"],
         default=["all"],
-        help="Specify which modules to load (default: all)"
+        help="Specify which modules to load (default: all)",
     )
     parser.add_argument(
-        "--list-tools",
-        action="store_true",
-        help="List all available tools and exit"
+        "--list-tools", action="store_true", help="List all available tools and exit"
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         if "all" in args.modules:
             register_all_tools()
         else:
             register_specific_tools(args.modules)
-        
+
         if args.list_tools:
             list_tools()
             return
-        
+
         logger.info("Starting Clappia MCP server")
         logger.info("CLAPPIA_API_KEY must be set as environment variable")
         app.run(transport="stdio")
-        
+
     except KeyboardInterrupt:
         logger.info("Server shutdown requested by user")
     except Exception as e:
