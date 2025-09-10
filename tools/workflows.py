@@ -1,3 +1,4 @@
+from typing import Union, Optional
 from mcp.server.fastmcp import FastMCP
 from utils import get_logger, workflow_definition_client
 from clappia_api_tools.models import (
@@ -21,6 +22,27 @@ from clappia_api_tools.models import (
     WorkflowResponse,
     WorkflowStepResponse,
 )
+
+# Union type for all workflow step request types
+WorkflowStepRequestUnion = Union[
+    UpsertAiWorkflowStepRequest,
+    UpsertApprovalWorkflowStepRequest,
+    UpsertCodeWorkflowStepRequest,
+    UpsertConditionWorkflowStepRequest,
+    UpsertDatabaseWorkflowStepRequest,
+    UpsertEmailWorkflowStepRequest,
+    UpsertLoopWorkflowStepRequest,
+    UpsertMobileNotificationWorkflowStepRequest,
+    UpsertRestApiWorkflowStepRequest,
+    UpsertSlackWorkflowStepRequest,
+    UpsertSmsWorkflowStepRequest,
+    UpsertWaitWorkflowStepRequest,
+    UpsertWhatsAppWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
+]
 
 from typing import Optional
 
@@ -47,7 +69,6 @@ def register_workflow_tools(mcp: FastMCP):
             app_id=app_id, trigger_type=trigger_type
         )
 
-    @mcp.tool()
     def add_ai_step(
         app_id: str,
         trigger_type: str,
@@ -74,7 +95,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_ai_step(
         app_id: str,
         trigger_type: str,
@@ -118,8 +138,129 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    # Approval Workflow Step Tools
     @mcp.tool()
+    def add_workflow_step(
+        app_id: str,
+        trigger_type: str,
+        request: WorkflowStepRequestUnion,
+        step_variable_name: Optional[str] = None,
+        parent_step_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """
+        Adds a workflow step to a Clappia app. The step type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
+            request (WorkflowStepRequestUnion): The request object containing step configuration. The step type is determined by the specific request type.
+            step_variable_name (Optional[str]): The variable name of the step, if not provided, a random variable name will be generated.
+            parent_step_variable_name (Optional[str]): The variable name of the parent step, below which the new step will be added. If not provided, the new step will be added to the start of the workflow, else it will be added below the parent step.
+
+        Returns:
+            WorkflowStepResponse: The response object containing the result of the step addition.
+
+        Raises:
+            Exception: Any error raised by the underlying step addition method.
+        """
+        # Determine step type based on request type and call appropriate function
+        if isinstance(request, UpsertAiWorkflowStepRequest):
+            return add_ai_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertApprovalWorkflowStepRequest):
+            return add_approval_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertCodeWorkflowStepRequest):
+            return add_code_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertConditionWorkflowStepRequest):
+            return add_condition_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
+            return add_database_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertEmailWorkflowStepRequest):
+            return add_email_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertLoopWorkflowStepRequest):
+            return add_loop_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
+            return add_mobile_notification_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertRestApiWorkflowStepRequest):
+            return add_rest_api_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertSlackWorkflowStepRequest):
+            return add_slack_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertSmsWorkflowStepRequest):
+            return add_sms_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertWaitWorkflowStepRequest):
+            return add_wait_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
+            return add_whatsapp_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
+            return add_create_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
+            return add_delete_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
+            return add_find_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
+            return add_edit_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        else:
+            raise ValueError(f"Unsupported workflow step request type: {type(request)}")
+
+    @mcp.tool()
+    def update_workflow_step(
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: WorkflowStepRequestUnion,
+    ) -> WorkflowStepResponse:
+        """
+        Updates a workflow step in a Clappia app. The step type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
+            step_variable_name (str): The variable name of the step to update.
+            request (WorkflowStepRequestUnion): The request object containing step configuration. The step type is determined by the specific request type.
+
+        Returns:
+            WorkflowStepResponse: The response object containing the result of the step update.
+
+        Raises:
+            Exception: Any error raised by the underlying step update method.
+        """
+        # Determine step type based on request type and call appropriate function
+        if isinstance(request, UpsertAiWorkflowStepRequest):
+            return update_ai_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertApprovalWorkflowStepRequest):
+            return update_approval_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertCodeWorkflowStepRequest):
+            return update_code_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertConditionWorkflowStepRequest):
+            return update_condition_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
+            return update_database_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertEmailWorkflowStepRequest):
+            return update_email_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertLoopWorkflowStepRequest):
+            return update_loop_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
+            return update_mobile_notification_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertRestApiWorkflowStepRequest):
+            return update_rest_api_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertSlackWorkflowStepRequest):
+            return update_slack_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertSmsWorkflowStepRequest):
+            return update_sms_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertWaitWorkflowStepRequest):
+            return update_wait_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
+            return update_whatsapp_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
+            return update_create_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
+            return update_delete_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
+            return update_find_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
+            return update_edit_submission_step(app_id, trigger_type, step_variable_name, request)
+        else:
+            raise ValueError(f"Unsupported workflow step request type: {type(request)}")
+
+    # Approval Workflow Step Tools
     def add_approval_step(
         app_id: str,
         trigger_type: str,
@@ -144,7 +285,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_approval_step(
         app_id: str,
         trigger_type: str,
@@ -167,7 +307,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Code Workflow Step Tools
-    @mcp.tool()
     def add_code_step(
         app_id: str,
         trigger_type: str,
@@ -192,7 +331,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_code_step(
         app_id: str,
         trigger_type: str,
@@ -215,7 +353,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Condition Workflow Step Tools
-    @mcp.tool()
     def add_condition_step(
         app_id: str,
         trigger_type: str,
@@ -240,7 +377,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_condition_step(
         app_id: str,
         trigger_type: str,
@@ -263,7 +399,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Database Workflow Step Tools
-    @mcp.tool()
     def add_database_step(
         app_id: str,
         trigger_type: str,
@@ -288,7 +423,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_database_step(
         app_id: str,
         trigger_type: str,
@@ -311,7 +445,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Email Workflow Step Tools
-    @mcp.tool()
     def add_email_step(
         app_id: str,
         trigger_type: str,
@@ -336,7 +469,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_email_step(
         app_id: str,
         trigger_type: str,
@@ -359,7 +491,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Loop Workflow Step Tools
-    @mcp.tool()
     def add_loop_step(
         app_id: str,
         trigger_type: str,
@@ -384,7 +515,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_loop_step(
         app_id: str,
         trigger_type: str,
@@ -407,7 +537,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Mobile Notification Workflow Step Tools
-    @mcp.tool()
     def add_mobile_notification_step(
         app_id: str,
         trigger_type: str,
@@ -432,7 +561,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_mobile_notification_step(
         app_id: str,
         trigger_type: str,
@@ -455,7 +583,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # REST API Workflow Step Tools
-    @mcp.tool()
     def add_rest_api_step(
         app_id: str,
         trigger_type: str,
@@ -480,7 +607,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_rest_api_step(
         app_id: str,
         trigger_type: str,
@@ -503,7 +629,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Slack Workflow Step Tools
-    @mcp.tool()
     def add_slack_step(
         app_id: str,
         trigger_type: str,
@@ -528,7 +653,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_slack_step(
         app_id: str,
         trigger_type: str,
@@ -551,7 +675,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # SMS Workflow Step Tools
-    @mcp.tool()
     def add_sms_step(
         app_id: str,
         trigger_type: str,
@@ -576,7 +699,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_sms_step(
         app_id: str,
         trigger_type: str,
@@ -599,7 +721,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Wait Workflow Step Tools
-    @mcp.tool()
     def add_wait_step(
         app_id: str,
         trigger_type: str,
@@ -624,7 +745,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_wait_step(
         app_id: str,
         trigger_type: str,
@@ -647,7 +767,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # WhatsApp Workflow Step Tools
-    @mcp.tool()
     def add_whatsapp_step(
         app_id: str,
         trigger_type: str,
@@ -672,7 +791,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_whatsapp_step(
         app_id: str,
         trigger_type: str,
@@ -695,7 +813,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Create Submission Workflow Step Tools
-    @mcp.tool()
     def add_create_submission_step(
         app_id: str,
         trigger_type: str,
@@ -720,7 +837,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_create_submission_step(
         app_id: str,
         trigger_type: str,
@@ -743,7 +859,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Delete Submission Workflow Step Tools
-    @mcp.tool()
     def add_delete_submission_step(
         app_id: str,
         trigger_type: str,
@@ -768,7 +883,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_delete_submission_step(
         app_id: str,
         trigger_type: str,
@@ -791,7 +905,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Find Submission Workflow Step Tools
-    @mcp.tool()
     def add_find_submission_step(
         app_id: str,
         trigger_type: str,
@@ -816,7 +929,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_find_submission_step(
         app_id: str,
         trigger_type: str,
@@ -839,7 +951,6 @@ def register_workflow_tools(mcp: FastMCP):
         )
 
     # Edit Submission Workflow Step Tools
-    @mcp.tool()
     def add_edit_submission_step(
         app_id: str,
         trigger_type: str,
@@ -864,7 +975,6 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name=parent_step_variable_name,
         )
 
-    @mcp.tool()
     def update_edit_submission_step(
         app_id: str,
         trigger_type: str,

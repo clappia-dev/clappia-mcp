@@ -1,3 +1,4 @@
+from typing import Union
 from mcp.server.fastmcp import FastMCP
 from utils import get_logger, app_definition_client
 from clappia_api_tools.enums import FieldType
@@ -59,6 +60,55 @@ from clappia_api_tools.models import (
     AppCreationResponse,
     ReorderSectionOperationResponse,
 )
+
+# Union type for all field request types
+FieldRequestUnion = Union[
+    UpsertFieldTextRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldAddressRequest,
+    UpsertFieldDatabaseRequest,
+    UpsertFieldDateRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldEmailInputRequest,
+    UpsertFieldEmojiRequest,
+    UpsertFieldFileRequest,
+    UpsertFieldGpsLocationRequest,
+    UpsertFieldLiveTrackingRequest,
+    UpsertFieldManualAddressRequest,
+    UpsertFieldPhoneNumberRequest,
+    UpsertFieldProgressBarRequest,
+    UpsertFieldSignatureRequest,
+    UpsertFieldCounterRequest,
+    UpsertFieldSliderRequest,
+    UpsertFieldTimeRequest,
+    UpsertFieldToggleRequest,
+    UpsertFieldValidationRequest,
+    UpsertFieldVideoViewerRequest,
+    UpsertFieldVoiceRequest,
+    UpsertFieldFormulaRequest,
+    UpsertFieldImageViewerRequest,
+    UpsertFieldRichTextEditorRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPdfViewerRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldUrlInputRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldButtonRequest,
+]
 
 
 logger = get_logger(__name__)
@@ -124,6 +174,239 @@ def register_definition_tools(mcp: FastMCP):
         return app_definition_client.reorder_section(request=request)
 
     @mcp.tool()
+    def add_field(
+        app_id: str,
+        section_index: int,
+        field_index: int,
+        page_index: int,
+        field_name: str,
+        request: FieldRequestUnion,
+    ) -> FieldOperationResponse:
+        """
+        Adds a field to a Clappia app. The field type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier for the target Clappia application.
+            section_index (int): The zero-based index of the section where the new field will be inserted.
+            field_index (int): The zero-based insertion index within that section.
+            page_index (int): The zero-based index of the page where the new field will be inserted.
+            field_name (str): The unique variable name for this field (e.g., `"text_field_1"`).
+            request (FieldRequestUnion): The request object containing field configuration. The field type is determined by the specific request type.
+
+        Returns:
+            FieldOperationResponse: Feedback from Clappia indicating success or failure of the field addition.
+
+        Raises:
+            Exception: Any error raised by the underlying field addition method.
+        """
+        # Determine field type based on request type and call appropriate function
+        if isinstance(request, UpsertFieldTextRequest):
+            return add_text_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldTextAreaRequest):
+            return add_textarea_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDependencyAppRequest):
+            return add_dependency_app_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldRestApiRequest):
+            return add_rest_api_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldAddressRequest):
+            return add_address_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDatabaseRequest):
+            return add_database_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDateRequest):
+            return add_date_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldAIRequest):
+            return add_ai_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCodeRequest):
+            return add_code_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCodeReaderRequest):
+            return add_code_reader_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldEmailInputRequest):
+            return add_email_input_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldEmojiRequest):
+            return add_emoji_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldFileRequest):
+            return add_file_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldGpsLocationRequest):
+            return add_gps_location_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldLiveTrackingRequest):
+            return add_live_tracking_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldManualAddressRequest):
+            return add_manual_address_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldPhoneNumberRequest):
+            return add_phone_number_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldProgressBarRequest):
+            return add_progress_bar_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldSignatureRequest):
+            return add_signature_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldCounterRequest):
+            return add_counter_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldSliderRequest):
+            return add_slider_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldTimeRequest):
+            return add_time_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldToggleRequest):
+            return add_toggle_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldValidationRequest):
+            return add_validation_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldVideoViewerRequest):
+            return add_video_viewer_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldVoiceRequest):
+            return add_voice_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldFormulaRequest):
+            return add_formula_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldImageViewerRequest):
+            return add_image_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldRichTextEditorRequest):
+            return add_rich_text_editor_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldNfcReaderRequest):
+            return add_nfc_reader_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldNumberInputRequest):
+            return add_number_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldPdfViewerRequest):
+            return add_pdf_viewer_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldReadOnlyFileRequest):
+            return add_read_only_file_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldReadOnlyTextRequest):
+            return add_read_only_text_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldTagsRequest):
+            return add_tag_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldUniqueSequentialRequest):
+            return add_unique_sequential_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldDropdownRequest):
+            return add_drop_down_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldRadioRequest):
+            return add_radio_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldUrlInputRequest):
+            return add_url_input_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldCheckboxRequest):
+            return add_checkbox_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
+            return add_razorpay_payment_gateway_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
+            return add_eazypay_payment_gateway_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
+            return add_paypal_payment_gateway_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
+            return add_stripe_payment_gateway_field(app_id, section_index, field_index, field_name, page_index, request)
+        elif isinstance(request, UpsertFieldButtonRequest):
+            return add_button_field(app_id, section_index, field_index, field_name, page_index, request)
+        else:
+            raise ValueError(f"Unsupported field request type: {type(request)}")
+
+    @mcp.tool()
+    def update_field(
+        app_id: str,
+        field_name: str,
+        request: FieldRequestUnion,
+    ) -> FieldOperationResponse:
+        """
+        Updates a field in a Clappia app. The field type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier for the target Clappia application.
+            field_name (str): The unique variable name for this field (e.g., `"text_field_1"`).
+            request (FieldRequestUnion): The request object containing field configuration. The field type is determined by the specific request type.
+
+        Returns:
+            FieldOperationResponse: Feedback from Clappia indicating success or failure of the field update.
+
+        Raises:
+            Exception: Any error raised by the underlying field update method.
+        """
+        # Determine field type based on request type and call appropriate function
+        if isinstance(request, UpsertFieldTextRequest):
+            return update_text_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTextAreaRequest):
+            return update_textarea_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDependencyAppRequest):
+            return update_dependency_app_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRestApiRequest):
+            return update_rest_api_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldAddressRequest):
+            return update_address_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDatabaseRequest):
+            return update_database_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDateRequest):
+            return update_date_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldAIRequest):
+            return update_ai_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCodeRequest):
+            return update_code_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCodeReaderRequest):
+            return update_code_reader_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEmailInputRequest):
+            return update_email_input_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEmojiRequest):
+            return update_emoji_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldFileRequest):
+            return update_file_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldGpsLocationRequest):
+            return update_gps_location_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldLiveTrackingRequest):
+            return update_live_tracking_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldManualAddressRequest):
+            return update_manual_address_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPhoneNumberRequest):
+            return update_phone_number_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldProgressBarRequest):
+            return update_progress_bar_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldSignatureRequest):
+            return update_signature_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCounterRequest):
+            return update_counter_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldSliderRequest):
+            return update_slider_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTimeRequest):
+            return update_time_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldToggleRequest):
+            return update_toggle_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldValidationRequest):
+            return update_validation_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldVideoViewerRequest):
+            return update_video_viewer_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldVoiceRequest):
+            return update_voice_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldFormulaRequest):
+            return update_formula_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldImageViewerRequest):
+            return update_image_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRichTextEditorRequest):
+            return update_rich_text_editor_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldNfcReaderRequest):
+            return update_nfc_reader_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldNumberInputRequest):
+            return update_number_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPdfViewerRequest):
+            return update_pdf_viewer_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyFileRequest):
+            return update_read_only_file_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyTextRequest):
+            return update_read_only_text_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTagsRequest):
+            return update_tag_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldUniqueSequentialRequest):
+            return update_unique_sequential_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDropdownRequest):
+            return update_drop_down_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRadioRequest):
+            return update_radio_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldUrlInputRequest):
+            return update_url_input_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCheckboxRequest):
+            return update_checkbox_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
+            return update_razorpay_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
+            return update_eazypay_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
+            return update_paypal_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
+            return update_stripe_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldButtonRequest):
+            return update_button_field(app_id, field_name, request)
+        else:
+            raise ValueError(f"Unsupported field request type: {type(request)}")
+
     def add_text_field(
         app_id: str,
         section_index: int,
@@ -158,7 +441,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_text_field(
         app_id: str, field_name: str, request: UpsertFieldTextRequest
     ) -> FieldOperationResponse:
@@ -180,7 +462,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_textarea_field(
         app_id: str,
         section_index: int,
@@ -215,7 +496,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_textarea_field(
         app_id: str, field_name: str, request: UpsertFieldTextAreaRequest
     ) -> FieldOperationResponse:
@@ -237,7 +517,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_dependency_app_field(
         app_id: str,
         section_index: int,
@@ -272,7 +551,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_dependency_app_field(
         app_id: str, field_name: str, request: UpsertFieldDependencyAppRequest
     ) -> FieldOperationResponse:
@@ -294,7 +572,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_rest_api_field(
         app_id: str,
         section_index: int,
@@ -329,7 +606,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_rest_api_field(
         app_id: str, field_name: str, request: UpsertFieldRestApiRequest
     ) -> FieldOperationResponse:
@@ -351,7 +627,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_address_field(
         app_id: str,
         section_index: int,
@@ -386,7 +661,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_address_field(
         app_id: str, field_name: str, request: UpsertFieldAddressRequest
     ) -> FieldOperationResponse:
@@ -409,7 +683,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_database_field(
         app_id: str,
         section_index: int,
@@ -446,7 +719,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_database_field(
         app_id: str, field_name: str, request: UpsertFieldDatabaseRequest
     ) -> FieldOperationResponse:
@@ -469,7 +741,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_date_field(
         app_id: str,
         section_index: int,
@@ -505,7 +776,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_date_field(
         app_id: str, field_name: str, request: UpsertFieldDateRequest
     ) -> FieldOperationResponse:
@@ -528,7 +798,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_ai_field(
         app_id: str,
         section_index: int,
@@ -564,7 +833,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_ai_field(
         app_id: str, field_name: str, request: UpsertFieldAIRequest
     ) -> FieldOperationResponse:
@@ -586,7 +854,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_code_field(
         app_id: str,
         section_index: int,
@@ -622,7 +889,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_code_field(
         app_id: str, field_name: str, request: UpsertFieldCodeRequest
     ) -> FieldOperationResponse:
@@ -644,7 +910,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_code_reader_field(
         app_id: str,
         section_index: int,
@@ -680,7 +945,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_code_reader_field(
         app_id: str, field_name: str, request: UpsertFieldCodeReaderRequest
     ) -> FieldOperationResponse:
@@ -702,7 +966,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_email_input_field(
         app_id: str,
         section_index: int,
@@ -736,7 +999,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_email_input_field(
         app_id: str, field_name: str, request: UpsertFieldEmailInputRequest
     ) -> FieldOperationResponse:
@@ -758,7 +1020,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_emoji_field(
         app_id: str,
         section_index: int,
@@ -793,7 +1054,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_emoji_field(
         app_id: str, field_name: str, request: UpsertFieldEmojiRequest
     ) -> FieldOperationResponse:
@@ -815,7 +1075,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_file_field(
         app_id: str,
         section_index: int,
@@ -850,7 +1109,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_file_field(
         app_id: str, field_name: str, request: UpsertFieldFileRequest
     ) -> FieldOperationResponse:
@@ -872,7 +1130,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_gps_location_field(
         app_id: str,
         section_index: int,
@@ -907,7 +1164,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_gps_location_field(
         app_id: str, field_name: str, request: UpsertFieldGpsLocationRequest
     ) -> FieldOperationResponse:
@@ -929,7 +1185,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_live_tracking_field(
         app_id: str,
         section_index: int,
@@ -964,7 +1219,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_live_tracking_field(
         app_id: str, field_name: str, request: UpsertFieldLiveTrackingRequest
     ) -> FieldOperationResponse:
@@ -986,7 +1240,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_manual_address_field(
         app_id: str,
         section_index: int,
@@ -1023,7 +1276,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_manual_address_field(
         app_id: str, field_name: str, request: UpsertFieldManualAddressRequest
     ) -> FieldOperationResponse:
@@ -1045,7 +1297,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_phone_number_field(
         app_id: str,
         section_index: int,
@@ -1080,7 +1331,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_phone_number_field(
         app_id: str, field_name: str, request: UpsertFieldPhoneNumberRequest
     ) -> FieldOperationResponse:
@@ -1102,7 +1352,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_progress_bar_field(
         app_id: str,
         section_index: int,
@@ -1137,7 +1386,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_progress_bar_field(
         app_id: str, field_name: str, request: UpsertFieldProgressBarRequest
     ) -> FieldOperationResponse:
@@ -1159,7 +1407,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_signature_field(
         app_id: str,
         section_index: int,
@@ -1194,7 +1441,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_signature_field(
         app_id: str, field_name: str, request: UpsertFieldSignatureRequest
     ) -> FieldOperationResponse:
@@ -1216,7 +1462,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_counter_field(
         app_id: str,
         section_index: int,
@@ -1251,7 +1496,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_counter_field(
         app_id: str, field_name: str, request: UpsertFieldCounterRequest
     ) -> FieldOperationResponse:
@@ -1273,7 +1517,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_slider_field(
         app_id: str,
         section_index: int,
@@ -1308,7 +1551,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_slider_field(
         app_id: str, field_name: str, request: UpsertFieldSliderRequest
     ) -> FieldOperationResponse:
@@ -1330,7 +1572,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_time_field(
         app_id: str,
         section_index: int,
@@ -1365,7 +1606,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_time_field(
         app_id: str, field_name: str, request: UpsertFieldTimeRequest
     ) -> FieldOperationResponse:
@@ -1387,7 +1627,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_toggle_field(
         app_id: str,
         section_index: int,
@@ -1422,7 +1661,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_toggle_field(
         app_id: str, field_name: str, request: UpsertFieldToggleRequest
     ) -> FieldOperationResponse:
@@ -1444,7 +1682,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_validation_field(
         app_id: str,
         section_index: int,
@@ -1479,7 +1716,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_validation_field(
         app_id: str, field_name: str, request: UpsertFieldValidationRequest
     ) -> FieldOperationResponse:
@@ -1501,7 +1737,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_video_viewer_field(
         app_id: str,
         section_index: int,
@@ -1536,7 +1771,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_video_viewer_field(
         app_id: str, field_name: str, request: UpsertFieldVideoViewerRequest
     ) -> FieldOperationResponse:
@@ -1558,7 +1792,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_voice_field(
         app_id: str,
         section_index: int,
@@ -1593,7 +1826,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_voice_field(
         app_id: str, field_name: str, request: UpsertFieldVoiceRequest
     ) -> FieldOperationResponse:
@@ -1615,7 +1847,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_formula_field(
         app_id: str,
         section_index: int,
@@ -1652,7 +1883,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_formula_field(
         app_id: str, field_name: str, request: UpsertFieldFormulaRequest
     ) -> FieldOperationResponse:
@@ -1674,7 +1904,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_image_field(
         app_id: str,
         section_index: int,
@@ -1709,7 +1938,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_image_field(
         app_id: str, field_name: str, request: UpsertFieldImageViewerRequest
     ) -> FieldOperationResponse:
@@ -1731,7 +1959,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_rich_text_editor_field(
         app_id: str,
         section_index: int,
@@ -1766,7 +1993,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_rich_text_editor_field(
         app_id: str, field_name: str, request: UpsertFieldRichTextEditorRequest
     ) -> FieldOperationResponse:
@@ -1788,7 +2014,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_nfc_reader_field(
         app_id: str,
         section_index: int,
@@ -1823,7 +2048,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_nfc_reader_field(
         app_id: str, field_name: str, request: UpsertFieldNfcReaderRequest
     ) -> FieldOperationResponse:
@@ -1845,7 +2069,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_number_field(
         app_id: str,
         section_index: int,
@@ -1880,7 +2103,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_number_field(
         app_id: str, field_name: str, request: UpsertFieldNumberInputRequest
     ) -> FieldOperationResponse:
@@ -1902,7 +2124,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_pdf_viewer_field(
         app_id: str,
         section_index: int,
@@ -1937,7 +2158,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_pdf_viewer_field(
         app_id: str, field_name: str, request: UpsertFieldPdfViewerRequest
     ) -> FieldOperationResponse:
@@ -1959,7 +2179,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_read_only_file_field(
         app_id: str,
         section_index: int,
@@ -1994,7 +2213,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_read_only_file_field(
         app_id: str, field_name: str, request: UpsertFieldReadOnlyFileRequest
     ) -> FieldOperationResponse:
@@ -2016,7 +2234,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_read_only_text_field(
         app_id: str,
         section_index: int,
@@ -2051,7 +2268,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_read_only_text_field(
         app_id: str, field_name: str, request: UpsertFieldReadOnlyTextRequest
     ) -> FieldOperationResponse:
@@ -2073,7 +2289,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_tag_field(
         app_id: str,
         section_index: int,
@@ -2108,7 +2323,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_tag_field(
         app_id: str, field_name: str, request: UpsertFieldTagsRequest
     ) -> FieldOperationResponse:
@@ -2130,7 +2344,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_unique_sequential_field(
         app_id: str,
         section_index: int,
@@ -2165,7 +2378,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_unique_sequential_field(
         app_id: str, field_name: str, request: UpsertFieldUniqueSequentialRequest
     ) -> FieldOperationResponse:
@@ -2187,7 +2399,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_drop_down_field(
         app_id: str,
         section_index: int,
@@ -2222,7 +2433,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_drop_down_field(
         app_id: str, field_name: str, request: UpsertFieldDropdownRequest
     ) -> FieldOperationResponse:
@@ -2244,7 +2454,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_radio_field(
         app_id: str,
         section_index: int,
@@ -2279,7 +2488,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_radio_field(
         app_id: str, field_name: str, request: UpsertFieldRadioRequest
     ) -> FieldOperationResponse:
@@ -2301,7 +2509,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_url_input_field(
         app_id: str,
         section_index: int,
@@ -2336,7 +2543,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_url_input_field(
         app_id: str, field_name: str, request: UpsertFieldUrlInputRequest
     ) -> FieldOperationResponse:
@@ -2358,7 +2564,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_checkbox_field(
         app_id: str,
         section_index: int,
@@ -2393,7 +2598,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_checkbox_field(
         app_id: str, field_name: str, request: UpsertFieldCheckboxRequest
     ) -> FieldOperationResponse:
@@ -2415,7 +2619,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_razorpay_payment_gateway_field(
         app_id: str,
         section_index: int,
@@ -2450,7 +2653,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_razorpay_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldRazorpayPaymentGatewayRequest
     ) -> FieldOperationResponse:
@@ -2472,7 +2674,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_eazypay_payment_gateway_field(
         app_id: str,
         section_index: int,
@@ -2507,7 +2708,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_eazypay_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldEazypayPaymentGatewayRequest
     ) -> FieldOperationResponse:
@@ -2529,7 +2729,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_paypal_payment_gateway_field(
         app_id: str,
         section_index: int,
@@ -2565,7 +2764,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_paypal_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldPaypalPaymentGatewayRequest
     ) -> FieldOperationResponse:
@@ -2587,7 +2785,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_stripe_payment_gateway_field(
         app_id: str,
         section_index: int,
@@ -2622,7 +2819,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_stripe_payment_gateway_field(
         app_id: str, field_name: str, request: UpsertFieldStripePaymentGatewayRequest
     ) -> FieldOperationResponse:
@@ -2644,7 +2840,6 @@ def register_definition_tools(mcp: FastMCP):
             app_id=app_id, field_name=field_name, request=request
         )
 
-    @mcp.tool()
     def add_button_field(
         app_id: str,
         section_index: int,
@@ -2679,7 +2874,6 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_button_field(
         app_id: str, field_name: str, request: UpsertFieldButtonRequest
     ) -> FieldOperationResponse:

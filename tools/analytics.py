@@ -1,3 +1,4 @@
+from typing import Union
 from mcp.server.fastmcp import FastMCP
 from utils import get_logger, analytics_client
 from clappia_api_tools.models import (
@@ -13,6 +14,18 @@ from clappia_api_tools.models import (
     UpsertGanttChartDefinitionRequest,
 )
 
+# Union type for all chart definition request types
+ChartDefinitionRequestUnion = Union[
+    UpsertSummaryChartDefinitionRequest,
+    UpsertBarChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
+    UpsertLineChartDefinitionRequest,
+    UpsertDataTableChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertGanttChartDefinitionRequest,
+]
+
 logger = get_logger(__name__)
 
 
@@ -20,7 +33,6 @@ def register_analytics_tools(mcp: FastMCP):
     """Register all analytics-related tools with the FastMCP server"""
 
     # Summary Chart Tools
-    @mcp.tool()
     def add_summary_chart(
         app_id: str,
         chart_index: int,
@@ -42,7 +54,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_summary_chart(
         app_id: str, chart_index: int, request: UpsertSummaryChartDefinitionRequest
     ) -> ChartResponse:
@@ -58,7 +69,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Bar Chart Tools
-    @mcp.tool()
     def add_bar_chart(
         app_id: str,
         chart_index: int,
@@ -80,7 +90,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_bar_chart(
         app_id: str, chart_index: int, request: UpsertBarChartDefinitionRequest
     ) -> ChartResponse:
@@ -96,7 +105,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Pie Chart Tools
-    @mcp.tool()
     def add_pie_chart(
         app_id: str,
         chart_index: int,
@@ -118,7 +126,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_pie_chart(
         app_id: str, chart_index: int, request: UpsertPieChartDefinitionRequest
     ) -> ChartResponse:
@@ -134,7 +141,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Doughnut Chart Tools
-    @mcp.tool()
     def add_doughnut_chart(
         app_id: str,
         chart_index: int,
@@ -156,7 +162,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_doughnut_chart(
         app_id: str, chart_index: int, request: UpsertDoughnutChartDefinitionRequest
     ) -> ChartResponse:
@@ -172,7 +177,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Line Chart Tools
-    @mcp.tool()
     def add_line_chart(
         app_id: str,
         chart_index: int,
@@ -194,7 +198,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_line_chart(
         app_id: str, chart_index: int, request: UpsertLineChartDefinitionRequest
     ) -> ChartResponse:
@@ -210,7 +213,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Data Table Chart Tools
-    @mcp.tool()
     def add_data_table_chart(
         app_id: str,
         chart_index: int,
@@ -232,7 +234,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_data_table_chart(
         app_id: str, chart_index: int, request: UpsertDataTableChartDefinitionRequest
     ) -> ChartResponse:
@@ -248,7 +249,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Map Chart Tools
-    @mcp.tool()
     def add_map_chart(
         app_id: str,
         chart_index: int,
@@ -270,7 +270,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_map_chart(
         app_id: str, chart_index: int, request: UpsertMapChartDefinitionRequest
     ) -> ChartResponse:
@@ -286,7 +285,6 @@ def register_analytics_tools(mcp: FastMCP):
         )
 
     # Gantt Chart Tools
-    @mcp.tool()
     def add_gantt_chart(
         app_id: str,
         chart_index: int,
@@ -308,7 +306,6 @@ def register_analytics_tools(mcp: FastMCP):
             request=request,
         )
 
-    @mcp.tool()
     def update_gantt_chart(
         app_id: str, chart_index: int, request: UpsertGanttChartDefinitionRequest
     ) -> ChartResponse:
@@ -337,6 +334,88 @@ def register_analytics_tools(mcp: FastMCP):
         return analytics_client.reorder_chart(
             app_id=app_id, source_index=source_index, target_index=target_index
         )
+
+    @mcp.tool()
+    def add_chart(
+        app_id: str,
+        chart_index: int,
+        chart_title: str,
+        request: ChartDefinitionRequestUnion,
+    ) -> ChartResponse:
+        """
+        Adds a chart to a Clappia app's analytics dashboard. The chart type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            chart_index (int): The index where the chart should be placed.
+            chart_title (str): The title of the chart.
+            request (ChartDefinitionRequestUnion): The request object containing chart configuration. The chart type is determined by the specific request type.
+
+        Returns:
+            ChartResponse: The response object containing the result of the chart addition.
+
+        Raises:
+            Exception: Any error raised by the underlying chart addition method.
+        """
+        # Determine chart type based on request type and call appropriate function
+        if isinstance(request, UpsertSummaryChartDefinitionRequest):
+            return add_summary_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertBarChartDefinitionRequest):
+            return add_bar_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertPieChartDefinitionRequest):
+            return add_pie_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
+            return add_doughnut_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertLineChartDefinitionRequest):
+            return add_line_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertDataTableChartDefinitionRequest):
+            return add_data_table_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertMapChartDefinitionRequest):
+            return add_map_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertGanttChartDefinitionRequest):
+            return add_gantt_chart(app_id, chart_index, chart_title, request)
+        else:
+            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
+
+    @mcp.tool()
+    def update_chart(
+        app_id: str,
+        chart_index: int,
+        request: ChartDefinitionRequestUnion,
+    ) -> ChartResponse:
+        """
+        Updates a chart in a Clappia app's analytics dashboard. The chart type is determined by the request object type.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            chart_index (int): The index of the chart to update.
+            request (ChartDefinitionRequestUnion): The request object containing chart configuration. The chart type is determined by the specific request type.
+
+        Returns:
+            ChartResponse: The response object containing the result of the chart update.
+
+        Raises:
+            Exception: Any error raised by the underlying chart update method.
+        """
+        # Determine chart type based on request type and call appropriate function
+        if isinstance(request, UpsertSummaryChartDefinitionRequest):
+            return update_summary_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertBarChartDefinitionRequest):
+            return update_bar_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertPieChartDefinitionRequest):
+            return update_pie_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
+            return update_doughnut_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertLineChartDefinitionRequest):
+            return update_line_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertDataTableChartDefinitionRequest):
+            return update_data_table_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertMapChartDefinitionRequest):
+            return update_map_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertGanttChartDefinitionRequest):
+            return update_gantt_chart(app_id, chart_index, request)
+        else:
+            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
 
     @mcp.tool()
     def get_app_charts(app_id: str) -> BaseResponse:
