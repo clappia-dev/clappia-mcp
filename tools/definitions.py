@@ -58,6 +58,8 @@ from clappia_api_tools.models import (
     UpsertSectionOperationResponse,
     AppCreationResponse,
     ReorderSectionOperationResponse,
+    UpdateAppMetadataRequest,
+
 )
 
 
@@ -2772,3 +2774,71 @@ def register_definition_tools(mcp: FastMCP):
             Exception: Propagates any exceptions raised by `app_definition_client.create_app`.
         """
         return app_definition_client.create_app(request=request)
+
+    @mcp.tool()
+    def update_app_metadata(app_id: str, request: UpdateAppMetadataRequest) -> AppDefinitionResponse:
+        """
+        Updates the metadata of a Clappia application.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            request (UpdateAppMetadataRequest): The request object containing updated metadata details.
+
+        Returns:
+            AppMetadataUpdateResponse: The response object indicating the result of the metadata update.
+
+        Raises:
+            Exception: Propagates any exceptions raised by `app_definition_client.update_app_metadata`.
+        """
+        return app_definition_client.update_app_metadata(app_id=app_id, request=request)
+    
+    @mcp.tool()
+    def get_app_versions(app_id: str) -> AppDefinitionResponse:
+        """
+        Gets the versions of a Clappia application.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+
+        Returns:
+            AppDefinitionResponse: The response object containing the app versions.
+
+        Raises:
+            Exception: Propagates any exceptions raised by `app_definition_client.get_app_versions`.
+        """
+        return app_definition_client.get_app_versions(app_id=app_id)
+    
+    @mcp.tool()
+    def update_app_version(app_id: str,initial_version_name: str, new_version_name: str) -> AppDefinitionResponse:
+        """
+        Updates a specific version of a Clappia application.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            initial_version_name (str): The name of the initial version, indentifier of the version to update.
+            new_version_name (str): The name of the new version.
+
+        Returns:
+            AppDefinitionResponse: The response object containing the app versions.
+
+        Raises:
+            Exception: Propagates any exceptions raised by `app_definition_client.update_app_version`.
+        """
+        return app_definition_client.update_app_version(app_id=app_id, initial_version_name=initial_version_name, new_version_name=new_version_name)
+    
+    @mcp.tool()
+    def create_app_version(app_id: str, version_name: str) -> AppDefinitionResponse:
+        """
+            Creates a new version of a Clappia application.
+
+        Args:
+            app_id (str): The unique identifier of the Clappia application.
+            version_name (str): The name of the new version.
+
+        Returns:
+            AppDefinitionResponse: The response object containing the app versions.
+
+        Raises:
+            Exception: Propagates any exceptions raised by `app_definition_client.create_app_version`.
+        """
+        return app_definition_client.create_new_app_version(app_id=app_id, version_name=version_name)
