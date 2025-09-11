@@ -10,6 +10,3 @@ dependencies = [
     "modelcontextprotocol>=0.1.0",
     "pydantic[email]>=2.11.7",
 ]
-
-[tool.uv.sources]
-clappia-api-tools = { path = "../clappia-tools" }
