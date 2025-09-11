@@ -1,6 +1,6 @@
 import sys
 import argparse
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from utils import get_logger
 from tools.submissions import register_submission_tools
 from tools.definitions import register_definition_tools
@@ -33,6 +33,7 @@ def register_all_tools():
 
     logger.info("All Clappia MCP tools registered successfully")
 
+register_all_tools()
 
 def register_specific_tools(modules):
     """Register tools from specific modules only"""
