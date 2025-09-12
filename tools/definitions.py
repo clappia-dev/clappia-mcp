@@ -1,6 +1,5 @@
 from mcp.server.fastmcp import FastMCP
 from utils import get_logger, app_definition_client
-from clappia_api_tools.enums import FieldType
 from typing import Union
 from clappia_api_tools.models import (
     CreateAppRequest,
