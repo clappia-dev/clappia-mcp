@@ -1,166 +1,120 @@
-# Clappia MCP (Model Context Protocol)
+# Clappia MCP
 
-A Python-based MCP server that provides a comprehensive interface for interacting with the Clappia platform. This server enables programmatic management of Clappia applications, forms, submissions, and more.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
 
-Clappia is a no-code platform that allows businesses, operations teams, and non-developers to create custom apps—like inspection forms, approval workflows, field data collection tools, internal dashboards, and more—without writing a single line of code. It's used across industries for automating manual processes, digitizing paperwork, and improving operational efficiency. [Click here](https://www.clappia.com) to learn more.
+MCP server for Clappia platform integration. Manage applications, submissions, workflows, and analytics through Claude Desktop.
+
+[Clappia](https://www.clappia.com) is a no-code platform for building custom business applications.
+
+## Table of Contents
+
+-  [Features](#features)
+-  [Prerequisites](#prerequisites)
+-  [Steps to Setup MCP Server](#steps-to-setup-mcp-server)
+-  [Project Structure](#project-structure)
+-  [Troubleshooting](#troubleshooting)
+-  [Support](#support)
+-  [License](#license)
 
 ## Features
 
--  **App Management**
+### App Management
 
-   -  Create new Clappia apps with customizable sections and fields
+-  Create new Clappia applications
+-  Get app definitions and metadata
+-  Update app metadata and versions
+-  Manage app sections and page breaks
 
-   -  Retrieve detailed app definitions with field metadata
+### Field Management
 
--  **Submission Management**
+-  Add and update fields (30+ field types supported)
+-  Reorder sections and fields
+-  Configure field properties and validation
 
-   -  Create new submissions with field data
-   -  Edit existing submissions with validation
-   -  Update submission status with optional comments
-   -  Manage submission owners with email-based assignments
-   -  Retrieve submissions with advanced filtering and pagination
-   -  Get submission aggregations for analytics with customizable dimensions
+### Submission Management
 
--  **Field Management**
-   -  Add new fields with comprehensive configuration options
-   -  Update field properties including validation, display conditions, and layout
-   -  Configure field validations (number, email, URL, custom)
-   -  Set up conditional logic for field display and editability
-   -  Manage field layouts with responsive design options
+-  Create and edit submissions
+-  Update submission status and owners
+-  Get submissions with filtering and pagination
+-  Export submissions to Excel
+-  Get submission aggregations for analytics
+
+### Workflow Management
+
+-  Get app workflow configurations
+-  Add, update, and reorder workflow steps
+-  Support for various workflow step types
+
+### Analytics
+
+-  Add, update, and reorder charts
+-  Get app charts for analytics dashboard
+
+### Workplace Management
+
+-  Add users to workplace
+-  Update user details, attributes, roles, and groups
+-  Add users to specific apps
+-  Get workplace apps and users
 
 ## Prerequisites
 
--  Python 3.8 or higher
--  uv python package manager
--  Access to Clappia API Key and Workplace ID
--  Claude for Desktop (or any other MCP Clients)
+-  **Python 3.10+**
+-  **Clappia API Key** and Workplace ID
+-  **Claude for Desktop**
 
-## Installation
+## Steps to Setup MCP Server
 
-1. **Set up Clappia API Access**:
+### 1. Install Prerequisites
 
-   -  Visit your Workplace in Clappia (https://<your_workplace>.clappia.com), you need to have Workplace Manager Access to this Workplace.
-   -  Visit Workplace Settings. Note your Workplace ID.
-   -  Visit Workplace Settings -> Preferences -> API Keys. Note your API Key, generate one if it is not yet generated.
+**Download and install:**
 
-2. **Set up Claude for Desktop**:
+-  Python 3.10+: `https://www.python.org/downloads/`
+-  Claude Desktop: `https://claude.ai/download`
+-  uv: `https://docs.astral.sh/uv/getting-started/installation/`
+-  Git: `https://git-scm.com/downloads`
+-  VS Code: `https://code.visualstudio.com/download`
+-  Cursor: `https://cursor.com/downloads`
 
-   -  Download Claude for Desktop for [macOS](https://claude.ai/download) or [Windows](https://claude.ai/download)
-   -  Install and launch Claude for Desktop
-   -  Open Claude menu → Settings → Developer → Edit Config
-   -  Add the following configuration to `claude_desktop_config.json`:
-      ```json
-      {
-         "mcpServers": {
-            "clappia-mcp": {
-               "command": "uv",
-               "args": [
-                  "--directory",
-                  "/Users/<YOUR_DIECTORY>/<PATH_OF_THE_MCP_FOLDER>",
-                  "run",
-                  "server.py"
-               ],
-               "env": {
-                  "CLAPPIA_API_KEY": "<ENTER_YOUR_WORKPLACE_API_KEY_HERE>"
-               }
-            }
-         }
-      }
-      ```
-   -  Restart Claude for Desktop
-   -  Verify the MCP server is running by checking for the tools icon in the input box
-
-3. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/clappia-dev/clappia-mcp.git
-   cd clappia-mcp
-   ```
-
-4. **Set up Python Environment**:
-
-   ```bash
-   # Install uv if not already installed
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-
-   # Install dependencies
-   uv sync
-   ```
-
-## Project Structure
-
-```
-clappia-mcp/
-├── server.py              # Legacy main MCP server (all tools)
-├── main_server.py         # New main server with module selection
-├── submissions_server.py  # Submissions-focused MCP server
-├── definitions_server.py  # App definitions-focused MCP server
-├── workflows_server.py    # Workflows-focused MCP server
-├── analytics_server.py    # Analytics-focused MCP server
-├── workplace_server.py    # Workplace management-focused MCP server
-├── test_servers.py        # Test script for all servers
-├── tools/                 # Core functionality modules
-│   ├── submissions.py     # Submission management tools
-│   ├── definitions.py     # App definition tools
-│   ├── workflows.py       # Workflow management tools
-│   ├── analytics.py       # Analytics and chart tools
-│   └── workplace.py       # Workplace user management tools
-├── utils/                 # Utility modules
-│   ├── clients.py         # API client configurations
-│   └── logging_utils.py   # Logging utilities
-├── pyproject.toml         # Project metadata and dependencies
-├── uv.lock               # Dependency lock file (if using uv)
-└── .env                  # Environment variables
-```
-
-## Running Different MCP Servers
-
-You can now run different MCP servers based on your specific needs:
-
-### 1. All-in-One Server (Legacy)
+### 2. Clone and Setup
 
 ```bash
-# Run all tools in one server
-uv run server.py
+# Clone repository to desktop
+git clone https://github.com/clappia-dev/clappia-mcp
+cd clappia-mcp
+
+# Setup Python environment
+uv venv
+uv sync
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate     # On Windows
 ```
 
-### 2. Main Server with Module Selection
+### 3. Get Clappia API Key
 
 ```bash
-# Run all modules
-uv run main_server.py
+# Visit your Clappia workplace
+open https://<your_workplace>.clappia.com
 
-# Run specific modules only
-uv run main_server.py --modules submissions definitions
-
-# List available tools
-uv run main_server.py --list-tools
+# Go to: Workplace Settings → Preferences → API Keys
+# Copy your API key
 ```
 
-### 3. Specialized Servers
+**Direct links:**
 
-```bash
-# Submissions-focused server
-uv run submissions_server.py
+-  Clappia Platform: `https://www.clappia.com`
+-  Your Workplace: `https://<your_workplace>.clappia.com`
 
-# App definitions-focused server
-uv run definitions_server.py
-
-# Workflows-focused server
-uv run workflows_server.py
-
-# Analytics-focused server
-uv run analytics_server.py
-
-# Workplace management-focused server
-uv run workplace_server.py
-```
-
-### Claude Desktop Configuration
-
-Update your `claude_desktop_config.json` to use any of these servers:
+### 4. Configure Claude Desktop
 
 ```json
+// Open Claude → Settings → Developer → Edit Config
+// Add this to claude_desktop_config.json:
 {
    "mcpServers": {
       "clappia-submissions": {
@@ -186,289 +140,135 @@ Update your `claude_desktop_config.json` to use any of these servers:
          "env": {
             "CLAPPIA_API_KEY": "your_api_key_here"
          }
+      },
+      "clappia-workflows": {
+         "command": "uv",
+         "args": [
+            "--directory",
+            "/path/to/clappia-mcp",
+            "run",
+            "workflows_server.py"
+         ],
+         "env": {
+            "CLAPPIA_API_KEY": "your_api_key_here"
+         }
+      },
+      "clappia-analytics": {
+         "command": "uv",
+         "args": [
+            "--directory",
+            "/path/to/clappia-mcp",
+            "run",
+            "analytics_server.py"
+         ],
+         "env": {
+            "CLAPPIA_API_KEY": "your_api_key_here"
+         }
+      },
+      "clappia-workplace": {
+         "command": "uv",
+         "args": [
+            "--directory",
+            "/path/to/clappia-mcp",
+            "run",
+            "workplace_server.py"
+         ],
+         "env": {
+            "CLAPPIA_API_KEY": "your_api_key_here"
+         }
       }
    }
 }
 ```
 
-### Testing Servers
+**Enable/Disable Servers:**
 
-You can test all servers to ensure they're working correctly:
+-  To enable/disable a server:Use Claude Desktop's interface after server is running
+-  To enable/disable tools: Use Claude Desktop's interface after server is running
+
+### 5. Start Using
 
 ```bash
-# Test all servers
-uv run test_servers.py
-
-# Or run directly
-./test_servers.py
+# Restart Claude Desktop
+# Look for tools icon (🔧) in input box
+# Start managing your Clappia apps!
 ```
 
-This will verify that each server can be imported and tools can be registered successfully.
-
-### Usage
-
--  The server will automatically start when Claude Desktop launches
--  Access tools through the Claude Desktop interface
--  Each specialized server provides focused functionality for specific use cases
-
-### Troubleshooting
-
-1. **Server Not Starting**:
-
-   -  Check Claude Desktop logs for errors
-   -  Verify Python environment is activated
-   -  Ensure all dependencies are installed
-   -  Check environment variables are set correctly
-
-2. **API Connection Issues**:
-
-   -  Verify API credentials in `claude_desktop_config.json` file
-   -  Check network connectivity
-   -  Review API rate limits
-
-3. **Tool Execution Failures**:
-   -  Check server logs for detailed error messages
-   -  Verify input parameters match API requirements
-   -  Ensure proper permissions for API operations
-
-### Example API Calls
-
-1. **Create a New Application**
-
-   ```python
-   from tools.create_app import create_app, Section, Field
-
-   result = create_app(
-       name="Employee Survey",
-       requesting_user_email_address="user@company.com",
-       sections=[
-           Section(
-               sectionName="Personal Information",
-               fields=[
-                   Field(
-                       fieldType="singleLineText",
-                       label="Full Name",
-                       required=True
-                   )
-               ]
-           )
-       ]
-   )
-   ```
-
-2. **Add a Field to an Application**
-
-   ```python
-   from tools.add_field import add_field_to_app
-
-   result = add_field_to_app(
-       app_id="APP123",
-       section_index=0,
-       field_index=1,
-       field_type="singleLineText",
-       label="Employee ID",
-       required=True,
-       validation="number",
-       block_width_percentage_desktop=50,
-       block_width_percentage_mobile=100
-   )
-   ```
-
-3. **Update a Field**
-
-   ```python
-   from tools.update_field import update_field_in_app
-
-   result = update_field_in_app(
-       app_id="APP123",
-       field_name="employeeName",
-       label="Full Employee Name",
-       required=True,
-       validation="none",
-       display_condition="status == 'active'"
-   )
-   ```
-
-4. **Create a Submission**
-
-   ```python
-   from tools.create_submission import create_app_submission
-
-   result = create_app_submission(
-       app_id="APP123",
-       data={"employeeName": "John Doe", "employeeId": "12345"},
-       email="user@company.com"
-   )
-   ```
-
-5. **Get Submissions with Filtering**
-
-   ```python
-   from tools.get_submissions import get_app_submissions, Filters, QueryGroup, Query, Condition
-
-   filters = Filters(queries=[
-       QueryGroup(queries=[
-           Query(
-               conditions=[
-                   Condition(
-                       operator="EQ",
-                       filterKeyType="STANDARD",
-                       key="status",
-                       value="active"
-                   )
-               ],
-               operator="AND"
-           )
-       ])
-   ])
-
-   result = get_app_submissions(
-       app_id="APP123",
-       page_size=10,
-       filters=filters
-   )
-   ```
-
-## API Documentation
-
-### Field Types
-
--  **Text Fields**
-
-   -  `singleLineText`: Single line text input
-   -  `multiLineText`: Multi-line text input
-   -  `richTextEditor`: Rich text editor with formatting
-
--  **Selector Fields**
-
-   -  `singleSelector`: Single choice selection
-   -  `multiSelector`: Multiple choice selection
-   -  `dropDown`: Dropdown selection
-
--  **Date/Time Fields**
-
-   -  `dateSelector`: Date selection
-   -  `timeSelector`: Time selection
-   -  `dateTime`: Combined date and time selection
-
--  **File Fields**
-
-   -  `file`: File upload with configurable types
-   -  `camera`: Direct camera capture
-   -  `signature`: Digital signature capture
-
--  **Advanced Fields**
-   -  `calculationsAndLogic`: Formula-based calculations
-   -  `gpsLocation`: Location tracking
-   -  `codeScanner`: Barcode/QR code scanning
-   -  `nfcReader`: NFC tag reading
-   -  `liveTracking`: Real-time location tracking
-   -  `address`: Address input with validation
-
-### Validation Types
-
--  `none`: No validation
--  `number`: Numeric validation
--  `email`: Email format validation
--  `url`: URL format validation
--  `custom`: Custom validation rules
-
-### Field Properties
-
--  **Layout**
-
-   -  `block_width_percentage_desktop`: Width on desktop (25, 50, 75, 100)
-   -  `block_width_percentage_mobile`: Width on mobile (50, 100)
-   -  `number_of_cols`: Number of columns for selector fields
-
--  **Behavior**
-
-   -  `required`: Whether field is mandatory
-   -  `is_editable`: Whether field can be edited
-   -  `hidden`: Whether field is hidden
-   -  `retain_values`: Whether to retain values when hidden
-
--  **Conditions**
-
-   -  `display_condition`: Condition for field visibility
-   -  `editability_condition`: Condition for field editability
-
--  **File Settings**
-   -  `allowed_file_types`: List of allowed file types
-   -  `max_file_allowed`: Maximum files allowed (1-10)
-   -  `image_quality`: Image quality (low, medium, high)
-   -  `file_name_prefix`: Prefix for uploaded files
-
-## Error Handling
-
-The server implements comprehensive error handling for:
-
--  Invalid API credentials
--  Network connectivity issues
--  Invalid input parameters
--  API rate limiting
--  Server errors
-
-All errors are logged with appropriate context for debugging.
-
-## Security
-
--  API keys are stored in environment variables
--  All API calls are made over HTTPS
--  Input validation is implemented for all parameters
--  Rate limiting is supported
--  Error messages are sanitized
-
-## Performance Considerations
-
--  Connection pooling for API requests
--  Efficient payload construction
--  Proper resource cleanup
--  Logging optimization
--  Error handling optimization
-
-## Support
-
-For support, please:
-
-1. Check the documentation
-2. Review existing issues
-3. Create a new issue if needed
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## API Integration
-
-### Clappia Public API
-
-The MCP server integrates with Clappia's public API to provide the following capabilities:
-
-1. **Authentication**:
-
-   -  API key-based authentication
-   -  Secure credential management
-   -  Rate limiting support
-
-2. **Endpoints**:
-
-   -  Application management
-   -  Form submissions
-   -  Field operations
-   -  User management
-   -  Analytics and reporting
-
-3. **API Documentation**:
-
-   -  Visit [Clappia Developer Portal](https://developer.clappia.com/) for:
-      -  API reference
-      -  Authentication guide
-      -  Rate limits
-      -  Best practices
-      -  Example implementations
-
-4. **API Versioning**:
-   -  Current stable version: v1
-   -  Backward compatibility maintained
-   -  Deprecation notices provided
+## 📁 Project Structure
+
+```
+clappia-mcp/
+├── main_server.py         # 🎯 Main MCP server with module selection
+├── submissions_server.py  # 📝 Submissions-focused MCP server
+├── definitions_server.py  # 📱 App definitions-focused MCP server
+├── workflows_server.py    # 🔄 Workflows-focused MCP server
+├── analytics_server.py    # 📊 Analytics-focused MCP server
+├── workplace_server.py    # 👥 Workplace management-focused MCP server
+├── tools/                 # 🛠️ Core functionality modules
+│   ├── submissions.py     # Submission management tools
+│   ├── definitions.py     # App definition and field management tools
+│   ├── workflows.py       # Workflow step management tools
+│   ├── analytics.py       # Analytics and chart generation tools
+│   └── workplace.py       # Workplace user management tools
+├── utils/                 # 🔧 Utility modules
+│   ├── __init__.py        # Package initialization
+│   ├── clients.py         # API client configurations and setup
+│   └── logging_utils.py   # Logging utilities and configuration
+├── pyproject.toml         # 📦 Project metadata and dependencies
+├── uv.lock               # 🔒 Dependency lock file
+└── README.md             # 📖 This documentation
+```
+
+### Server Architecture
+
+-  **`main_server.py`**: Primary server that can run all modules or specific subsets
+-  **Specialized Servers**: Focused servers for specific use cases (submissions, definitions, etc.)
+-  **`tools/`**: Modular tool implementations using Pydantic models
+-  **`utils/`**: Shared utilities for logging, API clients, and common functionality
+
+## Troubleshooting
+
+| Issue                       | Symptoms                        | Solution                                                                             |
+| --------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| **Server Not Starting**     | No tools icon in Claude Desktop | Check Python 3.10+, verify uv installation, reinstall dependencies, check file paths |
+| **API Connection Issues**   | Authentication errors           | Verify API key, check workplace permissions, test network connectivity               |
+| **Tool Execution Failures** | Tools return errors             | Check input parameters, validate data types, verify app ID format                    |
+| **Configuration Issues**    | Tools don't work as expected    | Verify environment variables, check JSON syntax, restart Claude Desktop              |
+| **Performance Issues**      | Slow response times             | Check API status, reduce page size, optimize filters                                 |
+
+### Quick Fixes
+
+-  **Python version**: `python --version` (need 3.10+)
+-  **Reinstall dependencies**: `rm -rf .venv uv.lock && uv sync`
+-  **Check logs**: Look in Claude Desktop console for errors
+-  **Verify API key**: Ensure it's correct and has proper permissions
+
+## 📞 Support
+
+### Getting Help
+
+-  📖 **Documentation**: Check this README and inline code documentation
+-  🐛 **Issues**: Search existing issues or create a new one
+-  💬 **Discussions**: Use GitHub Discussions for questions and ideas
+-  📧 **Contact**: Reach out to the maintainers for urgent issues
+
+### Reporting Issues
+
+When reporting issues, please include:
+
+-  Python version (`python --version`)
+-  uv version (`uv --version`)
+-  Operating system
+-  Steps to reproduce the issue
+-  Expected vs actual behavior
+-  Error messages (without sensitive information)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+-  **Clappia Team**: For providing the excellent no-code platform and API
+-  **Anthropic**: For creating the Model Context Protocol
+-  **Contributors**: Thank you to all contributors who help improve this project
