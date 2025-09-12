@@ -6,10 +6,8 @@ from clappia_api_tools import (
     AnalyticsClient,
     WorkplaceClient,
 )
-from dotenv import load_dotenv
-load_dotenv()
 
-CLAPPIA_EXTERNAL_API_BASE_URL = "https://preprod-public.clappia.com"
+CLAPPIA_EXTERNAL_API_BASE_URL = "https://api-public-v4.clappia.com"
 
 submission_client = SubmissionClient(
     api_key=os.getenv("CLAPPIA_API_KEY"),
