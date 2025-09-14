@@ -16,7 +16,7 @@ submission_client = SubmissionClient(
 
 app_definition_client = AppDefinitionClient(
     api_key=os.getenv("CLAPPIA_API_KEY"),
-    base_url=CLAPPIA_EXTERNAL_API_BASE_URL,
+    base_url=f"{CLAPPIA_EXTERNAL_API_BASE_URL}/appdefinitionv2",
 )
 
 workflow_definition_client = WorkflowDefinitionClient(
