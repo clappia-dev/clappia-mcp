@@ -38,6 +38,7 @@ def register_submission_tools(mcp: FastMCP):
             page_size=request.page_size,
             forward=request.forward,
             filters=request.filters,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
 
     @mcp.tool()
@@ -59,6 +60,7 @@ def register_submission_tools(mcp: FastMCP):
             forward=request.forward,
             page_size=request.page_size,
             filters=request.filters,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
 
     @mcp.tool()
@@ -74,6 +76,7 @@ def register_submission_tools(mcp: FastMCP):
         return submission_client.create_submission(
             app_id=request.app_id,
             data=request.data,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
 
     @mcp.tool()
@@ -87,6 +90,7 @@ def register_submission_tools(mcp: FastMCP):
             app_id=request.app_id,
             submission_id=request.submission_id,
             data=request.data,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
 
     @mcp.tool()
@@ -103,6 +107,7 @@ def register_submission_tools(mcp: FastMCP):
             submission_id=request.submission_id,
             status_name=request.status_name,
             comments=request.comments,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
 
     @mcp.tool()
@@ -136,4 +141,5 @@ def register_submission_tools(mcp: FastMCP):
             app_id=request.app_id,
             submission_id=request.submission_id,
             email_ids=email_ids,
+            requesting_user_email_address=request.requesting_user_email_address,
         )
