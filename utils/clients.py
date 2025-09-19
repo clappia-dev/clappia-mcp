@@ -1,10 +1,10 @@
 import os
 from clappia_api_tools import (
-    SubmissionClient,
-    AppDefinitionClient,
-    WorkflowDefinitionClient,
-    AnalyticsClient,
-    WorkplaceClient,
+    SubmissionAPIKeyClient as SubmissionClient,
+    AppDefinitionAPIKeyClient as AppDefinitionClient,
+    WorkflowDefinitionAPIKeyClient as WorkflowDefinitionClient,
+    AnalyticsAPIKeyClient as AnalyticsClient,
+    WorkplaceAPIKeyClient as WorkplaceClient,
 )
 
 CLAPPIA_EXTERNAL_API_BASE_URL = "https://api-public-v3.clappia.com"
