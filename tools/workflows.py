@@ -51,19 +51,19 @@ def register_workflow_tools(mcp: FastMCP):
     """Register all workflow-related tools with the FastMCP server"""
 
     @mcp.tool()
-    def get_app_workflow(app_id: str, trigger_type: str) -> WorkflowResponse:
+    def get_app_workflow(app_id: str, trigger_type: str, version_variable_name: Optional[str] = None) -> WorkflowResponse:
         """Retrieve the workflow configuration for a Clappia app.
 
         Args:
             app_id (str): The unique identifier of the Clappia application.
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
-
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         Returns:
             WorkflowResponse: The response object containing the workflow configuration.
         """
 
         return workflow_definition_client.get_workflow(
-            app_id=app_id, trigger_type=trigger_type
+            app_id=app_id, trigger_type=trigger_type, version_variable_name=version_variable_name
         )
 
     @mcp.tool()
@@ -73,6 +73,7 @@ def register_workflow_tools(mcp: FastMCP):
         request: WorkflowStepRequestUnion,
         step_variable_name: Optional[str] = None,
         parent_step_variable_name: Optional[str] = None,
+        version_variable_name: Optional[str] = None,
     ) -> WorkflowStepResponse:
         """
         Adds a workflow step to a Clappia app's workflow. The step type is determined by the request object type.
@@ -83,7 +84,7 @@ def register_workflow_tools(mcp: FastMCP):
             request (WorkflowStepRequestUnion): The request object containing step configuration. The step type is determined by the specific request type.
             step_variable_name (Optional[str]): The variable name of the step, if not provided, a random variable name will be generated.
             parent_step_variable_name (Optional[str]): The variable name of the parent step, below which the new step will be added. If not provided, the new step will be added to the start of the workflow, else it will be added below the parent step.
-
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         Returns:
             WorkflowStepResponse: The response object containing the result of the step addition.
 
@@ -96,6 +97,7 @@ def register_workflow_tools(mcp: FastMCP):
             request=request,
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
+            version_variable_name=version_variable_name,
         )
 
     @mcp.tool()
@@ -104,6 +106,7 @@ def register_workflow_tools(mcp: FastMCP):
         trigger_type: str,
         step_variable_name: str,
         request: WorkflowStepRequestUnion,
+        version_variable_name: Optional[str] = None,
     ) -> WorkflowStepResponse:
         """
         Updates a workflow step in a Clappia app's workflow. The step type is determined by the request object type.
@@ -113,7 +116,7 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission.
             step_variable_name (str): The variable name of the step to update.
             request (WorkflowStepRequestUnion): The request object containing step configuration. The step type is determined by the specific request type.
-
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         Returns:
             WorkflowStepResponse: The response object containing the result of the step update.
 
@@ -125,6 +128,7 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
             request=request,
+            version_variable_name=version_variable_name,
         )
 
 
@@ -134,6 +138,7 @@ def register_workflow_tools(mcp: FastMCP):
         trigger_type: str,
         step_variable_name: str,
         parent_step_variable_name: str,
+        version_variable_name: Optional[str] = None,
     ) -> WorkflowStepResponse:
         """Reorder steps in a Clappia app's workflow.
 
@@ -142,12 +147,14 @@ def register_workflow_tools(mcp: FastMCP):
             trigger_type (str): The trigger type of the workflow. allowed values are newSubmission, editSubmission, reviewSubmission. allowed values are newSubmission, editSubmission, reviewSubmission.
             step_variable_name (str): The variable name of the step to reorder.
             parent_step_variable_name (str): The variable name of the parent step, below which the step will be moved.
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
         return workflow_definition_client.reorder_step(
             app_id=app_id,
             trigger_type=trigger_type,
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
+            version_variable_name=version_variable_name,
         )
 
 

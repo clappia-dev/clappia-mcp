@@ -68,10 +68,8 @@ class Logger:
         else:
             colored_message = formatted_message
 
-        output_stream = (
-            sys.stderr if level.value >= LogLevel.WARNING.value else sys.stdout
-        )
-        print(colored_message, file=output_stream)
+        # Always print to stderr
+        print(colored_message, file=sys.stderr, flush=True)
 
     def debug(self, message: str):
         """Log a debug message."""

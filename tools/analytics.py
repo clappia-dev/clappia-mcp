@@ -12,7 +12,7 @@ from clappia_api_tools.models import (
     UpsertMapChartDefinitionRequest,
     UpsertGanttChartDefinitionRequest,
 )
-from typing import Union
+from typing import Union, Optional
 
 logger = get_logger(__name__)
 
@@ -38,6 +38,7 @@ def register_analytics_tools(mcp: FastMCP):
         chart_index: int,
         chart_title: str,
         request: ChartDefinitionRequestUnion,
+        version_variable_name: Optional[str] = None,    
     ) -> ChartResponse:
         """
         Adds a chart to a Clappia app's analytics dashboard. The chart type is determined by the request object type.
@@ -47,6 +48,7 @@ def register_analytics_tools(mcp: FastMCP):
             chart_index (int): The index where the chart should be placed.
             chart_title (str): The title of the chart.
             request (ChartDefinitionRequestUnion): The request object containing chart configuration. The chart type is determined by the specific request type.
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
 
         Returns:
             ChartResponse: The response object containing the result of the chart addition.
@@ -54,13 +56,14 @@ def register_analytics_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying chart addition method.
         """
-        return analytics_client.add(app_id, chart_index, chart_title, request)
+        return analytics_client.add(app_id, chart_index, chart_title, request, version_variable_name)
 
     @mcp.tool()
     def update_chart(
         app_id: str,
         chart_index: int,
         request: ChartDefinitionRequestUnion,
+        version_variable_name: Optional[str] = None,
     ) -> ChartResponse:
         """
         Updates a chart in a Clappia app's analytics dashboard. The chart type is determined by the request object type.
@@ -69,6 +72,7 @@ def register_analytics_tools(mcp: FastMCP):
             app_id (str): The unique identifier of the Clappia application.
             chart_index (int): The index of the chart to update.
             request (ChartDefinitionRequestUnion): The request object containing chart configuration. The chart type is determined by the specific request type.
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
 
         Returns:
             ChartResponse: The response object containing the result of the chart update.
@@ -76,11 +80,11 @@ def register_analytics_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying chart update method.
         """
-        return analytics_client.update(app_id, chart_index, request)
+        return analytics_client.update(app_id, chart_index, request, version_variable_name)
 
     @mcp.tool()
     def reorder_chart(
-        app_id: str, source_index: int, target_index: int
+        app_id: str, source_index: int, target_index: int, version_variable_name: Optional[str] = None
     ) -> ChartResponse:
         """Reorder charts in a Clappia app's analytics dashboard.
 
@@ -88,16 +92,18 @@ def register_analytics_tools(mcp: FastMCP):
             app_id (str): The unique identifier of the Clappia application.
             source_index (int): The current index of the chart to move.
             target_index (int): The target index where the chart should be moved.
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
         return analytics_client.reorder_chart(
-            app_id=app_id, source_index=source_index, target_index=target_index
+            app_id=app_id, source_index=source_index, target_index=target_index, version_variable_name=version_variable_name
         )
 
     @mcp.tool()
-    def get_app_charts(app_id: str) -> BaseResponse:
+    def get_app_charts(app_id: str, version_variable_name: Optional[str] = None) -> BaseResponse:
         """Get all charts for a Clappia app's analytics dashboard.
 
         Args:
             app_id (str): The unique identifier of the Clappia application.
+            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
-        return analytics_client.get_charts(app_id=app_id)
+        return analytics_client.get_charts(app_id=app_id, version_variable_name=version_variable_name)
