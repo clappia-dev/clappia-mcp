@@ -6,6 +6,7 @@ PROJECT_NAME = clappia-mcp
 DOCKER_IMAGE = okaru413/clappia-mcp
 VERSION ?= 1.0.0
 DOCKER_HUB_USERNAME ?= $(shell echo $$DOCKER_HUB_USERNAME)
+PLATFORMS = linux/amd64,linux/arm64
 
 # Colors for output
 GREEN = \033[0;32m
@@ -97,53 +98,100 @@ run-charts: ## Run clappia-app-charts server
 	fi
 	uv run analytics_server.py
 
-# Docker Commands
-.PHONY: docker-build
-docker-build: ## Build main Docker image
-	@echo "$(BLUE)Building main Docker image: $(DOCKER_IMAGE):$(VERSION)$(NC)"
-	docker build -t $(DOCKER_IMAGE):$(VERSION) .
-	docker build -t $(DOCKER_IMAGE):latest .
-	@echo "$(GREEN)✅ Main Docker image built successfully$(NC)"
+# Docker Setup
+.PHONY: docker-setup
+docker-setup: ## Setup Docker buildx for multi-platform builds
+	@echo "$(BLUE)Setting up Docker buildx for multi-platform builds...$(NC)"
+	docker buildx create --name multiarch-builder --use 2>/dev/null || docker buildx use multiarch-builder
+	@echo "$(GREEN)✅ Docker buildx setup completed$(NC)"
 
-# Individual Docker Build Commands
+# Multi-Platform Docker Commands
+.PHONY: docker-build
+docker-build: docker-setup ## Build multi-platform Docker image with rich metadata
+	@echo "$(BLUE)Building multi-platform Docker image: $(DOCKER_IMAGE):$(VERSION) for $(PLATFORMS)$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-t $(DOCKER_IMAGE):latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Docker image built successfully$(NC)"
+
+# Individual Multi-Platform Docker Build Commands
 .PHONY: docker-build-form
-docker-build-form: ## Build Docker image for form server
-	@echo "$(BLUE)Building Docker image for form server...$(NC)"
-	docker build -f Dockerfile.form -t $(DOCKER_IMAGE)-form:$(VERSION) .
-	docker build -f Dockerfile.form -t $(DOCKER_IMAGE)-form:latest .
-	@echo "$(GREEN)✅ Form Docker image built successfully$(NC)"
+docker-build-form: docker-setup ## Build multi-platform Docker image for form server
+	@echo "$(BLUE)Building multi-platform Docker image for form server...$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.form \
+		-t $(DOCKER_IMAGE)-form:$(VERSION) \
+		-t $(DOCKER_IMAGE)-form:latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Form Docker image built successfully$(NC)"
 
 .PHONY: docker-build-workflow
-docker-build-workflow: ## Build Docker image for workflow server
-	@echo "$(BLUE)Building Docker image for workflow server...$(NC)"
-	docker build -f Dockerfile.workflow -t $(DOCKER_IMAGE)-workflow:$(VERSION) .
-	docker build -f Dockerfile.workflow -t $(DOCKER_IMAGE)-workflow:latest .
-	@echo "$(GREEN)✅ Workflow Docker image built successfully$(NC)"
+docker-build-workflow: docker-setup ## Build multi-platform Docker image for workflow server
+	@echo "$(BLUE)Building multi-platform Docker image for workflow server...$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.workflow \
+		-t $(DOCKER_IMAGE)-workflow:$(VERSION) \
+		-t $(DOCKER_IMAGE)-workflow:latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Workflow Docker image built successfully$(NC)"
 
 .PHONY: docker-build-submission
-docker-build-submission: ## Build Docker image for submission server
-	@echo "$(BLUE)Building Docker image for submission server...$(NC)"
-	docker build -f Dockerfile.submission -t $(DOCKER_IMAGE)-submission:$(VERSION) .
-	docker build -f Dockerfile.submission -t $(DOCKER_IMAGE)-submission:latest .
-	@echo "$(GREEN)✅ Submission Docker image built successfully$(NC)"
+docker-build-submission: docker-setup ## Build multi-platform Docker image for submission server
+	@echo "$(BLUE)Building multi-platform Docker image for submission server...$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.submission \
+		-t $(DOCKER_IMAGE)-submission:$(VERSION) \
+		-t $(DOCKER_IMAGE)-submission:latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Submission Docker image built successfully$(NC)"
 
 .PHONY: docker-build-workplace
-docker-build-workplace: ## Build Docker image for workplace server
-	@echo "$(BLUE)Building Docker image for workplace server...$(NC)"
-	docker build -f Dockerfile.workplace -t $(DOCKER_IMAGE)-workplace:$(VERSION) .
-	docker build -f Dockerfile.workplace -t $(DOCKER_IMAGE)-workplace:latest .
-	@echo "$(GREEN)✅ Workplace Docker image built successfully$(NC)"
+docker-build-workplace: docker-setup ## Build multi-platform Docker image for workplace server
+	@echo "$(BLUE)Building multi-platform Docker image for workplace server...$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.workplace \
+		-t $(DOCKER_IMAGE)-workplace:$(VERSION) \
+		-t $(DOCKER_IMAGE)-workplace:latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Workplace Docker image built successfully$(NC)"
 
 .PHONY: docker-build-charts
-docker-build-charts: ## Build Docker image for charts server
-	@echo "$(BLUE)Building Docker image for charts server...$(NC)"
-	docker build -f Dockerfile.charts -t $(DOCKER_IMAGE)-charts:$(VERSION) .
-	docker build -f Dockerfile.charts -t $(DOCKER_IMAGE)-charts:latest .
-	@echo "$(GREEN)✅ Charts Docker image built successfully$(NC)"
+docker-build-charts: docker-setup ## Build multi-platform Docker image for charts server
+	@echo "$(BLUE)Building multi-platform Docker image for charts server...$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.charts \
+		-t $(DOCKER_IMAGE)-charts:$(VERSION) \
+		-t $(DOCKER_IMAGE)-charts:latest \
+		--load \
+		.
+	@echo "$(GREEN)✅ Multi-platform Charts Docker image built successfully$(NC)"
 
 .PHONY: docker-build-all
-docker-build-all: docker-build docker-build-form docker-build-workflow docker-build-submission docker-build-workplace docker-build-charts ## Build all Docker images
-	@echo "$(GREEN)🎉 All Docker images built successfully$(NC)"
+docker-build-all: docker-build docker-build-form docker-build-workflow docker-build-submission docker-build-workplace docker-build-charts ## Build all multi-platform Docker images
+	@echo "$(GREEN)🎉 All multi-platform Docker images built successfully$(NC)"
+
+# Legacy single-platform builds (for compatibility)
+.PHONY: docker-build-single
+docker-build-single: ## Build single-platform Docker image (current architecture only)
+	@echo "$(BLUE)Building single-platform Docker image: $(DOCKER_IMAGE):$(VERSION)$(NC)"
+	docker build -t $(DOCKER_IMAGE):$(VERSION) .
+	docker build -t $(DOCKER_IMAGE):latest .
+	@echo "$(GREEN)✅ Single-platform Docker image built successfully$(NC)"
 
 .PHONY: docker-run
 docker-run: ## Run Docker container with main server
@@ -188,82 +236,111 @@ docker-run-charts: ## Run Docker container with charts server
 		$(DOCKER_IMAGE)-charts:latest
 
 .PHONY: docker-push
-docker-push: ## Push main Docker image to registry (usage: make docker-push DOCKER_HUB_USERNAME=yourusername)
-	@echo "$(BLUE)Pushing main Docker image to registry...$(NC)"
+docker-push: docker-setup ## Push multi-platform Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		echo "Usage: make docker-push DOCKER_HUB_USERNAME=yourusername"; \
 		exit 1; \
 	fi
 	docker login
-	docker push $(DOCKER_IMAGE):$(VERSION)
-	docker push $(DOCKER_IMAGE):latest
-	@echo "$(GREEN)✅ Main Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-t $(DOCKER_IMAGE):latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Docker image pushed successfully$(NC)"
 
 # Individual Docker Push Commands
 .PHONY: docker-push-form
-docker-push-form: ## Push form Docker image to registry
-	@echo "$(BLUE)Pushing form Docker image to registry...$(NC)"
+docker-push-form: docker-setup ## Push multi-platform form Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform form Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		exit 1; \
 	fi
-	docker push $(DOCKER_IMAGE)-form:$(VERSION)
-	docker push $(DOCKER_IMAGE)-form:latest
-	@echo "$(GREEN)✅ Form Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.form \
+		-t $(DOCKER_IMAGE)-form:$(VERSION) \
+		-t $(DOCKER_IMAGE)-form:latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Form Docker image pushed successfully$(NC)"
 
 .PHONY: docker-push-workflow
-docker-push-workflow: ## Push workflow Docker image to registry
-	@echo "$(BLUE)Pushing workflow Docker image to registry...$(NC)"
+docker-push-workflow: docker-setup ## Push multi-platform workflow Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform workflow Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		exit 1; \
 	fi
-	docker push $(DOCKER_IMAGE)-workflow:$(VERSION)
-	docker push $(DOCKER_IMAGE)-workflow:latest
-	@echo "$(GREEN)✅ Workflow Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.workflow \
+		-t $(DOCKER_IMAGE)-workflow:$(VERSION) \
+		-t $(DOCKER_IMAGE)-workflow:latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Workflow Docker image pushed successfully$(NC)"
 
 .PHONY: docker-push-submission
-docker-push-submission: ## Push submission Docker image to registry
-	@echo "$(BLUE)Pushing submission Docker image to registry...$(NC)"
+docker-push-submission: docker-setup ## Push multi-platform submission Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform submission Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		exit 1; \
 	fi
-	docker push $(DOCKER_IMAGE)-submission:$(VERSION)
-	docker push $(DOCKER_IMAGE)-submission:latest
-	@echo "$(GREEN)✅ Submission Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.submission \
+		-t $(DOCKER_IMAGE)-submission:$(VERSION) \
+		-t $(DOCKER_IMAGE)-submission:latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Submission Docker image pushed successfully$(NC)"
 
 .PHONY: docker-push-workplace
-docker-push-workplace: ## Push workplace Docker image to registry
-	@echo "$(BLUE)Pushing workplace Docker image to registry...$(NC)"
+docker-push-workplace: docker-setup ## Push multi-platform workplace Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform workplace Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		exit 1; \
 	fi
-	docker push $(DOCKER_IMAGE)-workplace:$(VERSION)
-	docker push $(DOCKER_IMAGE)-workplace:latest
-	@echo "$(GREEN)✅ Workplace Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.workplace \
+		-t $(DOCKER_IMAGE)-workplace:$(VERSION) \
+		-t $(DOCKER_IMAGE)-workplace:latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Workplace Docker image pushed successfully$(NC)"
 
 .PHONY: docker-push-charts
-docker-push-charts: ## Push charts Docker image to registry
-	@echo "$(BLUE)Pushing charts Docker image to registry...$(NC)"
+docker-push-charts: docker-setup ## Push multi-platform charts Docker image to registry
+	@echo "$(BLUE)Pushing multi-platform charts Docker image to registry...$(NC)"
 	@if [ -z "$(DOCKER_HUB_USERNAME)" ]; then \
 		echo "$(YELLOW)⚠️  DOCKER_HUB_USERNAME not set$(NC)"; \
 		exit 1; \
 	fi
-	docker push $(DOCKER_IMAGE)-charts:$(VERSION)
-	docker push $(DOCKER_IMAGE)-charts:latest
-	@echo "$(GREEN)✅ Charts Docker image pushed successfully$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		-f Dockerfile.charts \
+		-t $(DOCKER_IMAGE)-charts:$(VERSION) \
+		-t $(DOCKER_IMAGE)-charts:latest \
+		--push \
+		.
+	@echo "$(GREEN)✅ Multi-platform Charts Docker image pushed successfully$(NC)"
 
 .PHONY: docker-push-all
-docker-push-all: docker-push docker-push-form docker-push-workflow docker-push-submission docker-push-workplace docker-push-charts ## Push all Docker images to registry
-	@echo "$(GREEN)🎉 All Docker images pushed successfully$(NC)"
+docker-push-all: docker-push docker-push-form docker-push-workflow docker-push-submission docker-push-workplace docker-push-charts ## Push all multi-platform Docker images to registry
+	@echo "$(GREEN)🎉 All multi-platform Docker images pushed successfully$(NC)"
 
 # Deployment Pipeline
 .PHONY: deploy
-deploy: clean install docker-build docker-push ## Full deployment pipeline (usage: make deploy DOCKER_HUB_USERNAME=yourusername)
-	@echo "$(GREEN)🎉 Full deployment completed!$(NC)"
+deploy: clean install docker-build docker-push ## Full deployment pipeline with multi-platform support
+	@echo "$(GREEN)🎉 Full multi-platform deployment completed!$(NC)"
 
 # Utility Commands
 .PHONY: status
@@ -273,16 +350,39 @@ status: ## Show project status
 	@echo "Project: $(PROJECT_NAME)"
 	@echo "Version: $(VERSION)"
 	@echo "Docker Image: $(DOCKER_IMAGE)"
+	@echo "Platforms: $(PLATFORMS)"
 	@echo ""
 	@echo "$(BLUE)Environment$(NC)"
 	@echo "CLAPPIA_API_KEY: $${CLAPPIA_API_KEY:+✅ Set} $${CLAPPIA_API_KEY:-❌ Not Set}"
 	@echo "DOCKER_HUB_USERNAME: $${DOCKER_HUB_USERNAME:+✅ Set} $${DOCKER_HUB_USERNAME:-❌ Not Set}"
+	@echo ""
+	@echo "$(BLUE)Docker Buildx Status$(NC)"
+	@docker buildx ls 2>/dev/null || echo "❌ Docker buildx not available"
 
 .PHONY: setup
-setup: install ## Initial project setup
-	@echo "$(GREEN)✅ Project setup completed!$(NC)"
+setup: install docker-setup ## Initial project setup with multi-platform support
+	@echo "$(GREEN)✅ Project setup with multi-platform support completed!$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Next steps:$(NC)"
 	@echo "1. Set your API key: export CLAPPIA_API_KEY=your_key_here"
 	@echo "2. Test locally: make run"
-	@echo "3. Deploy: make deploy DOCKER_HUB_USERNAME=yourusername"
+	@echo "3. Build multi-platform: make docker-build"
+	@echo "4. Deploy: make deploy DOCKER_HUB_USERNAME=yourusername"
+
+# Inspection Commands
+.PHONY: docker-inspect
+docker-inspect: ## Inspect multi-platform image details
+	@echo "$(BLUE)Inspecting multi-platform image: $(DOCKER_IMAGE):latest$(NC)"
+	docker buildx imagetools inspect $(DOCKER_IMAGE):latest 2>/dev/null || \
+	docker image inspect $(DOCKER_IMAGE):latest --format 'Architecture: {{.Architecture}}, OS: {{.Os}}'
+
+.PHONY: docker-inspect-all
+docker-inspect-all: ## Inspect all multi-platform images
+	@echo "$(BLUE)Inspecting all multi-platform images...$(NC)"
+	@for image in "$(DOCKER_IMAGE)" "$(DOCKER_IMAGE)-form" "$(DOCKER_IMAGE)-workflow" "$(DOCKER_IMAGE)-submission" "$(DOCKER_IMAGE)-workplace" "$(DOCKER_IMAGE)-charts"; do \
+		echo ""; \
+		echo "Image: $$image:latest"; \
+		docker buildx imagetools inspect $$image:latest 2>/dev/null | grep "Platform:" || \
+		docker image inspect $$image:latest --format 'Single platform: {{.Os}}/{{.Architecture}}' 2>/dev/null || \
+		echo "❌ Image not found"; \
+	done

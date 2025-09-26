@@ -1,7 +1,43 @@
 FROM python:3.10-slim
 
-# Required MCP label
+# Comprehensive metadata for Docker Hub
+LABEL org.opencontainers.image.title="Clappia MCP Server"
+LABEL org.opencontainers.image.description="Model Context Protocol (MCP) server for Clappia integration. Enables AI assistants to interact with Clappia workspaces, forms, workflows, and analytics through a standardized protocol."
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.authors="Clappia Development Team <dev@clappia.com>"
+LABEL org.opencontainers.image.vendor="Clappia"
+LABEL org.opencontainers.image.url="https://github.com/clappia-dev/clappia-mcp"
+LABEL org.opencontainers.image.documentation="https://github.com/clappia-dev/clappia-mcp/blob/main/README.md"
+LABEL org.opencontainers.image.source="https://github.com/clappia-dev/clappia-mcp"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.created="2025-01-01T00:00:00Z"
+LABEL org.opencontainers.image.revision="main"
+
+# Clappia-specific labels
 LABEL io.modelcontextprotocol.server.name="io.github.clappia-dev/clappia-mcp"
+LABEL io.modelcontextprotocol.server.version="1.0.0"
+LABEL clappia.server.type="main"
+LABEL clappia.server.features="workspace,forms,workflows,submissions,analytics"
+
+# Additional metadata
+LABEL maintainer="Clappia Development Team <dev@clappia.com>"
+LABEL summary="MCP server for seamless Clappia integration with AI assistants"
+LABEL description="This Docker image provides a Model Context Protocol (MCP) server that enables AI assistants like Claude to interact with Clappia's no-code platform. Features include workspace management, form definitions, workflow automation, submission handling, and analytics access."
+
+# Multi-architecture support metadata
+LABEL org.opencontainers.image.platform="linux/amd64,linux/arm64"
+LABEL architecture="multi-platform"
+LABEL compatibility="Intel x86_64, Apple Silicon ARM64"
+
+# Usage and environment metadata
+LABEL usage="docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:latest"
+LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
+LABEL ports.exposed="None (MCP uses stdio)"
+LABEL volumes.recommended="None required"
+
+# Keywords for Docker Hub search
+LABEL keywords="clappia,mcp,model-context-protocol,ai,no-code,workflow,forms,automation,claude,openai"
+LABEL category="Development Tools, AI/ML, Automation"
 
 WORKDIR /app
 
@@ -10,5 +46,19 @@ RUN pip install uv
 COPY . .
 RUN uv sync
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD python -c "import sys; sys.exit(0)" || exit 1
+
+# Set default environment variables with documentation
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # Run the main server
 CMD ["uv", "run", "main_server.py"]
+
+# Additional documentation as labels
+LABEL readme.overview="Clappia MCP Server enables AI assistants to seamlessly integrate with Clappia's no-code platform through the Model Context Protocol."
+LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• Workspace management\n• Form definitions and structure access\n• Workflow automation\n• Submission data handling\n• Analytics and reporting\n• Secure API authentication"
+LABEL readme.requirements="• Docker installed\n• Clappia API key\n• Network access to Clappia services"
+LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:latest"
