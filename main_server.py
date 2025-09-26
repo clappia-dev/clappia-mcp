@@ -1,7 +1,7 @@
 import sys
 import argparse
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger
+from utils.logging_utils import get_logger
 from tools.submissions import register_submission_tools
 from tools.definitions import register_definition_tools
 from tools.workflows import register_workflow_tools

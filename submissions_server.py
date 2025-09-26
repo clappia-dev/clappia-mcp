@@ -5,7 +5,7 @@ from tools.submissions import register_submission_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-submissions-server")
+app = FastMCP("clappia-app-submission")
 
 
 def register_all_tools():

@@ -5,7 +5,7 @@ from tools.analytics import register_analytics_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-analytics-server")
+app = FastMCP("clappia-app-charts")
 
 
 def register_all_tools():

@@ -1,0 +1,14 @@
+FROM python:3.10-slim
+
+# Required MCP label
+LABEL io.modelcontextprotocol.server.name="io.github.clappia-dev/clappia-mcp"
+
+WORKDIR /app
+
+# Install uv and dependencies
+RUN pip install uv
+COPY . .
+RUN uv sync
+
+# Run the workflow server
+CMD ["uv", "run", "workflows_server.py"]

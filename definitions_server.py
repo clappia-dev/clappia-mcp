@@ -5,7 +5,7 @@ from tools.definitions import register_definition_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-definitions-server")
+app = FastMCP("clappia-app-form")
 
 
 def register_all_tools():
@@ -38,7 +38,7 @@ def list_tools():
             if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
             else {}
         )
-        print(f"\n=== Clappia App Definitions MCP Tools ({len(tools)}) ===")
+        print(f"\n=== Clappia App Form MCP Tools ({len(tools)}) ===")
         for tool_name in tools.keys():
             print(f"• {tool_name}")
     except Exception as e:
@@ -53,12 +53,12 @@ if __name__ == "__main__":
     elif "--help" in args or "-h" in args:
         print(
             """
-        Clappia App Definitions MCP Server
+        Clappia App Form MCP Server
         
         Usage:
-            uv run definitions_server.py                # Run server (default)
-            uv run definitions_server.py --list-tools   # List all tools
-            uv run definitions_server.py --help         # Show help
+            uv run clappia-app-form.py                # Run server (default)
+            uv run clappia-app-form.py --list-tools   # List all tools
+            uv run clappia-app-form.py --help         # Show help
         
         Required Environment Variables:
             CLAPPIA_API_KEY
