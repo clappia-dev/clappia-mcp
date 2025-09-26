@@ -12,7 +12,6 @@ CLAPPIA_EXTERNAL_API_BASE_URL_V4 = "https://api-public-v4.clappia.com"
 
 submission_client = SubmissionClient(
     api_key=os.getenv("CLAPPIA_API_KEY"),
-    workplace_id=os.getenv("CLAPPIA_WORKPLACE_ID"),
     base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
 )
 
