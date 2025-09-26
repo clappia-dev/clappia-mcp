@@ -61,7 +61,7 @@ MCP server for Clappia platform integration. Manage applications, submissions, w
 
 ## Prerequisites
 
--  **Python 3.10+**
+-  **Docker Desktop** (with Docker CLI)
 -  **Clappia API Key** and Workplace ID
 -  **Claude for Desktop**
 
@@ -69,33 +69,25 @@ MCP server for Clappia platform integration. Manage applications, submissions, w
 
 ### 1. Install Prerequisites
 
-**Download and install:**
-
--  Python 3.10+: `https://www.python.org/downloads/`
--  Claude Desktop: `https://claude.ai/download`
--  uv: `https://docs.astral.sh/uv/getting-started/installation/`
--  Git: `https://git-scm.com/downloads`
--  VS Code: `https://code.visualstudio.com/download`
--  Cursor: `https://cursor.com/downloads`
-
-### 2. Clone and Setup
-
+**Install Homebrew (if not already installed):**
 ```bash
-# Clone repository to desktop
-git clone https://github.com/clappia-dev/clappia-mcp
-cd clappia-mcp
-
-# Setup Python environment
-uv venv
-uv sync
-
-# Activate virtual environment
-source .venv/bin/activate  # On macOS/Linux
-# or
-.venv\Scripts\activate     # On Windows
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 3. Get Clappia API Key
+**Install Docker CLI:**
+```bash
+brew install docker
+```
+
+**Download and install:**
+-  Docker Desktop: `https://www.docker.com/products/docker-desktop/`
+-  Claude Desktop: `https://claude.ai/download`
+
+**Configure Docker Desktop:**
+-  Install Docker Desktop and configure it to run in the background
+-  Ensure Docker is running before proceeding
+
+### 2. Get Clappia API Key
 
 ```bash
 # Visit your Clappia workplace
@@ -110,88 +102,71 @@ open https://<your_workplace>.clappia.com
 -  Clappia Platform: `https://www.clappia.com`
 -  Your Workplace: `https://<your_workplace>.clappia.com`
 
-### 4. Configure Claude Desktop
+### 3. Configure Claude Desktop
+
+**Open Claude Desktop:**
+1.  Open Claude Desktop
+2.  Go to Settings
+3.  Select Developer option → Edit Config → Click on Edit
+4.  Replace the content with the configuration below
 
 ```json
-// Open Claude → Settings → Developer → Edit Config
-// Add this to claude_desktop_config.json:
 {
-   "mcpServers": {
-      "clappia-submissions": {
-         "command": "uv",
-         "args": [
-            "--directory",
-            "/path/to/clappia-mcp",
-            "run",
-            "submissions_server.py"
-         ],
-         "env": {
-            "CLAPPIA_API_KEY": "your_api_key_here"
-         }
-      },
-      "clappia-definitions": {
-         "command": "uv",
-         "args": [
-            "--directory",
-            "/path/to/clappia-mcp",
-            "run",
-            "definitions_server.py"
-         ],
-         "env": {
-            "CLAPPIA_API_KEY": "your_api_key_here"
-         }
-      },
-      "clappia-workflows": {
-         "command": "uv",
-         "args": [
-            "--directory",
-            "/path/to/clappia-mcp",
-            "run",
-            "workflows_server.py"
-         ],
-         "env": {
-            "CLAPPIA_API_KEY": "your_api_key_here"
-         }
-      },
-      "clappia-analytics": {
-         "command": "uv",
-         "args": [
-            "--directory",
-            "/path/to/clappia-mcp",
-            "run",
-            "analytics_server.py"
-         ],
-         "env": {
-            "CLAPPIA_API_KEY": "your_api_key_here"
-         }
-      },
-      "clappia-workplace": {
-         "command": "uv",
-         "args": [
-            "--directory",
-            "/path/to/clappia-mcp",
-            "run",
-            "workplace_server.py"
-         ],
-         "env": {
-            "CLAPPIA_API_KEY": "your_api_key_here"
-         }
-      }
-   }
+  "mcpServers": {
+    "clappia-app-form-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-form:1.0.0"
+      ]
+    },
+    "clappia-app-workflow-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-workflow:1.0.0"
+      ]
+    },
+    "clappia-app-charts-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-charts:1.0.0"
+      ]
+    },
+    "clappia-app-submission-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-submission:1.0.0"
+      ]
+    },
+    "clappia-workplace-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-workplace:1.0.0"
+      ]
+    }
+  }
 }
 ```
 
-**Enable/Disable Servers:**
+**Important:** 
+-  Replace `your_api_key` with your actual Clappia API key
+-  After making changes, **close Claude Desktop completely** and reopen it
+-  If servers don't appear, close and reopen Claude Desktop again
 
--  To enable/disable a server:Use Claude Desktop's interface after server is running
--  To enable/disable tools: Use Claude Desktop's interface after server is running
-
-### 5. Start Using
+### 4. Start Using
 
 ```bash
-# Restart Claude Desktop
-# Look for tools icon (🔧) in input box
-# Start managing your Clappia apps!
+# Look for tools icon (🔧) in Claude Desktop input box
+# Start managing your Clappia apps with Docker containers!
 ```
 
 ## 📁 Project Structure
@@ -230,18 +205,20 @@ clappia-mcp/
 
 | Issue                       | Symptoms                        | Solution                                                                             |
 | --------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| **Server Not Starting**     | No tools icon in Claude Desktop | Check Python 3.10+, verify uv installation, reinstall dependencies, check file paths |
+| **Server Not Starting**     | No tools icon in Claude Desktop | Check Docker Desktop is running, verify Docker CLI installation, restart Claude Desktop |
+| **Docker Issues**          | Docker command not found        | Install Docker CLI via Homebrew, ensure Docker Desktop is running                    |
 | **API Connection Issues**   | Authentication errors           | Verify API key, check workplace permissions, test network connectivity               |
 | **Tool Execution Failures** | Tools return errors             | Check input parameters, validate data types, verify app ID format                    |
-| **Configuration Issues**    | Tools don't work as expected    | Verify environment variables, check JSON syntax, restart Claude Desktop              |
+| **Configuration Issues**    | Tools don't work as expected    | Verify JSON syntax, restart Claude Desktop completely, check Docker container logs   |
 | **Performance Issues**      | Slow response times             | Check API status, reduce page size, optimize filters                                 |
 
 ### Quick Fixes
 
--  **Python version**: `python --version` (need 3.10+)
--  **Reinstall dependencies**: `rm -rf .venv uv.lock && uv sync`
+-  **Docker status**: `docker --version` and `docker ps` (ensure Docker is running)
+-  **Restart Docker**: Restart Docker Desktop if containers fail to start
 -  **Check logs**: Look in Claude Desktop console for errors
 -  **Verify API key**: Ensure it's correct and has proper permissions
+-  **Restart Claude**: Close Claude Desktop completely and reopen after configuration changes
 
 ## 📞 Support
 
@@ -256,8 +233,8 @@ clappia-mcp/
 
 When reporting issues, please include:
 
--  Python version (`python --version`)
--  uv version (`uv --version`)
+-  Docker version (`docker --version`)
+-  Docker Desktop version and status
 -  Operating system
 -  Steps to reproduce the issue
 -  Expected vs actual behavior
