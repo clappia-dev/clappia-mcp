@@ -5,7 +5,7 @@ from tools.workflows import register_workflow_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-workflows-server")
+app = FastMCP("clappia-app-workflow")
 
 
 def register_all_tools():

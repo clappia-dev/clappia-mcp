@@ -5,7 +5,7 @@ from tools.workplace import register_workplace_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-workplace-server")
+app = FastMCP("clappia-workplace")
 
 
 def register_all_tools():
