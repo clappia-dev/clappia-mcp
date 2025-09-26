@@ -56,9 +56,9 @@ from clappia_api_tools.models import (
     PageBreakOperationResponse,
     FieldOperationResponse,
     UpsertSectionOperationResponse,
-    AppCreationResponse,
     ReorderSectionOperationResponse,
     UpdateAppMetadataRequest,
+    BaseResponse
 
 )
 
@@ -318,7 +318,7 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def create_app(request: CreateAppRequest) -> AppCreationResponse:
+    def create_app(request: CreateAppRequest) -> BaseResponse:
         """
         Creates a new Clappia application with specified sections and fields.
 
@@ -326,7 +326,7 @@ def register_definition_tools(mcp: FastMCP):
             request (CreateAppRequest): The request object containing app configuration details, sections, and fields.
 
         Returns:
-            AppCreationResponse: The response object indicating the result of the app creation.
+            BaseResponse: The response object indicating the result of the app creation.
 
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.create_app`.

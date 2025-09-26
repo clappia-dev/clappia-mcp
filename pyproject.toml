@@ -5,8 +5,7 @@ description = "MCP server that allows operations at Clappia"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "clappia-api-tools",
+    "clappia-api-tools>=2.0.9",
     "mcp[cli]>=1.8.0",
     "modelcontextprotocol>=0.1.0",
-    "pydantic[email]>=2.11.7",
 ]
