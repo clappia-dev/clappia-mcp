@@ -1,380 +1,267 @@
-# Clappia MCP (Model Context Protocol)
+# Clappia MCP
 
-A Python-based MCP server that provides a comprehensive interface for interacting with the Clappia platform. This server enables programmatic management of Clappia applications, forms, submissions, and more.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
+[![smithery badge](https://smithery.ai/badge/@clappia-dev/simitry-clappia-mcp)](https://smithery.ai/server/@clappia-dev/simitry-clappia-mcp)
 
-Clappia is a no-code platform that allows businesses, operations teams, and non-developers to create custom apps—like inspection forms, approval workflows, field data collection tools, internal dashboards, and more—without writing a single line of code. It's used across industries for automating manual processes, digitizing paperwork, and improving operational efficiency. [Click here](https://www.clappia.com) to learn more.
+MCP server for Clappia platform integration. Manage applications, submissions, workflows, and analytics through Claude Desktop.
+
+[Clappia](https://www.clappia.com) is a no-code platform for building custom business applications.
+
+## Table of Contents
+
+-  [Features](#features)
+-  [Prerequisites](#prerequisites)
+-  [Steps to Setup MCP Server](#steps-to-setup-mcp-server)
+-  [Project Structure](#project-structure)
+-  [Troubleshooting](#troubleshooting)
+-  [Support](#support)
+-  [License](#license)
 
 ## Features
 
--  **App Management**
+### App Management
 
-   -  Create new Clappia apps with customizable sections and fields
+-  Create new Clappia applications
+-  Get app definitions and metadata
+-  Update app metadata and versions
+-  Manage app sections and page breaks
 
-   -  Retrieve detailed app definitions with field metadata
+### Field Management
 
--  **Submission Management**
+-  Add and update fields (30+ field types supported)
+-  Reorder sections and fields
+-  Configure field properties and validation
 
-   -  Create new submissions with field data
-   -  Edit existing submissions with validation
-   -  Update submission status with optional comments
-   -  Manage submission owners with email-based assignments
-   -  Retrieve submissions with advanced filtering and pagination
-   -  Get submission aggregations for analytics with customizable dimensions
+### Submission Management
 
--  **Field Management**
-   -  Add new fields with comprehensive configuration options
-   -  Update field properties including validation, display conditions, and layout
-   -  Configure field validations (number, email, URL, custom)
-   -  Set up conditional logic for field display and editability
-   -  Manage field layouts with responsive design options
+-  Create and edit submissions
+-  Update submission status and owners
+-  Get submissions with filtering and pagination
+-  Export submissions to Excel
+-  Get submission aggregations for analytics
+
+### Workflow Management
+
+-  Get app workflow configurations
+-  Add, update, and reorder workflow steps
+-  Support for various workflow step types
+
+### Analytics
+
+-  Add, update, and reorder charts
+-  Get app charts for analytics dashboard
+
+### Workplace Management
+
+-  Add users to workplace
+-  Update user details, attributes, roles, and groups
+-  Add users to specific apps
+-  Get workplace apps and users
 
 ## Prerequisites
 
--  Python 3.8 or higher
--  uv python package manager
--  Access to Clappia API Key and Workplace ID
--  Claude for Desktop (or any other MCP Clients)
+-  **Docker Desktop** (with Docker CLI)
+-  **Clappia API Key** and Workplace ID
+-  **Claude for Desktop**
 
-## Installation
+## Steps to Setup MCP Server
 
+### Installing via Smithery
 
-1. **Set up Clappia API Access**:
+To install Clappia automatically via [Smithery](https://smithery.ai/server/@clappia-dev/simitry-clappia-mcp):
 
-   -  Visit your Workplace in Clappia (https://<your_workplace>.clappia.com), you need to have Workplace Manager Access to this Workplace.
-   -  Visit Workplace Settings. Note your Workplace ID.
-   -  Visit Workplace Settings -> Preferences -> API Keys. Note your API Key, generate one if it is not yet generated.
-2. **Set up Claude for Desktop**:
+```bash
+npx -y @smithery/cli install @clappia-dev/simitry-clappia-mcp
+```
 
-   -  Download Claude for Desktop for [macOS](https://claude.ai/download) or [Windows](https://claude.ai/download)
-   -  Install and launch Claude for Desktop
-   -  Open Claude menu → Settings → Developer → Edit Config
-   -  Add the following configuration to `claude_desktop_config.json`:
-      ```json
-      {
-         "mcpServers": {
-            "clappia-mcp": {
-               "command": "uv",
-               "args": [
-                  "--directory",
-                  "/Users/<YOUR_DIECTORY>/Desktop/clappia-mcp",
-                  "run",
-                  "clappia-mcp.py"
-               ],
-               "env": {
-                  "CLAPPIA_API_KEY": "<ENTER_YOUR_WORKPLACE_API_KEY_HERE>",
-                  "CLAPPIA_WORKPLACE_ID": "<ENTER_YOUR_WORKPLACE_ID_HERE>"
-               }
-            }
-         }
-      }
-      ```
-   -  Restart Claude for Desktop
-   -  Verify the MCP server is running by checking for the tools icon in the input box
+### 1. Install Prerequisites
 
-3. **Clone the repository**:
+**Install Homebrew (if not already installed):**
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
 
-   ```bash
-   git clone https://github.com/clappia-dev/clappia-mcp.git
-   cd clappia-mcp
-   ```
+**Install Docker CLI:**
+```bash
+brew install docker
+```
 
-4. **Set up Python Environment**:
+**Download and install:**
+-  Docker Desktop: `https://www.docker.com/products/docker-desktop/`
+-  Claude Desktop: `https://claude.ai/download`
 
-   ```bash
-   # Install uv if not already installed
-   curl -LsSf https://astral.sh/uv/install.sh | sh
+**Configure Docker Desktop:**
+-  Install Docker Desktop and configure it to run in the background
+-  Ensure Docker is running before proceeding
 
-   # Install dependencies
-   uv sync
-   ```
+### 2. Get Clappia API Key
 
-## Project Structure
+```bash
+# Visit your Clappia workplace
+open https://<your_workplace>.clappia.com
+
+# Go to: Workplace Settings → Preferences → API Keys
+# Copy your API key
+```
+
+**Direct links:**
+
+-  Clappia Platform: `https://www.clappia.com`
+-  Your Workplace: `https://<your_workplace>.clappia.com`
+
+### 3. Configure Claude Desktop
+
+**Open Claude Desktop:**
+1.  Open Claude Desktop
+2.  Go to Settings
+3.  Select Developer option → Edit Config → Click on Edit
+4.  Replace the content with the configuration below
+
+```json
+{
+  "mcpServers": {
+    "clappia-app-form-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-form:1.0.0"
+      ]
+    },
+    "clappia-app-workflow-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-workflow:1.0.0"
+      ]
+    },
+    "clappia-app-charts-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-charts:1.0.0"
+      ]
+    },
+    "clappia-app-submission-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-submission:1.0.0"
+      ]
+    },
+    "clappia-workplace-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "okaru413/clappia-mcp-workplace:1.0.0"
+      ]
+    }
+  }
+}
+```
+
+**Important:** 
+-  Replace `your_api_key` with your actual Clappia API key
+-  After making changes, **close Claude Desktop completely** and reopen it
+-  If servers don't appear, close and reopen Claude Desktop again
+
+### 4. Start Using
+
+```bash
+# Look for tools icon (🔧) in Claude Desktop input box
+# Start managing your Clappia apps with Docker containers!
+```
+
+## 📁 Project Structure
 
 ```
 clappia-mcp/
-├── clappia-mcp.py          # Main MCP server implementation
-├── tools/                  # Core functionality modules
-│   ├── add_field.py        # Field addition functionality
-│   ├── create_app.py       # App creation functionality
-│   ├── create_submission.py # Submission creation
-│   ├── edit_submission.py  # Submission editing
-│   ├── get_definition.py   # App definition retrieval
-│   ├── get_submissions.py  # Submission retrieval
-│   ├── get_submissions_aggregation.py # Analytics functionality
-│   ├── update_field.py     # Field update functionality
-│   ├── update_submission_owners.py # Owner management
-│   └── update_submission_status.py # Status management
-├── pyproject.toml         # Project metadata and dependencies
-├── uv.lock               # Dependency lock file (if using uv)
-└── .env                  # Environment variables
+├── main_server.py         # 🎯 Main MCP server with module selection
+├── server/                # 🖥️ Specialized MCP servers
+│   ├── submissions_server.py  # 📝 Submissions-focused MCP server
+│   ├── definitions_server.py  # 📱 App definitions-focused MCP server
+│   ├── workflows_server.py    # 🔄 Workflows-focused MCP server
+│   ├── analytics_server.py   # 📊 Analytics-focused MCP server
+│   └── workplace_server.py    # 👥 Workplace management-focused MCP server
+├── docker/                # 🐳 Docker configuration files
+│   ├── Dockerfile.form        # Form server Docker configuration
+│   ├── Dockerfile.workflow    # Workflow server Docker configuration
+│   ├── Dockerfile.submission  # Submission server Docker configuration
+│   ├── Dockerfile.workplace   # Workplace server Docker configuration
+│   └── Dockerfile.charts      # Charts server Docker configuration
+├── tools/                 # 🛠️ Core functionality modules
+│   ├── submissions.py     # Submission management tools
+│   ├── definitions.py     # App definition and field management tools
+│   ├── workflows.py       # Workflow step management tools
+│   ├── analytics.py       # Analytics and chart generation tools
+│   └── workplace.py       # Workplace user management tools
+├── utils/                 # 🔧 Utility modules
+│   ├── __init__.py        # Package initialization
+│   ├── clients.py         # API client configurations and setup
+│   └── logging_utils.py   # Logging utilities and configuration
+├── pyproject.toml         # 📦 Project metadata and dependencies
+├── uv.lock               # 🔒 Dependency lock file
+└── README.md             # 📖 This documentation
 ```
 
-### Usage
+### Server Architecture
 
--  The server will automatically start when Claude Desktop launches
--  Access tools through the Claude Desktop interface
+-  **`main_server.py`**: Primary server that can run all modules or specific subsets
+-  **Specialized Servers**: Focused servers for specific use cases (submissions, definitions, etc.)
+-  **`tools/`**: Modular tool implementations using Pydantic models
+-  **`utils/`**: Shared utilities for logging, API clients, and common functionality
 
-### Troubleshooting
+## Troubleshooting
 
-1. **Server Not Starting**:
+| Issue                       | Symptoms                        | Solution                                                                             |
+| --------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| **Server Not Starting**     | No tools icon in Claude Desktop | Check Docker Desktop is running, verify Docker CLI installation, restart Claude Desktop |
+| **Docker Issues**          | Docker command not found        | Install Docker CLI via Homebrew, ensure Docker Desktop is running                    |
+| **API Connection Issues**   | Authentication errors           | Verify API key, check workplace permissions, test network connectivity               |
+| **Tool Execution Failures** | Tools return errors             | Check input parameters, validate data types, verify app ID format                    |
+| **Configuration Issues**    | Tools don't work as expected    | Verify JSON syntax, restart Claude Desktop completely, check Docker container logs   |
+| **Performance Issues**      | Slow response times             | Check API status, reduce page size, optimize filters                                 |
 
-   -  Check Claude Desktop logs for errors
-   -  Verify Python environment is activated
-   -  Ensure all dependencies are installed
-   -  Check environment variables are set correctly
+### Quick Fixes
 
-2. **API Connection Issues**:
+-  **Docker status**: `docker --version` and `docker ps` (ensure Docker is running)
+-  **Restart Docker**: Restart Docker Desktop if containers fail to start
+-  **Check logs**: Look in Claude Desktop console for errors
+-  **Verify API key**: Ensure it's correct and has proper permissions
+-  **Restart Claude**: Close Claude Desktop completely and reopen after configuration changes
 
-   -  Verify API credentials in `claude_desktop_config.json` file
-   -  Check network connectivity
-   -  Review API rate limits
+## 📞 Support
 
-3. **Tool Execution Failures**:
-   -  Check server logs for detailed error messages
-   -  Verify input parameters match API requirements
-   -  Ensure proper permissions for API operations
+### Getting Help
 
-### Example API Calls
+-  📖 **Documentation**: Check this README and inline code documentation
+-  🐛 **Issues**: Search existing issues or create a new one
+-  💬 **Discussions**: Use GitHub Discussions for questions and ideas
+-  📧 **Contact**: Reach out to the maintainers for urgent issues
 
-1. **Create a New Application**
+### Reporting Issues
 
-   ```python
-   from tools.create_app import create_app, Section, Field
+When reporting issues, please include:
 
-   result = create_app(
-       app_name="Employee Survey",
-       requesting_user_email_address="user@company.com",
-       sections=[
-           Section(
-               sectionName="Personal Information",
-               fields=[
-                   Field(
-                       fieldType="singleLineText",
-                       label="Full Name",
-                       required=True
-                   )
-               ]
-           )
-       ]
-   )
-   ```
+-  Docker version (`docker --version`)
+-  Docker Desktop version and status
+-  Operating system
+-  Steps to reproduce the issue
+-  Expected vs actual behavior
+-  Error messages (without sensitive information)
 
-2. **Add a Field to an Application**
+## 📄 License
 
-   ```python
-   from tools.add_field import add_field_to_app
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-   result = add_field_to_app(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       section_index=0,
-       field_index=1,
-       field_type="singleLineText",
-       label="Employee ID",
-       required=True,
-       validation="number",
-       block_width_percentage_desktop=50,
-       block_width_percentage_mobile=100
-   )
-   ```
+## 🙏 Acknowledgments
 
-3. **Update a Field**
-
-   ```python
-   from tools.update_field import update_field_in_app
-
-   result = update_field_in_app(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       field_name="employeeName",
-       label="Full Employee Name",
-       required=True,
-       validation="none",
-       display_condition="status == 'active'"
-   )
-   ```
-
-4. **Create a Submission**
-
-   ```python
-   from tools.create_submission import create_app_submission
-
-   result = create_app_submission(
-       app_id="APP123",
-       data={"employeeName": "John Doe", "employeeId": "12345"},
-       email="user@company.com"
-   )
-   ```
-
-5. **Get Submissions with Filtering**
-
-   ```python
-   from tools.get_submissions import get_app_submissions, Filters, QueryGroup, Query, Condition
-
-   filters = Filters(queries=[
-       QueryGroup(queries=[
-           Query(
-               conditions=[
-                   Condition(
-                       operator="EQ",
-                       filterKeyType="STANDARD",
-                       key="status",
-                       value="active"
-                   )
-               ],
-               operator="AND"
-           )
-       ])
-   ])
-
-   result = get_app_submissions(
-       app_id="APP123",
-       requesting_user_email_address="user@company.com",
-       page_size=10,
-       filters=filters
-   )
-   ```
-
-## API Documentation
-
-### Field Types
-
--  **Text Fields**
-
-   -  `singleLineText`: Single line text input
-   -  `multiLineText`: Multi-line text input
-   -  `richTextEditor`: Rich text editor with formatting
-
--  **Selector Fields**
-
-   -  `singleSelector`: Single choice selection
-   -  `multiSelector`: Multiple choice selection
-   -  `dropDown`: Dropdown selection
-
--  **Date/Time Fields**
-
-   -  `dateSelector`: Date selection
-   -  `timeSelector`: Time selection
-   -  `dateTime`: Combined date and time selection
-
--  **File Fields**
-
-   -  `file`: File upload with configurable types
-   -  `camera`: Direct camera capture
-   -  `signature`: Digital signature capture
-
--  **Advanced Fields**
-   -  `calculationsAndLogic`: Formula-based calculations
-   -  `gpsLocation`: Location tracking
-   -  `codeScanner`: Barcode/QR code scanning
-   -  `nfcReader`: NFC tag reading
-   -  `liveTracking`: Real-time location tracking
-   -  `address`: Address input with validation
-
-### Validation Types
-
--  `none`: No validation
--  `number`: Numeric validation
--  `email`: Email format validation
--  `url`: URL format validation
--  `custom`: Custom validation rules
-
-### Field Properties
-
--  **Layout**
-
-   -  `block_width_percentage_desktop`: Width on desktop (25, 50, 75, 100)
-   -  `block_width_percentage_mobile`: Width on mobile (50, 100)
-   -  `number_of_cols`: Number of columns for selector fields
-
--  **Behavior**
-
-   -  `required`: Whether field is mandatory
-   -  `is_editable`: Whether field can be edited
-   -  `hidden`: Whether field is hidden
-   -  `retain_values`: Whether to retain values when hidden
-
--  **Conditions**
-
-   -  `display_condition`: Condition for field visibility
-   -  `editability_condition`: Condition for field editability
-
--  **File Settings**
-   -  `allowed_file_types`: List of allowed file types
-   -  `max_file_allowed`: Maximum files allowed (1-10)
-   -  `image_quality`: Image quality (low, medium, high)
-   -  `file_name_prefix`: Prefix for uploaded files
-
-## Error Handling
-
-The server implements comprehensive error handling for:
-
--  Invalid API credentials
--  Network connectivity issues
--  Invalid input parameters
--  API rate limiting
--  Server errors
-
-All errors are logged with appropriate context for debugging.
-
-## Security
-
--  API keys are stored in environment variables
--  All API calls are made over HTTPS
--  Input validation is implemented for all parameters
--  Rate limiting is supported
--  Error messages are sanitized
-
-## Performance Considerations
-
--  Connection pooling for API requests
--  Efficient payload construction
--  Proper resource cleanup
--  Logging optimization
--  Error handling optimization
-
-## Support
-
-For support, please:
-
-1. Check the documentation
-2. Review existing issues
-3. Create a new issue if needed
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## API Integration
-
-### Clappia Public API
-
-The MCP server integrates with Clappia's public API to provide the following capabilities:
-
-1. **Authentication**:
-
-   -  API key-based authentication
-   -  Secure credential management
-   -  Rate limiting support
-
-2. **Endpoints**:
-
-   -  Application management
-   -  Form submissions
-   -  Field operations
-   -  User management
-   -  Analytics and reporting
-
-3. **API Documentation**:
-
-   -  Visit [Clappia Developer Portal](https://developer.clappia.com/) for:
-      -  API reference
-      -  Authentication guide
-      -  Rate limits
-      -  Best practices
-      -  Example implementations
-
-4. **API Versioning**:
-   -  Current stable version: v1
-   -  Backward compatibility maintained
-   -  Deprecation notices provided
+-  **Clappia Team**: For providing the excellent no-code platform and API
+-  **Anthropic**: For creating the Model Context Protocol
+-  **Contributors**: Thank you to all contributors who help improve this project
