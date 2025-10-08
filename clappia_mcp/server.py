@@ -19,7 +19,8 @@ class ConfigSchema(BaseModel):
         description="List of modules to load (submissions, definitions, workflows, analytics, workplace, or all)"
     )
     api_key: str = Field(
-        description="Clappia API key for authentication"
+        default="",
+        description="Clappia API key for authentication (can be set via environment variable CLAPPIA_API_KEY)"
     )
 
 
