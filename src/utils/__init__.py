@@ -5,20 +5,20 @@ This package contains utility modules for the Clappia MCP server.
 """
 
 from .logging_utils import get_logger
-from .clients import (
-    submission_client,
-    app_definition_client,
-    workflow_definition_client,
-    analytics_client,
-    workplace_client
+from .constants import (
+    CLAPPIA_EXTERNAL_PREPROD_API_BASE_URL,
+    CLAPPIA_EXTERNAL_API_BASE_URL,
+    CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+    CLAPPIA_APP_DEFINITION_API_BASE_URL,
+    CLAPPIA_API_KEY_ENV_VAR,
 )
 
 __all__ = [
     "get_logger",
-    "submission_client",
-    "app_definition_client", 
-    "workflow_definition_client",
-    "analytics_client",
-    "workplace_client"
+    "CLAPPIA_EXTERNAL_PREPROD_API_BASE_URL",
+    "CLAPPIA_EXTERNAL_API_BASE_URL", 
+    "CLAPPIA_EXTERNAL_API_BASE_URL_V4",
+    "CLAPPIA_APP_DEFINITION_API_BASE_URL",
+    "CLAPPIA_API_KEY_ENV_VAR",
 ]
 __version__ = "1.0.0"

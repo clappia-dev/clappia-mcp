@@ -1,5 +1,7 @@
+import os
 from mcp.server.fastmcp import FastMCP
-from src.utils import get_logger, workflow_definition_client
+from src.utils import get_logger, CLAPPIA_EXTERNAL_API_BASE_URL_V4, CLAPPIA_API_KEY_ENV_VAR
+from clappia_api_tools import WorkflowDefinitionAPIKeyClient as WorkflowDefinitionClient
 from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
@@ -62,6 +64,10 @@ def register_workflow_tools(mcp: FastMCP):
             WorkflowResponse: The response object containing the workflow configuration.
         """
 
+        workflow_definition_client = WorkflowDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workflow_definition_client.get_workflow(
             app_id=app_id, trigger_type=trigger_type, version_variable_name=version_variable_name
         )
@@ -91,6 +97,10 @@ def register_workflow_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying step addition method.
         """
+        workflow_definition_client = WorkflowDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workflow_definition_client.add(
             app_id=app_id,
             trigger_type=trigger_type,
@@ -123,6 +133,10 @@ def register_workflow_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying step update method.
         """
+        workflow_definition_client = WorkflowDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workflow_definition_client.update(
             app_id=app_id,
             trigger_type=trigger_type,
@@ -149,6 +163,10 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name (str): The variable name of the parent step, below which the step will be moved.
             version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
+        workflow_definition_client = WorkflowDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workflow_definition_client.reorder_step(
             app_id=app_id,
             trigger_type=trigger_type,

@@ -60,7 +60,10 @@ class Logger:
         message_str = str(message)
         formatted_message = self._format_message(level, message_str)
 
-        supports_color = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+        try:
+            supports_color = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+        except (ValueError, OSError):
+            supports_color = False
 
         if supports_color:
             color = self.colors.get(level, "")
@@ -68,8 +71,10 @@ class Logger:
         else:
             colored_message = formatted_message
 
-        # Always print to stderr
-        print(colored_message, file=sys.stderr, flush=True)
+        try:
+            print(colored_message, file=sys.stderr, flush=True)
+        except (ValueError, OSError):
+            pass
 
     def debug(self, message: str):
         """Log a debug message."""

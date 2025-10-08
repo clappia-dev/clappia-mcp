@@ -1,5 +1,7 @@
+import os
 from mcp.server.fastmcp import FastMCP
-from src.utils import get_logger, app_definition_client
+from src.utils import get_logger, CLAPPIA_APP_DEFINITION_API_BASE_URL, CLAPPIA_API_KEY_ENV_VAR
+from clappia_api_tools import AppDefinitionAPIKeyClient as AppDefinitionClient
 from typing import Union, Optional
 from clappia_api_tools.models import (
     CreateAppRequest,
@@ -132,6 +134,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.add_section`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.add_section(request=request)
 
     @mcp.tool()
@@ -151,6 +157,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_section`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_section(request=request)
 
     @mcp.tool()
@@ -170,6 +180,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.reorder_section`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.reorder_section(request=request)
 
     @mcp.tool()
@@ -199,6 +213,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying field addition method.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.add_field(
             app_id=app_id,
             section_index=section_index,
@@ -230,6 +248,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying field update method.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_field(
             app_id=app_id,
             field_name=field_name,
@@ -258,6 +280,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
                 Exception: Any error raised by the underlying field reordering method.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.reorder_field(app_id=app_id, source_page_index=source_page_index, target_page_index=target_page_index, source_section_index=source_section_index, target_section_index=target_section_index, index_in_target_section=index_in_target_section, field_name=field_name, version_variable_name=version_variable_name)
 
     @mcp.tool()
@@ -277,6 +303,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.add_page_break`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.add_page_break(request=request)
 
     @mcp.tool()
@@ -296,6 +326,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_page`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_page(request=request)
 
     @mcp.tool()
@@ -312,6 +346,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.get_definition`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.get_definition(
             app_id=app_id,
             version_variable_name=version_variable_name,
@@ -331,6 +369,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.create_app`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.create_app(request=request)
 
     @mcp.tool()
@@ -348,6 +390,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_app_metadata`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_app_metadata(app_id=app_id, request=request, version_variable_name=version_variable_name)
     
     @mcp.tool()
@@ -364,6 +410,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.get_app_versions`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.get_app_versions(app_id=app_id)
     
     @mcp.tool()
@@ -382,6 +432,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_app_version`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_app_version(app_id=app_id, initial_version_name=initial_version_name, new_version_name=new_version_name)
     
 
@@ -400,6 +454,10 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.update_live_version`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.update_live_version(app_id=app_id, version_variable_name=version_variable_name)
     
     @mcp.tool()
@@ -417,4 +475,8 @@ def register_definition_tools(mcp: FastMCP):
         Raises:
             Exception: Propagates any exceptions raised by `app_definition_client.create_app_version`.
         """
+        app_definition_client = AppDefinitionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        )
         return app_definition_client.create_new_app_version(app_id=app_id, version_name=version_name)

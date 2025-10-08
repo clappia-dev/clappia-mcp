@@ -6,8 +6,10 @@ Handles all workplace user management operations with clean Pydantic models
 from typing import Literal
 from pydantic import EmailStr
 
+import os
 from mcp.server.fastmcp import FastMCP
-from src.utils import get_logger, workplace_client
+from src.utils import get_logger, CLAPPIA_EXTERNAL_API_BASE_URL_V4, CLAPPIA_API_KEY_ENV_VAR
+from clappia_api_tools import WorkplaceAPIKeyClient as WorkplaceClient
 from clappia_api_tools.models.permissions import Permission
 
 from clappia_api_tools.models.request import (
@@ -51,6 +53,10 @@ def register_workplace_tools(mcp: FastMCP):
             attributes=attributes or {},
         )
         
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.add_user_to_workplace(request)
 
     @mcp.tool()
@@ -72,6 +78,10 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
         
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.update_workplace_user_details(request)
 
     @mcp.tool()
@@ -93,6 +103,10 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
         
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.update_workplace_user_attributes(request)
 
     @mcp.tool()
@@ -107,6 +121,10 @@ def register_workplace_tools(mcp: FastMCP):
         Changes the role of a workplace user. Only one contact method (email or phone) is required
         for identification. Supports various role types including Workplace Manager, App Builder, User.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.update_workplace_user_role(
             email_address=email_address,
             phone_number=phone_number,
@@ -125,6 +143,10 @@ def register_workplace_tools(mcp: FastMCP):
         Modifies the group assignments for a workplace user. Only one contact method (email or phone)
         is required for identification. Groups help organize and manage user access.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.update_workplace_user_groups(
             email_address=email_address,
             phone_number=phone_number,
@@ -144,6 +166,10 @@ def register_workplace_tools(mcp: FastMCP):
         Grants app access to a workplace user with specific permissions. Only one contact method
         (email or phone) is required for identification. Supports various permission types.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.add_user_to_app(
             app_id=app_id,
             permissions=permissions,
@@ -159,6 +185,10 @@ def register_workplace_tools(mcp: FastMCP):
         Retrieves a list of all apps that exist in the workplace, including metadata
         such as app ID, name, creation date, and last update information.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.get_workplace_apps()
 
     @mcp.tool()
@@ -172,6 +202,10 @@ def register_workplace_tools(mcp: FastMCP):
         Retrieves the list of apps that a particular user has access to. Only one contact method
         (email or phone) is required for identification.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.get_workplace_user_apps(
             email_address=email_address,
             phone_number=phone_number,
@@ -188,6 +222,10 @@ def register_workplace_tools(mcp: FastMCP):
         Retrieves a paginated list of all users in the workplace. Supports pagination
         with page size and token parameters for efficient data retrieval.
         """
+        workplace_client = WorkplaceClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return workplace_client.get_workplace_users(
             page_size=page_size,
             token=token,

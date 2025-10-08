@@ -3,7 +3,10 @@ submissions.py - Clappia MCP Submissions Module using Modern Pydantic Approach
 Handles all submission management operations with clean Pydantic models
 """
 
+import os
 from mcp.server.fastmcp import FastMCP
+from clappia_api_tools import SubmissionAPIKeyClient as SubmissionClient
+from src.utils import CLAPPIA_EXTERNAL_API_BASE_URL_V4, CLAPPIA_API_KEY_ENV_VAR
 from clappia_api_tools.models import (
     GetSubmissionsRequest,
     GetSubmissionsAggregationRequest,
@@ -17,7 +20,7 @@ from clappia_api_tools.models import (
     SubmissionResponse,
     SubmissionsAggregationResponse,
 )
-from src.utils import get_logger, submission_client
+from src.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -33,6 +36,10 @@ def register_submission_tools(mcp: FastMCP):
         Supports complex filtering with conditions, operators, and logical combinations.
         Fetch app definition first to see the fields and statuses in the app.
         """
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.get_submissions(
             app_id=request.app_id,
             page_size=request.page_size,
@@ -52,6 +59,10 @@ def register_submission_tools(mcp: FastMCP):
         Fetch app definition first to see the fields and statuses in the app.
         """
 
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.get_submissions_aggregation(
             app_id=request.app_id,
             dimensions=request.dimensions,
@@ -73,6 +84,10 @@ def register_submission_tools(mcp: FastMCP):
         Fetch app definition first to see the fields in the app.
         """
 
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.create_submission(
             app_id=request.app_id,
             data=request.data,
@@ -86,6 +101,10 @@ def register_submission_tools(mcp: FastMCP):
 
         Fetch app definition first to see the fields in the app.
         """
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.edit_submission(
             app_id=request.app_id,
             submission_id=request.submission_id,
@@ -102,6 +121,10 @@ def register_submission_tools(mcp: FastMCP):
 
         Fetch app definition first to see the available statuses in the app.
         """
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.update_status(
             app_id=request.app_id,
             submission_id=request.submission_id,
@@ -120,6 +143,10 @@ def register_submission_tools(mcp: FastMCP):
         Supports complex filtering with conditions, operators, and logical combinations.
         Fetch app definition first to see the fields and statuses in the app.
         """
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.get_submissions_in_excel(
             app_id=request.app_id,
             requesting_user_email_address=str(request.requesting_user_email_address),
@@ -137,6 +164,10 @@ def register_submission_tools(mcp: FastMCP):
         """
         email_ids = [str(email) for email in request.email_ids]
 
+        submission_client = SubmissionClient(
+            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
+            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+        )
         return submission_client.update_owners(
             app_id=request.app_id,
             submission_id=request.submission_id,

@@ -1,0 +1,88 @@
+FROM python:3.10-slim
+
+# Comprehensive metadata for Docker Hub
+LABEL org.opencontainers.image.title="Clappia MCP Server (HTTP/SSE)"
+LABEL org.opencontainers.image.description="Model Context Protocol (MCP) server for Clappia integration with HTTP/SSE transport. Enables AI assistants to interact with Clappia workspaces, forms, workflows, and analytics through a standardized protocol with web-based transport."
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.authors="Clappia Development Team <dev@clappia.com>"
+LABEL org.opencontainers.image.vendor="Clappia"
+LABEL org.opencontainers.image.url="https://github.com/clappia-dev/clappia-mcp"
+LABEL org.opencontainers.image.documentation="https://github.com/clappia-dev/clappia-mcp/blob/main/README.md"
+LABEL org.opencontainers.image.source="https://github.com/clappia-dev/clappia-mcp"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.created="2025-01-01T00:00:00Z"
+LABEL org.opencontainers.image.revision="main"
+
+# Clappia-specific labels
+LABEL io.modelcontextprotocol.server.name="io.github.clappia-dev/clappia-mcp-http"
+LABEL io.modelcontextprotocol.server.version="1.0.0"
+LABEL clappia.server.type="http-sse"
+LABEL clappia.server.features="workspace,forms,workflows,submissions,analytics"
+LABEL clappia.server.transport="http,sse"
+
+# Additional metadata
+LABEL maintainer="Clappia Development Team <dev@clappia.com>"
+LABEL summary="MCP server with HTTP/SSE transport for Clappia integration"
+LABEL description="This Docker image provides a Model Context Protocol (MCP) server with HTTP/SSE transport that enables AI assistants to interact with Clappia's no-code platform. Features include workspace management, form definitions, workflow automation, submission handling, and analytics access through web-based transport."
+
+# Multi-architecture support metadata
+LABEL org.opencontainers.image.platform="linux/amd64,linux/arm64"
+LABEL architecture="multi-platform"
+LABEL compatibility="Intel x86_64, Apple Silicon ARM64"
+
+# Usage and environment metadata
+LABEL usage="docker run -p 8000:8000 -e CLAPPIA_API_KEY=your_key clappia-mcp:latest"
+LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
+LABEL ports.exposed="8000 (HTTP/SSE endpoint)"
+LABEL volumes.recommended="None required"
+
+# Keywords for Docker Hub search
+LABEL keywords="clappia,mcp,model-context-protocol,ai,no-code,workflow,forms,automation,claude,openai,http,sse,web"
+LABEL category="Development Tools, AI/ML, Automation, Web Services"
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for dependency management
+RUN pip install uv
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install Python dependencies
+RUN uv sync --frozen
+
+# Copy application code
+COPY . .
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/sse', timeout=5)" || exit 1
+
+# Set default environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
+
+# Expose port
+EXPOSE 8000
+
+# Run the server
+CMD ["uv", "run", "server.py", "--host", "0.0.0.0", "--port", "8000"]
+
+# Additional documentation as labels
+LABEL readme.overview="Clappia MCP Server with HTTP/SSE transport enables AI assistants to seamlessly integrate with Clappia's no-code platform through web-based communication."
+LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• HTTP/SSE transport for web integration\n• Workspace management\n• Form definitions and structure access\n• Workflow automation\n• Submission data handling\n• Analytics and reporting\n• Secure API authentication\n• Health check endpoint"
+LABEL readme.requirements="• Docker installed\n• Clappia API key\n• Network access to Clappia services\n• Port 8000 available"
+LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -p 8000:8000 -e CLAPPIA_API_KEY=your_key clappia-mcp:latest\n3. Access SSE endpoint at http://localhost:8000/sse"
+LABEL readme.endpoints="• SSE Endpoint: /sse\n• Authentication: X-API-Key header required"
