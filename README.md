@@ -174,11 +174,18 @@ open https://<your_workplace>.clappia.com
 ```
 clappia-mcp/
 ├── main_server.py         # 🎯 Main MCP server with module selection
-├── submissions_server.py  # 📝 Submissions-focused MCP server
-├── definitions_server.py  # 📱 App definitions-focused MCP server
-├── workflows_server.py    # 🔄 Workflows-focused MCP server
-├── analytics_server.py    # 📊 Analytics-focused MCP server
-├── workplace_server.py    # 👥 Workplace management-focused MCP server
+├── server/                # 🖥️ Specialized MCP servers
+│   ├── submissions_server.py  # 📝 Submissions-focused MCP server
+│   ├── definitions_server.py  # 📱 App definitions-focused MCP server
+│   ├── workflows_server.py    # 🔄 Workflows-focused MCP server
+│   ├── analytics_server.py   # 📊 Analytics-focused MCP server
+│   └── workplace_server.py    # 👥 Workplace management-focused MCP server
+├── docker/                # 🐳 Docker configuration files
+│   ├── Dockerfile.form        # Form server Docker configuration
+│   ├── Dockerfile.workflow    # Workflow server Docker configuration
+│   ├── Dockerfile.submission  # Submission server Docker configuration
+│   ├── Dockerfile.workplace   # Workplace server Docker configuration
+│   └── Dockerfile.charts      # Charts server Docker configuration
 ├── tools/                 # 🛠️ Core functionality modules
 │   ├── submissions.py     # Submission management tools
 │   ├── definitions.py     # App definition and field management tools

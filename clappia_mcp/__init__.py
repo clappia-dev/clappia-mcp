@@ -1,0 +1,1 @@
+# Clappia MCP Server Package

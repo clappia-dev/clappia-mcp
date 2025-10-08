@@ -1,8 +1,8 @@
 FROM python:3.10-slim
 
 # Comprehensive metadata for Docker Hub
-LABEL org.opencontainers.image.title="Clappia MCP Submissions Server"
-LABEL org.opencontainers.image.description="Model Context Protocol (MCP) server for Clappia submissions and data management integration. Enables AI assistants to access, manage, and process form submissions, handle data entries, and work with submission data through a standardized protocol."
+LABEL org.opencontainers.image.title="Clappia MCP Workplace Server"
+LABEL org.opencontainers.image.description="Model Context Protocol (MCP) server for Clappia workplace and workspace integration. Enables AI assistants to manage workspaces, access workplace data, and interact with organizational structures through a standardized protocol."
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Clappia Development Team <dev@clappia.com>"
 LABEL org.opencontainers.image.vendor="Clappia"
@@ -16,13 +16,13 @@ LABEL org.opencontainers.image.revision="main"
 # Clappia-specific labels
 LABEL io.modelcontextprotocol.server.name="io.github.clappia-dev/clappia-mcp"
 LABEL io.modelcontextprotocol.server.version="1.0.0"
-LABEL clappia.server.type="submissions"
-LABEL clappia.server.features="submissions,data-entries,form-data,processing,validation,export"
+LABEL clappia.server.type="workplace"
+LABEL clappia.server.features="workspace,workplace,organization,teams,users,permissions"
 
 # Additional metadata
 LABEL maintainer="Clappia Development Team <dev@clappia.com>"
-LABEL summary="MCP server for Clappia submissions and data management"
-LABEL description="This Docker image provides a Model Context Protocol (MCP) server that enables AI assistants to access, manage, and process Clappia form submissions, handle data entries, validate submission data, and export submission information. Specialized for submission and data management operations."
+LABEL summary="MCP server for Clappia workplace and workspace management"
+LABEL description="This Docker image provides a Model Context Protocol (MCP) server that enables AI assistants to manage Clappia workspaces, access workplace data, handle organizational structures, and manage team permissions. Specialized for workplace and workspace operations."
 
 # Multi-architecture support metadata
 LABEL org.opencontainers.image.platform="linux/amd64,linux/arm64"
@@ -30,14 +30,14 @@ LABEL architecture="multi-platform"
 LABEL compatibility="Intel x86_64, Apple Silicon ARM64"
 
 # Usage and environment metadata
-LABEL usage="docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:submissions"
+LABEL usage="docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:workplace"
 LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
 LABEL ports.exposed="None (MCP uses stdio)"
 LABEL volumes.recommended="None required"
 
 # Keywords for Docker Hub search
-LABEL keywords="clappia,mcp,submissions,data-entries,form-data,processing,validation,export,model-context-protocol,ai,no-code"
-LABEL category="Development Tools, AI/ML, Data Management, Form Processing"
+LABEL keywords="clappia,mcp,workplace,workspace,organization,teams,users,permissions,model-context-protocol,ai,no-code"
+LABEL category="Development Tools, AI/ML, Workplace, Organization Management"
 
 WORKDIR /app
 
@@ -54,11 +54,11 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Run the submission server
-CMD ["uv", "run", "submissions_server.py"]
+# Run the workplace server
+CMD ["uv", "run", "server/workplace_server.py"]
 
 # Additional documentation as labels
-LABEL readme.overview="Clappia MCP Submissions Server enables AI assistants to access, manage, and process Clappia form submissions and data entries."
-LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• Submission data access\n• Form data processing\n• Data validation\n• Export capabilities\n• Submission management\n• Secure API authentication"
+LABEL readme.overview="Clappia MCP Workplace Server enables AI assistants to manage Clappia workspaces, organizational structures, and team permissions."
+LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• Workspace management\n• Organizational structure access\n• Team and user management\n• Permission handling\n• Workplace data access\n• Secure API authentication"
 LABEL readme.requirements="• Docker installed\n• Clappia API key\n• Network access to Clappia services"
-LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:submissions"
+LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:workplace"
