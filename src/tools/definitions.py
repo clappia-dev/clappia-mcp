@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger, app_definition_client
+from src.utils import get_logger, app_definition_client
 from typing import Union, Optional
 from clappia_api_tools.models import (
     CreateAppRequest,

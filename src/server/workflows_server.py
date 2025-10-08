@@ -1,7 +1,7 @@
 import sys
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger
-from tools.workflows import register_workflow_tools
+from src.utils.logging_utils import get_logger
+from src.tools.workflows import register_workflow_tools
 
 logger = get_logger(__name__)
 
@@ -56,9 +56,9 @@ if __name__ == "__main__":
         Clappia Workflows MCP Server
         
         Usage:
-            uv run workflows_server.py                # Run server (default)
-            uv run workflows_server.py --list-tools   # List all tools
-            uv run workflows_server.py --help         # Show help
+            uv run -m src.server.workflows_server                # Run server (default)
+            uv run -m src.server.workflows_server --list-tools   # List all tools
+            uv run -m src.server.workflows_server --help         # Show help
         
         Required Environment Variables:
             CLAPPIA_API_KEY

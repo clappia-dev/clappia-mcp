@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger, workflow_definition_client
+from src.utils import get_logger, workflow_definition_client
 from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,

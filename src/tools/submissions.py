@@ -17,7 +17,7 @@ from clappia_api_tools.models import (
     SubmissionResponse,
     SubmissionsAggregationResponse,
 )
-from utils import get_logger, submission_client
+from src.utils import get_logger, submission_client
 
 logger = get_logger(__name__)
 

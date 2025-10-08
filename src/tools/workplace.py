@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import EmailStr
 
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger, workplace_client
+from src.utils import get_logger, workplace_client
 from clappia_api_tools.models.permissions import Permission
 
 from clappia_api_tools.models.request import (

@@ -55,7 +55,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run the form server
-CMD ["uv", "run", "definitions_server.py"]
+CMD ["uv", "run", "-m", "src.server.definitions_server"]
 
 # Additional documentation as labels
 LABEL readme.overview="Clappia MCP Forms Server enables AI assistants to access and manage Clappia form definitions, field structures, and validation rules."

@@ -49,7 +49,7 @@ docker buildx build \
     -t $IMAGE_NAME:$VERSION \
     -t $IMAGE_NAME:latest \
     --load \
-    .
+    -f Dockerfile.main .
 
 echo -e "${GREEN}✅ Multi-platform image built successfully with rich metadata!${NC}"
 

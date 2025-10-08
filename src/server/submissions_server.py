@@ -1,7 +1,7 @@
 import sys
 from mcp.server.fastmcp import FastMCP
-from utils import get_logger
-from tools.submissions import register_submission_tools
+from src.utils.logging_utils import get_logger
+from src.tools.submissions import register_submission_tools
 
 logger = get_logger(__name__)
 
@@ -56,9 +56,9 @@ if __name__ == "__main__":
         Clappia Submissions MCP Server
         
         Usage:
-            uv run submissions_server.py                # Run server (default)
-            uv run submissions_server.py --list-tools   # List all tools
-            uv run submissions_server.py --help         # Show help
+            uv run -m src.server.submissions_server                # Run server (default)
+            uv run -m src.server.submissions_server --list-tools   # List all tools
+            uv run -m src.server.submissions_server --help         # Show help
         
         Required Environment Variables:
             CLAPPIA_API_KEY

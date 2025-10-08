@@ -1,12 +1,12 @@
 import sys
 import argparse
 from mcp.server.fastmcp import FastMCP
-from utils.logging_utils import get_logger
-from tools.submissions import register_submission_tools
-from tools.definitions import register_definition_tools
-from tools.workflows import register_workflow_tools
-from tools.analytics import register_analytics_tools
-from tools.workplace import register_workplace_tools
+from src.utils.logging_utils import get_logger
+from src.tools.submissions import register_submission_tools
+from src.tools.definitions import register_definition_tools
+from src.tools.workflows import register_workflow_tools
+from src.tools.analytics import register_analytics_tools
+from src.tools.workplace import register_workplace_tools
 
 logger = get_logger(__name__)
 

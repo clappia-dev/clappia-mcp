@@ -56,7 +56,7 @@ run-form: ## Run clappia-app-form server
 		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
 		exit 1; \
 	fi
-	uv run definitions_server.py
+	uv run -m src.server.definitions_server
 
 .PHONY: run-workflow
 run-workflow: ## Run clappia-app-workflow server
@@ -66,7 +66,7 @@ run-workflow: ## Run clappia-app-workflow server
 		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
 		exit 1; \
 	fi
-	uv run workflows_server.py
+	uv run -m src.server.workflows_server
 
 .PHONY: run-submission
 run-submission: ## Run clappia-app-submission server
@@ -76,7 +76,7 @@ run-submission: ## Run clappia-app-submission server
 		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
 		exit 1; \
 	fi
-	uv run submissions_server.py
+	uv run -m src.server.submissions_server
 
 .PHONY: run-workplace
 run-workplace: ## Run clappia-workplace server
@@ -86,7 +86,7 @@ run-workplace: ## Run clappia-workplace server
 		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
 		exit 1; \
 	fi
-	uv run workplace_server.py
+	uv run -m src.server.workplace_server
 
 .PHONY: run-charts
 run-charts: ## Run clappia-app-charts server
@@ -96,7 +96,7 @@ run-charts: ## Run clappia-app-charts server
 		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
 		exit 1; \
 	fi
-	uv run analytics_server.py
+	uv run -m src.server.analytics_server
 
 # Docker Setup
 .PHONY: docker-setup
@@ -117,7 +117,7 @@ docker-build: docker-setup ## Build multi-platform Docker image with rich metada
 		-t $(DOCKER_IMAGE):$(VERSION) \
 		-t $(DOCKER_IMAGE):latest \
 		--load \
-		.
+		-f Dockerfile.main .
 	@echo "$(GREEN)✅ Multi-platform Docker image built successfully$(NC)"
 
 # Individual Multi-Platform Docker Build Commands
@@ -126,7 +126,7 @@ docker-build-form: docker-setup ## Build multi-platform Docker image for form se
 	@echo "$(BLUE)Building multi-platform Docker image for form server...$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.form \
+		-f docker/Dockerfile.form \
 		-t $(DOCKER_IMAGE)-form:$(VERSION) \
 		-t $(DOCKER_IMAGE)-form:latest \
 		--load \
@@ -138,7 +138,7 @@ docker-build-workflow: docker-setup ## Build multi-platform Docker image for wor
 	@echo "$(BLUE)Building multi-platform Docker image for workflow server...$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.workflow \
+		-f docker/Dockerfile.workflow \
 		-t $(DOCKER_IMAGE)-workflow:$(VERSION) \
 		-t $(DOCKER_IMAGE)-workflow:latest \
 		--load \
@@ -150,7 +150,7 @@ docker-build-submission: docker-setup ## Build multi-platform Docker image for s
 	@echo "$(BLUE)Building multi-platform Docker image for submission server...$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.submission \
+		-f docker/Dockerfile.submission \
 		-t $(DOCKER_IMAGE)-submission:$(VERSION) \
 		-t $(DOCKER_IMAGE)-submission:latest \
 		--load \
@@ -162,7 +162,7 @@ docker-build-workplace: docker-setup ## Build multi-platform Docker image for wo
 	@echo "$(BLUE)Building multi-platform Docker image for workplace server...$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.workplace \
+		-f docker/Dockerfile.workplace \
 		-t $(DOCKER_IMAGE)-workplace:$(VERSION) \
 		-t $(DOCKER_IMAGE)-workplace:latest \
 		--load \
@@ -174,7 +174,7 @@ docker-build-charts: docker-setup ## Build multi-platform Docker image for chart
 	@echo "$(BLUE)Building multi-platform Docker image for charts server...$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.charts \
+		-f docker/Dockerfile.charts \
 		-t $(DOCKER_IMAGE)-charts:$(VERSION) \
 		-t $(DOCKER_IMAGE)-charts:latest \
 		--load \
@@ -262,7 +262,7 @@ docker-push-form: docker-setup ## Push multi-platform form Docker image to regis
 	fi
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.form \
+		-f docker/Dockerfile.form \
 		-t $(DOCKER_IMAGE)-form:$(VERSION) \
 		-t $(DOCKER_IMAGE)-form:latest \
 		--push \
@@ -278,7 +278,7 @@ docker-push-workflow: docker-setup ## Push multi-platform workflow Docker image 
 	fi
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.workflow \
+		-f docker/Dockerfile.workflow \
 		-t $(DOCKER_IMAGE)-workflow:$(VERSION) \
 		-t $(DOCKER_IMAGE)-workflow:latest \
 		--push \
@@ -294,7 +294,7 @@ docker-push-submission: docker-setup ## Push multi-platform submission Docker im
 	fi
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.submission \
+		-f docker/Dockerfile.submission \
 		-t $(DOCKER_IMAGE)-submission:$(VERSION) \
 		-t $(DOCKER_IMAGE)-submission:latest \
 		--push \
@@ -310,7 +310,7 @@ docker-push-workplace: docker-setup ## Push multi-platform workplace Docker imag
 	fi
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.workplace \
+		-f docker/Dockerfile.workplace \
 		-t $(DOCKER_IMAGE)-workplace:$(VERSION) \
 		-t $(DOCKER_IMAGE)-workplace:latest \
 		--push \
@@ -326,7 +326,7 @@ docker-push-charts: docker-setup ## Push multi-platform charts Docker image to r
 	fi
 	docker buildx build \
 		--platform $(PLATFORMS) \
-		-f Dockerfile.charts \
+		-f docker/Dockerfile.charts \
 		-t $(DOCKER_IMAGE)-charts:$(VERSION) \
 		-t $(DOCKER_IMAGE)-charts:latest \
 		--push \
