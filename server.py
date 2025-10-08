@@ -3,12 +3,10 @@ import sys
 import argparse
 from typing import Optional
 from mcp.server.fastmcp import FastMCP, Context
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse
 import uvicorn
-from starlette.applications import Starlette
-from starlette.middleware import Middleware
+import traceback
 
 from src.utils.logging_utils import get_logger
 from src.tools.submissions import register_submission_tools
@@ -30,59 +28,76 @@ AVAILABLE_MODULES = {
 }
 
 
-class AuthLoggingMiddleware(BaseHTTPMiddleware):
-    """Middleware to extract and log auth tokens from requests"""
+class AuthLoggingMiddleware:
     
-    async def dispatch(self, request: Request, call_next):
+    def __init__(self, app):
+        self.app = app
+    
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        
         auth_token = None
+        headers = dict(scope.get("headers", []))
         
-        api_key_headers = [
-            "x-api-key",
-            "X-API-Key", 
-            "X-API-KEY",
-            "X-Api-Key",
-            "x-apikey",
-            "X-Apikey",
-            "X-APIKEY"
-        ]
-        
-        for header_name in api_key_headers:
-            if header_name in request.headers:
-                auth_token = request.headers[header_name]
+        for header_key in [b"x-api-key", b"x-apikey"]:
+            if header_key in headers:
+                auth_token = headers[header_key].decode("utf-8")
                 break
         
+        if not auth_token and b"authorization" in headers:
+            auth_header = headers[b"authorization"].decode("utf-8")
+            if auth_header.startswith("Bearer "):
+                auth_token = auth_header[7:]
+        
         if not auth_token:
-            from starlette.responses import JSONResponse
-            return JSONResponse(
-                status_code=401,
-                content={
-                    "error": "Authentication required",
-                    "message": "No API key found in request headers. Please provide an API key using one of these headers: " + ", ".join(api_key_headers)
-                }
-            )
+            await send({
+                "type": "http.response.start",
+                "status": 401,
+                "headers": [[b"content-type", b"application/json"]],
+            })
+            await send({
+                "type": "http.response.body",
+                "body": b'{"error":"Authentication required","message":"Please provide X-API-Key header"}',
+            })
+            return
         
         os.environ["CLAPPIA_API_KEY"] = auth_token
         
-        client_ip = request.client.host if request.client else "unknown"
+        client = scope.get("client")
+        client_ip = client[0] if client else "unknown"
+        path = scope.get("path", "")
+        method = scope.get("method", "")
+        
         logger.info(
-            f"Request: {request.method} {request.url.path} | "
+            f"Request: {method} {path} | "
             f"Client: {client_ip} | "
-            f"Auth Token: {auth_token[:8]}..."  
+            f"Auth Token: {auth_token[:8]}..."
         )
         
-        request.state.auth_token = auth_token
-        response = await call_next(request)
+        response_status = None
         
-        logger.info(
-            f"Response: {response.status_code} | "
-            f"Token: {auth_token[:8]}..."
-        )
+        async def send_wrapper(message):
+            nonlocal response_status
+            if message["type"] == "http.response.start":
+                response_status = message.get("status")
+            await send(message)
         
-        return response
+        try:
+            await self.app(scope, receive, send_wrapper)
+            
+            if response_status:
+                logger.info(
+                    f"Response: {response_status} | "
+                    f"Token: {auth_token[:8]}..."
+                )
+        except Exception as e:
+            logger.error(f"Error processing request: {str(e)}")
+            raise
 
 
 def register_all_tools():
-    """Register all tools from all modules"""
     for module_name, register_func in AVAILABLE_MODULES.items():
         try:
             register_func(app)
@@ -94,7 +109,6 @@ def register_all_tools():
 
 
 def register_specific_tools(modules):
-    """Register tools from specific modules only"""
     for module in modules:
         if module in AVAILABLE_MODULES:
             try:
@@ -157,6 +171,7 @@ def main():
         if args.list_tools:
             list_tools()
             return
+            
         logger.info("=" * 70)
         logger.info("Starting Clappia MCP Server [SSE TRANSPORT]")
         logger.info("=" * 70)
@@ -165,7 +180,8 @@ def main():
         logger.info("SSE Endpoint: /sse")
         logger.info("")
         logger.info("Authentication: Pass token via:")
-        logger.info("  - Header: X-API-Key: your-token (or any case variation)")
+        logger.info("  - Header: X-API-Key: your-token")
+        logger.info("  - Header: Authorization: Bearer your-token")
         logger.info("")
         logger.info("Note: Auth token will be stored in CLAPPIA_API_KEY env var")
         logger.info("      Authentication is REQUIRED for all requests")
@@ -176,14 +192,7 @@ def main():
         logger.info("=" * 70)
         
         sse_app = app.sse_app()
-        
-        wrapped_app = Starlette(
-            routes=sse_app.routes,
-            middleware=[
-                Middleware(AuthLoggingMiddleware)
-            ],
-            lifespan=sse_app.router.lifespan_context
-        )
+        wrapped_app = AuthLoggingMiddleware(sse_app)
         
         uvicorn.run(
             wrapped_app,
@@ -196,6 +205,7 @@ def main():
         logger.info("Server shutdown requested by user")
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
+        traceback.print_exc()
         sys.exit(1)
     finally:
         logger.info("MCP server shutdown complete")
