@@ -4,3 +4,4 @@ uv.lock
 logs
 __pycache__/
 .vscode/
+clappia-mcp-key-pair.pem

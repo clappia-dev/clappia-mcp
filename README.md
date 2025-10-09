@@ -13,6 +13,7 @@ MCP server for Clappia platform integration. Manage applications, submissions, w
 -  [Features](#features)
 -  [Prerequisites](#prerequisites)
 -  [Steps to Setup MCP Server](#steps-to-setup-mcp-server)
+-  [Deployment](#deployment)
 -  [Project Structure](#project-structure)
 -  [Troubleshooting](#troubleshooting)
 -  [Support](#support)
@@ -169,46 +170,174 @@ open https://<your_workplace>.clappia.com
 # Start managing your Clappia apps with Docker containers!
 ```
 
+## 🚀 Deployment
+
+### Docker Build Options
+
+This project supports multiple deployment methods with different Dockerfiles for different server types:
+
+#### Main Servers
+- **`Dockerfile.http`**: HTTP/SSE server for web integration (uses `http_server.py`)
+- **`Dockerfile.mcp`**: MCP server for Claude Desktop integration (uses `mcp_server.py`)
+
+#### Specialized Servers (Individual Modules)
+- **`docker/Dockerfile.form`**: Form definitions server
+- **`docker/Dockerfile.workflow`**: Workflow management server  
+- **`docker/Dockerfile.submission`**: Submission handling server
+- **`docker/Dockerfile.workplace`**: Workplace management server
+- **`docker/Dockerfile.charts`**: Analytics and charts server
+
+### Build Commands
+
+#### Using Makefile (Recommended)
+
+```bash
+# Build HTTP/SSE server (web deployment)
+make docker-build-http
+
+# Build MCP server (Claude Desktop)
+make docker-build-mcp
+
+# Build individual specialized servers
+make docker-build-form
+make docker-build-workflow
+make docker-build-submission
+make docker-build-workplace
+make docker-build-charts
+
+# Build all servers
+make docker-build-all
+
+# Push to registry
+make docker-push DOCKER_HUB_USERNAME=yourusername
+```
+
+
+### AWS EC2 Deployment
+
+For production deployment on AWS EC2, see the comprehensive deployment guide:
+
+```bash
+# Quick deployment steps:
+# 1. Launch EC2 instance (Ubuntu 22.04, t3.small or larger)
+# 2. Install Docker and Docker Compose
+# 3. Upload your code to EC2
+# 4. Build and run with Docker Compose
+
+# Example deployment commands:
+docker-compose up -d
+```
+
+### Docker Compose Deployment
+
+For production deployment with nginx reverse proxy:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Environment Configuration
+
+Create a `.env` file with your configuration:
+
+```bash
+# Required
+CLAPPIA_API_KEY=your_actual_api_key_here
+
+# Optional
+PYTHONUNBUFFERED=1
+PYTHONDONTWRITEBYTECODE=1
+PYTHONPATH=/app
+```
+
+### Server Architecture
+
+| Server Type | Dockerfile | Purpose | Transport |
+|-------------|------------|---------|-----------|
+| **HTTP/SSE Server** | `Dockerfile.http` | Web deployment with HTTP/SSE | HTTP/SSE |
+| **MCP Server** | `Dockerfile.mcp` | Claude Desktop integration | MCP |
+| **Form Server** | `docker/Dockerfile.form` | App definitions & forms | MCP |
+| **Workflow Server** | `docker/Dockerfile.workflow` | Workflow management | MCP |
+| **Submission Server** | `docker/Dockerfile.submission` | Data submissions | MCP |
+| **Workplace Server** | `docker/Dockerfile.workplace` | User management | MCP |
+| **Charts Server** | `docker/Dockerfile.charts` | Analytics & reporting | MCP |
+
+### Production Deployment Checklist
+
+- [ ] Set up AWS EC2 instance
+- [ ] Configure security groups (ports 22, 80, 443)
+- [ ] Install Docker and Docker Compose
+- [ ] Upload application code
+- [ ] Create `.env` file with API key
+- [ ] Build Docker images
+- [ ] Configure nginx reverse proxy
+- [ ] Set up SSL certificates (Let's Encrypt)
+- [ ] Configure firewall rules
+- [ ] Set up monitoring and logging
+- [ ] Test deployment
+
 ## 📁 Project Structure
 
 ```
 clappia-mcp/
-├── main_server.py         # 🎯 Main MCP server with module selection
-├── Dockerfile.main        # 🐳 Main Dockerfile
-├── docker/                # 🐳 Docker configurations
+├── http_server.py        # 🎯 HTTP/SSE server for web deployment
+├── mcp_server.py         # 🎯 MCP server for Claude Desktop
+├── Dockerfile.http       # 🐳 Dockerfile for HTTP/SSE server
+├── Dockerfile.mcp        # 🐳 Dockerfile for MCP server
+├── Makefile             # 🛠️ Build automation and deployment
+├── docker-compose.yml   # 🐳 Production deployment with nginx
+├── docker/              # 🐳 Specialized server configurations
 │   ├── Dockerfile.form     # Form server Docker configuration
 │   ├── Dockerfile.workflow # Workflow server Docker configuration
 │   ├── Dockerfile.submission # Submission server Docker configuration
 │   ├── Dockerfile.workplace # Workplace server Docker configuration
 │   └── Dockerfile.charts   # Charts server Docker configuration
-├── src/                   # 📁 Source code directory
-│   ├── server/            # 🖥️ Specialized MCP servers
+├── src/                 # 📁 Source code directory
+│   ├── server/          # 🖥️ Specialized MCP servers
 │   │   ├── submissions_server.py  # 📝 Submissions-focused MCP server
 │   │   ├── definitions_server.py  # 📱 App definitions-focused MCP server
 │   │   ├── workflows_server.py    # 🔄 Workflows-focused MCP server
 │   │   ├── analytics_server.py    # 📊 Analytics-focused MCP server
 │   │   └── workplace_server.py    # 👥 Workplace management-focused MCP server
-│   ├── tools/             # 🛠️ Core functionality modules
+│   ├── tools/           # 🛠️ Core functionality modules
 │   │   ├── submissions.py     # Submission management tools
-│   │   ├── definitions.py     # App definition and field management tools
-│   │   ├── workflows.py       # Workflow step management tools
-│   │   ├── analytics.py       # Analytics and chart generation tools
-│   │   └── workplace.py       # Workplace user management tools
-│   └── utils/             # 🔧 Utility modules
+│   │   ├── definitions.py    # App definition and field management tools
+│   │   ├── workflows.py      # Workflow step management tools
+│   │   ├── analytics.py      # Analytics and chart generation tools
+│   │   └── workplace.py      # Workplace user management tools
+│   └── utils/           # 🔧 Utility modules
 │       ├── __init__.py        # Package initialization
-│       ├── clients.py         # API client configurations and setup
+│       ├── constants.py      # Application constants
 │       └── logging_utils.py   # Logging utilities and configuration
-├── pyproject.toml         # 📦 Project metadata and dependencies
-├── uv.lock               # 🔒 Dependency lock file
-└── README.md             # 📖 This documentation
+├── pyproject.toml       # 📦 Project metadata and dependencies
+├── uv.lock             # 🔒 Dependency lock file
+└── README.md           # 📖 This documentation
 ```
 
 ### Server Architecture
 
--  **`main_server.py`**: Primary server that can run all modules or specific subsets
--  **Specialized Servers**: Focused servers for specific use cases (submissions, definitions, etc.)
+-  **`http_server.py`**: HTTP/SSE server for web deployment with all modules
+-  **`mcp_server.py`**: MCP server for Claude Desktop integration with all modules
+-  **Specialized Servers**: Individual MCP servers for specific use cases (submissions, definitions, etc.)
 -  **`tools/`**: Modular tool implementations using Pydantic models
 -  **`utils/`**: Shared utilities for logging, API clients, and common functionality
+
+#### Deployment Options
+
+1. **Web Deployment**: Use `http_server.py` with `Dockerfile.http` for HTTP/SSE transport
+2. **MCP Deployment**: Use `mcp_server.py` with `Dockerfile.mcp` for Claude Desktop
+3. **Specialized MCP**: Use individual servers in `src/server/` with specialized Dockerfiles
+4. **Hybrid Deployment**: Combine approaches for different use cases
 
 ## Troubleshooting
 

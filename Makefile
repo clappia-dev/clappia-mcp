@@ -14,8 +14,36 @@ YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m # No Color
 
-# Default target
-.DEFAULT_GOAL := help
+# No default target - require explicit command
+.DEFAULT_GOAL := error
+
+# Error target - show when no command specified
+.PHONY: error
+error:
+	@echo "$(YELLOW)❌ No command specified!$(NC)"
+	@echo ""
+	@echo "$(BLUE)Available Commands:$(NC)"
+	@echo "======================"
+	@echo ""
+	@echo "$(GREEN)Build Commands:$(NC)"
+	@echo "  make docker-build-http    # Build HTTP/SSE server (multi-platform)"
+	@echo "  make docker-build-http-amd64 # Build HTTP/SSE server (AMD64 only)"
+	@echo "  make docker-build-http-arm64 # Build HTTP/SSE server (ARM64 only)"
+	@echo "  make docker-build-mcp      # Build MCP server"
+	@echo "  make docker-build-form    # Build form server"
+	@echo "  make docker-build-workflow # Build workflow server"
+	@echo "  make docker-build-submission # Build submission server"
+	@echo "  make docker-build-workplace # Build workplace server"
+	@echo "  make docker-build-charts   # Build charts server"
+	@echo "  make docker-build-all      # Build all servers"
+	@echo ""
+	@echo "$(GREEN)Other Commands:$(NC)"
+	@echo "  make help                  # Show full help"
+	@echo "  make status               # Show project status"
+	@echo "  make setup                # Initial setup"
+	@echo ""
+	@echo "$(YELLOW)Example: make docker-build-http$(NC)"
+	@exit 1
 
 # Help target
 .PHONY: help
@@ -106,9 +134,9 @@ docker-setup: ## Setup Docker buildx for multi-platform builds
 	@echo "$(GREEN)✅ Docker buildx setup completed$(NC)"
 
 # Multi-Platform Docker Commands
-.PHONY: docker-build
-docker-build: docker-setup ## Build multi-platform Docker image with rich metadata
-	@echo "$(BLUE)Building multi-platform Docker image: $(DOCKER_IMAGE):$(VERSION) for $(PLATFORMS)$(NC)"
+.PHONY: docker-build-http
+docker-build-http: docker-setup ## Build multi-platform HTTP/SSE Docker image with rich metadata
+	@echo "$(BLUE)Building multi-platform HTTP/SSE Docker image: $(DOCKER_IMAGE):$(VERSION) for $(PLATFORMS)$(NC)"
 	docker buildx build \
 		--platform $(PLATFORMS) \
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
@@ -117,8 +145,8 @@ docker-build: docker-setup ## Build multi-platform Docker image with rich metada
 		-t $(DOCKER_IMAGE):$(VERSION) \
 		-t $(DOCKER_IMAGE):latest \
 		--load \
-		-f Dockerfile.main .
-	@echo "$(GREEN)✅ Multi-platform Docker image built successfully$(NC)"
+		-f Dockerfile.http .
+	@echo "$(GREEN)✅ Multi-platform HTTP/SSE Docker image built successfully$(NC)"
 
 # Individual Multi-Platform Docker Build Commands
 .PHONY: docker-build-form
@@ -182,16 +210,59 @@ docker-build-charts: docker-setup ## Build multi-platform Docker image for chart
 	@echo "$(GREEN)✅ Multi-platform Charts Docker image built successfully$(NC)"
 
 .PHONY: docker-build-all
-docker-build-all: docker-build docker-build-form docker-build-workflow docker-build-submission docker-build-workplace docker-build-charts ## Build all multi-platform Docker images
+docker-build-all: docker-build-http docker-build-mcp docker-build-form docker-build-workflow docker-build-submission docker-build-workplace docker-build-charts ## Build all multi-platform Docker images
 	@echo "$(GREEN)🎉 All multi-platform Docker images built successfully$(NC)"
 
 # Legacy single-platform builds (for compatibility)
 .PHONY: docker-build-single
 docker-build-single: ## Build single-platform Docker image (current architecture only)
 	@echo "$(BLUE)Building single-platform Docker image: $(DOCKER_IMAGE):$(VERSION)$(NC)"
-	docker build -t $(DOCKER_IMAGE):$(VERSION) .
-	docker build -t $(DOCKER_IMAGE):latest .
+	docker build -t $(DOCKER_IMAGE):$(VERSION) -f Dockerfile.http .
+	docker tag $(DOCKER_IMAGE):$(VERSION) $(DOCKER_IMAGE):latest
 	@echo "$(GREEN)✅ Single-platform Docker image built successfully$(NC)"
+
+# Platform-specific builds to avoid warnings
+.PHONY: docker-build-http-amd64
+docker-build-http-amd64: ## Build HTTP/SSE Docker image for AMD64 platform only
+	@echo "$(BLUE)Building AMD64 HTTP/SSE Docker image: $(DOCKER_IMAGE):$(VERSION)$(NC)"
+	docker buildx build \
+		--platform linux/amd64 \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-t $(DOCKER_IMAGE):latest \
+		--load \
+		-f Dockerfile.http .
+	@echo "$(GREEN)✅ AMD64 HTTP/SSE Docker image built successfully$(NC)"
+
+.PHONY: docker-build-http-arm64
+docker-build-http-arm64: ## Build HTTP/SSE Docker image for ARM64 platform only
+	@echo "$(BLUE)Building ARM64 HTTP/SSE Docker image: $(DOCKER_IMAGE):$(VERSION)$(NC)"
+	docker buildx build \
+		--platform linux/arm64 \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-t $(DOCKER_IMAGE):latest \
+		--load \
+		-f Dockerfile.http .
+	@echo "$(GREEN)✅ ARM64 HTTP/SSE Docker image built successfully$(NC)"
+
+# Simple Docker build using MCP Dockerfile
+.PHONY: docker-build-mcp
+docker-build-mcp: ## Build Docker image using MCP Dockerfile (fast local build)
+	@echo "$(BLUE)Building Docker image using MCP Dockerfile: $(DOCKER_IMAGE):$(VERSION)$(NC)"
+	docker build \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-t $(DOCKER_IMAGE):latest \
+		-f Dockerfile.mcp .
+	@echo "$(GREEN)✅ Docker image built successfully using MCP Dockerfile$(NC)"
+
 
 .PHONY: docker-run
 docker-run: ## Run Docker container with main server

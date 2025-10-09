@@ -30,6 +30,17 @@ LABEL org.opencontainers.image.platform="linux/amd64,linux/arm64"
 LABEL architecture="multi-platform"
 LABEL compatibility="Intel x86_64, Apple Silicon ARM64"
 
+# Platform detection and build arguments
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+# Set platform-specific labels
+LABEL org.opencontainers.image.platform.detected="${TARGETPLATFORM}"
+LABEL org.opencontainers.image.platform.build="${BUILDPLATFORM}"
+
 # Usage and environment metadata
 LABEL usage="docker run -p 8000:8000 -e CLAPPIA_API_KEY=your_key clappia-mcp:latest"
 LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
@@ -43,16 +54,20 @@ LABEL category="Development Tools, AI/ML, Automation, Web Services"
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies with platform-specific optimizations
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Platform-specific optimizations
+RUN echo "Building for platform: ${TARGETPLATFORM:-unknown}" && \
+    echo "Build platform: ${BUILDPLATFORM:-unknown}"
+
 # Install uv for dependency management
 RUN pip install uv
 
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
+# Copy dependency files and README
+COPY pyproject.toml uv.lock README.md ./
 
 # Install Python dependencies
 RUN uv sync --frozen
@@ -78,7 +93,7 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # Run the server
-CMD ["uv", "run", "server.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "http_server.py", "--host", "0.0.0.0", "--port", "8000"]
 
 # Additional documentation as labels
 LABEL readme.overview="Clappia MCP Server with HTTP/SSE transport enables AI assistants to seamlessly integrate with Clappia's no-code platform through web-based communication."

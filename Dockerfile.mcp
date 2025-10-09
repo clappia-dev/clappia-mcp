@@ -54,8 +54,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Run the main server
-CMD ["uv", "run", "main_server.py"]
+# Run the MCP server
+CMD ["uv", "run", "mcp_server.py"]
 
 # Additional documentation as labels
 LABEL readme.overview="Clappia MCP Server enables AI assistants to seamlessly integrate with Clappia's no-code platform through the Model Context Protocol."
