@@ -67,4 +67,5 @@ test/
 tests/
 *_test.py
 test_*.py
-clappia-mcp-key-pair.pem
+*.pem
+*.tar
