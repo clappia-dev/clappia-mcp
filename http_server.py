@@ -1,11 +1,10 @@
 import os
 import sys
 import argparse
-from typing import Optional
-from mcp.server.fastmcp import FastMCP, Context
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-import uvicorn
+from fastmcp.server.http import create_sse_app
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware, MiddlewareContext
+from fastmcp.server.dependencies import get_http_headers
 import traceback
 
 from src.utils.logging_utils import get_logger
@@ -28,96 +27,53 @@ AVAILABLE_MODULES = {
 }
 
 
-class AuthLoggingMiddleware:
+class APIKeyAuthMiddleware(Middleware):
     
-    def __init__(self, app):
-        self.app = app
-    
-    async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
+    async def on_request(self, context: MiddlewareContext, call_next):
+        headers = get_http_headers()
         
-        auth_token = None
-        headers = dict(scope.get("headers", []))
+        api_key = headers.get("x-api-key") or headers.get("x-api-key")
         
-        for header_key in [b"x-api-key", b"x-apikey"]:
-            if header_key in headers:
-                auth_token = headers[header_key].decode("utf-8")
-                break
+        if not api_key:
+            logger.warning("Request rejected: Missing API key")
+            raise ValueError("API key is required. Please provide X-API-Key header")
         
-        if not auth_token and b"authorization" in headers:
-            auth_header = headers[b"authorization"].decode("utf-8")
-            if auth_header.startswith("Bearer "):
-                auth_token = auth_header[7:]
+        logger.debug(f"Request authenticated with key: {api_key[:10]}...")
         
-        if not auth_token:
-            await send({
-                "type": "http.response.start",
-                "status": 401,
-                "headers": [[b"content-type", b"application/json"]],
-            })
-            await send({
-                "type": "http.response.body",
-                "body": b'{"error":"Authentication required","message":"Please provide X-API-Key header"}',
-            })
-            return
-        
-        os.environ["CLAPPIA_API_KEY"] = auth_token
-        
-        client = scope.get("client")
-        client_ip = client[0] if client else "unknown"
-        path = scope.get("path", "")
-        method = scope.get("method", "")
-        
-        logger.info(
-            f"Request: {method} {path} | "
-            f"Client: {client_ip} | "
-            f"Auth Token: {auth_token[:8]}..."
-        )
-        
-        response_status = None
-        
-        async def send_wrapper(message):
-            nonlocal response_status
-            if message["type"] == "http.response.start":
-                response_status = message.get("status")
-            await send(message)
-        
-        try:
-            await self.app(scope, receive, send_wrapper)
-            
-            if response_status:
-                logger.info(
-                    f"Response: {response_status} | "
-                    f"Token: {auth_token[:8]}..."
-                )
-        except Exception as e:
-            logger.error(f"Error processing request: {str(e)}")
-            raise
+        result = await call_next(context)
+        return result
 
 
 def register_all_tools():
+    app.add_middleware(APIKeyAuthMiddleware())
+    logger.info("✓ Registered API key authentication middleware")
+    
     for module_name, register_func in AVAILABLE_MODULES.items():
         try:
             register_func(app)
-            logger.info(f"Registered {module_name} tools")
+            logger.info(f"✓ Registered {module_name} tools")
         except Exception as e:
-            logger.error(f"Failed to register {module_name} tools: {str(e)}")
+            logger.error(f"✗ Failed to register {module_name} tools: {str(e)}")
+            logger.error(traceback.format_exc())
 
     logger.info("All Clappia MCP tools registered successfully")
 
 
 def register_specific_tools(modules):
+    app.add_middleware(APIKeyAuthMiddleware())
+    logger.info("✓ Registered API key authentication middleware")
+    
     for module in modules:
         if module in AVAILABLE_MODULES:
             try:
                 AVAILABLE_MODULES[module](app)
-                logger.info(f"Registered {module} tools")
+                logger.info(f"✓ Registered {module} tools")
             except Exception as e:
-                logger.error(f"Failed to register {module} tools: {str(e)}")
+                logger.error(f"✗ Failed to register {module} tools: {str(e)}")
+                logger.error(traceback.format_exc())
         else:
-            logger.warning(f"Unknown module: {module}")
+            logger.warning(f"⚠ Unknown module: {module}")
+            logger.info(f"Available modules: {', '.join(AVAILABLE_MODULES.keys())}")
 
     logger.info(f"Registered tools from modules: {', '.join(modules)}")
 
@@ -129,15 +85,46 @@ def list_tools():
             if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
             else {}
         )
-        print(f"\n=== Clappia MCP Tools ({len(tools)}) ===")
-        for tool_name in tools.keys():
-            print(f"• {tool_name}")
+        print(f"\n{'='*60}")
+        print(f"Clappia MCP Tools ({len(tools)} tools registered)")
+        print(f"{'='*60}")
+        
+        if tools:
+            for tool_name in sorted(tools.keys()):
+                print(f"  • {tool_name}")
+        else:
+            print("  No tools registered")
+        
+        print(f"{'='*60}\n")
     except Exception as e:
+        logger.error(f"Error listing tools: {e}")
         print(f"Error listing tools: {e}")
 
 
+def print_startup_banner(args):
+    logger.info("=" * 70)
+    logger.info("Starting Clappia MCP Server [SSE TRANSPORT]")
+    logger.info("=" * 70)
+    logger.info(f"Listening: http://{args.host}:{args.port}")
+    logger.info("")
+    logger.info("SSE Endpoint: /sse")
+    logger.info("")
+    logger.info("Authentication: Pass token via:")
+    logger.info("  - Header: X-API-Key: your-token")
+    logger.info("  - Header: X-Api-Key: your-token")
+    logger.info("")
+    logger.info("⚠ Authentication is REQUIRED for all requests")
+    logger.info("")
+    logger.info("Available Modules:")
+    for module in AVAILABLE_MODULES.keys():
+        logger.info(f"  • {module}")
+    logger.info("=" * 70)
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Clappia MCP Server")
+    parser = argparse.ArgumentParser(
+        description="Clappia MCP Server - Model Context Protocol server for Clappia API"
+    )
     parser.add_argument(
         "--modules",
         nargs="+",
@@ -146,18 +133,20 @@ def main():
         help="Specify which modules to load (default: all)",
     )
     parser.add_argument(
-        "--list-tools", action="store_true", help="List all available tools and exit"
+        "--list-tools", 
+        action="store_true", 
+        help="List all available tools and exit"
     )
     parser.add_argument(
         "--host",
         default="0.0.0.0",
-        help="Host to bind to"
+        help="Host to bind to (default: 0.0.0.0)"
     )
     parser.add_argument(
         "--port",
         type=int,
         default=8000,
-        help="Port to bind to"
+        help="Port to bind to (default: 8000)"
     )
 
     args = parser.parse_args()
@@ -171,41 +160,19 @@ def main():
         if args.list_tools:
             list_tools()
             return
-            
-        logger.info("=" * 70)
-        logger.info("Starting Clappia MCP Server [SSE TRANSPORT]")
-        logger.info("=" * 70)
-        logger.info(f"Listening: http://{args.host}:{args.port}")
-        logger.info("")
-        logger.info("SSE Endpoint: /sse")
-        logger.info("")
-        logger.info("Authentication: Pass token via:")
-        logger.info("  - Header: X-API-Key: your-token")
-        logger.info("  - Header: Authorization: Bearer your-token")
-        logger.info("")
-        logger.info("Note: Auth token will be stored in CLAPPIA_API_KEY env var")
-        logger.info("      Authentication is REQUIRED for all requests")
-        logger.info("")
-        logger.info("Available Modules:")
-        for module in AVAILABLE_MODULES.keys():
-            logger.info(f"  - {module}")
-        logger.info("=" * 70)
         
-        sse_app = app.sse_app()
-        wrapped_app = AuthLoggingMiddleware(sse_app)
-        
-        uvicorn.run(
-            wrapped_app,
-            host=args.host,
-            port=args.port,
-            log_level="info"
-        )
+        print_startup_banner(args)
+        app.run(transport="http")
 
     except KeyboardInterrupt:
+        logger.info("\n" + "=" * 70)
         logger.info("Server shutdown requested by user")
+        logger.info("=" * 70)
     except Exception as e:
+        logger.error("=" * 70)
         logger.error(f"Server error: {str(e)}")
-        traceback.print_exc()
+        logger.error("=" * 70)
+        logger.error(traceback.format_exc())
         sys.exit(1)
     finally:
         logger.info("MCP server shutdown complete")

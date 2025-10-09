@@ -1,6 +1,7 @@
-import os
-from mcp.server.fastmcp import FastMCP
-from src.utils import get_logger, CLAPPIA_EXTERNAL_API_BASE_URL_V4, CLAPPIA_API_KEY_ENV_VAR
+from fastmcp import FastMCP
+from src.utils.logging_utils import get_logger
+from src.utils.context import get_api_key
+from src.utils.constants import CLAPPIA_EXTERNAL_API_BASE_URL_V4
 from clappia_api_tools import AnalyticsAPIKeyClient as AnalyticsClient
 from clappia_api_tools.models import (
     BaseResponse,
@@ -30,6 +31,13 @@ ChartDefinitionRequestUnion = Union[
     UpsertGanttChartDefinitionRequest,
 ]
 
+def _get_analytics_client() -> AnalyticsClient:
+    api_key = get_api_key()
+    return AnalyticsClient(
+        api_key=api_key,
+        base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
+    )
+
 
 def register_analytics_tools(mcp: FastMCP):
     """Register all analytics-related tools with the FastMCP server"""
@@ -58,10 +66,7 @@ def register_analytics_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying chart addition method.
         """
-        analytics_client = AnalyticsClient(
-            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
-            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
-        )
+        analytics_client = _get_analytics_client()
         return analytics_client.add(app_id, chart_index, chart_title, request, version_variable_name)
 
     @mcp.tool()
@@ -86,10 +91,7 @@ def register_analytics_tools(mcp: FastMCP):
         Raises:
             Exception: Any error raised by the underlying chart update method.
         """
-        analytics_client = AnalyticsClient(
-            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
-            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
-        )
+        analytics_client = _get_analytics_client()
         return analytics_client.update(app_id, chart_index, request, version_variable_name)
 
     @mcp.tool()
@@ -104,10 +106,7 @@ def register_analytics_tools(mcp: FastMCP):
             target_index (int): The target index where the chart should be moved.
             version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
-        analytics_client = AnalyticsClient(
-            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
-            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
-        )
+        analytics_client = _get_analytics_client()
         return analytics_client.reorder_chart(
             app_id=app_id, source_index=source_index, target_index=target_index, version_variable_name=version_variable_name
         )
@@ -120,8 +119,5 @@ def register_analytics_tools(mcp: FastMCP):
             app_id (str): The unique identifier of the Clappia application.
             version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
         """
-        analytics_client = AnalyticsClient(
-            api_key=os.getenv(CLAPPIA_API_KEY_ENV_VAR),
-            base_url=CLAPPIA_EXTERNAL_API_BASE_URL_V4,
-        )
+        analytics_client = _get_analytics_client()
         return analytics_client.get_charts(app_id=app_id, version_variable_name=version_variable_name)

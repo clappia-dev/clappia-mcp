@@ -1,5 +1,5 @@
 import sys
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
 from src.tools.submissions import register_submission_tools
 
