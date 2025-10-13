@@ -1,11 +1,9 @@
 import os
 import sys
 import argparse
-from fastmcp.server.http import create_sse_app
 from fastmcp import FastMCP
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 from fastmcp.server.dependencies import get_http_headers
-import traceback
 
 from src.utils.logging_utils import get_logger
 from src.tools.submissions import register_submission_tools
@@ -38,7 +36,6 @@ class APIKeyAuthMiddleware(Middleware):
             logger.warning("Request rejected: Missing API key")
             raise ValueError("API key is required. Please provide X-API-Key header")
         
-        logger.debug(f"Request authenticated with key: {api_key[:10]}...")
         
         result = await call_next(context)
         return result
@@ -51,12 +48,9 @@ def register_all_tools():
     for module_name, register_func in AVAILABLE_MODULES.items():
         try:
             register_func(app)
-            logger.info(f"✓ Registered {module_name} tools")
         except Exception as e:
             logger.error(f"✗ Failed to register {module_name} tools: {str(e)}")
-            logger.error(traceback.format_exc())
 
-    logger.info("All Clappia MCP tools registered successfully")
 
 
 def register_specific_tools(modules):
@@ -67,15 +61,11 @@ def register_specific_tools(modules):
         if module in AVAILABLE_MODULES:
             try:
                 AVAILABLE_MODULES[module](app)
-                logger.info(f"✓ Registered {module} tools")
             except Exception as e:
                 logger.error(f"✗ Failed to register {module} tools: {str(e)}")
-                logger.error(traceback.format_exc())
         else:
             logger.warning(f"⚠ Unknown module: {module}")
-            logger.info(f"Available modules: {', '.join(AVAILABLE_MODULES.keys())}")
 
-    logger.info(f"Registered tools from modules: {', '.join(modules)}")
 
 
 def list_tools():
@@ -85,40 +75,19 @@ def list_tools():
             if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
             else {}
         )
-        print(f"\n{'='*60}")
-        print(f"Clappia MCP Tools ({len(tools)} tools registered)")
-        print(f"{'='*60}")
+        logger.info(f"Clappia MCP Tools ({len(tools)} tools registered)")
         
         if tools:
             for tool_name in sorted(tools.keys()):
-                print(f"  • {tool_name}")
+                logger.info(f"  • {tool_name}")
         else:
-            print("  No tools registered")
-        
-        print(f"{'='*60}\n")
+            logger.info("  No tools registered")
     except Exception as e:
         logger.error(f"Error listing tools: {e}")
-        print(f"Error listing tools: {e}")
 
 
 def print_startup_banner(args):
-    logger.info("=" * 70)
-    logger.info("Starting Clappia MCP Server [SSE TRANSPORT]")
-    logger.info("=" * 70)
-    logger.info(f"Listening: http://{args.host}:{args.port}")
-    logger.info("")
-    logger.info("SSE Endpoint: /sse")
-    logger.info("")
-    logger.info("Authentication: Pass token via:")
-    logger.info("  - Header: X-API-Key: your-token")
-    logger.info("  - Header: X-Api-Key: your-token")
-    logger.info("")
-    logger.info("⚠ Authentication is REQUIRED for all requests")
-    logger.info("")
-    logger.info("Available Modules:")
-    for module in AVAILABLE_MODULES.keys():
-        logger.info(f"  • {module}")
-    logger.info("=" * 70)
+    logger.info(f"Starting Clappia MCP Server on http://{args.host}:{args.port}")
 
 
 def main():
@@ -162,20 +131,15 @@ def main():
             return
         
         print_startup_banner(args)
-        app.run(transport="http")
+        app.run(transport="streamable-http")
 
     except KeyboardInterrupt:
-        logger.info("\n" + "=" * 70)
-        logger.info("Server shutdown requested by user")
-        logger.info("=" * 70)
+        pass
     except Exception as e:
-        logger.error("=" * 70)
         logger.error(f"Server error: {str(e)}")
-        logger.error("=" * 70)
-        logger.error(traceback.format_exc())
         sys.exit(1)
     finally:
-        logger.info("MCP server shutdown complete")
+        pass
 
 
 if __name__ == "__main__":

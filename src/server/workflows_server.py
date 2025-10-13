@@ -11,22 +11,19 @@ app = FastMCP("clappia-app-workflow")
 def register_all_tools():
     """Register all workflow-related tools"""
     register_workflow_tools(app)
-    logger.info("All Clappia workflow tools registered successfully")
 
 
 def main():
     try:
         register_all_tools()
-        logger.info("Starting Clappia Workflows MCP server")
-        logger.info("CLAPPIA_API_KEY must be set as environment variable")
         app.run(transport="stdio")
     except KeyboardInterrupt:
-        logger.info("Server shutdown requested by user")
+        pass
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
         sys.exit(1)
     finally:
-        logger.info("MCP server shutdown complete")
+        pass
 
 
 def list_tools():
@@ -38,11 +35,11 @@ def list_tools():
             if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
             else {}
         )
-        print(f"\n=== Clappia Workflows MCP Tools ({len(tools)}) ===")
+        logger.info(f"Clappia Workflows MCP Tools ({len(tools)})")
         for tool_name in tools.keys():
-            print(f"• {tool_name}")
+            logger.info(f"• {tool_name}")
     except Exception as e:
-        print(f"Error listing tools: {e}")
+        logger.error(f"Error listing tools: {e}")
 
 
 if __name__ == "__main__":

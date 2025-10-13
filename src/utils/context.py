@@ -25,7 +25,6 @@ def get_api_key_from_headers() -> str:
         logger.error("API key not found in headers")
         raise ValueError("API key is required. Please provide 'x-api-key' header.")
     
-    logger.debug(f"API key found: {api_key[:10]}...")
     return api_key
 
 
@@ -45,7 +44,6 @@ def get_api_key_from_env() -> str:
         logger.error("API key not found in environment variables")
         raise ValueError("API key is required. Please set CLAPPIA_API_KEY environment variable.")
     
-    logger.debug(f"API key found in environment: {api_key[:10]}...")
     return api_key
 
 
@@ -64,7 +62,6 @@ def get_api_key() -> str:
     try:
         return get_api_key_from_headers()
     except (ValueError, Exception) as e:
-        logger.debug(f"Could not get API key from headers: {e}")
         try:
             return get_api_key_from_env()
         except ValueError as env_error:

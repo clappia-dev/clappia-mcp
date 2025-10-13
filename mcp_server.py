@@ -27,11 +27,9 @@ def register_all_tools():
     for module_name, register_func in AVAILABLE_MODULES.items():
         try:
             register_func(app)
-            logger.info(f"Registered {module_name} tools")
         except Exception as e:
             logger.error(f"Failed to register {module_name} tools: {str(e)}")
 
-    logger.info("All Clappia MCP tools registered successfully")
 
 
 def register_specific_tools(modules):
@@ -40,13 +38,11 @@ def register_specific_tools(modules):
         if module in AVAILABLE_MODULES:
             try:
                 AVAILABLE_MODULES[module](app)
-                logger.info(f"Registered {module} tools")
             except Exception as e:
                 logger.error(f"Failed to register {module} tools: {str(e)}")
         else:
             logger.warning(f"Unknown module: {module}")
 
-    logger.info(f"Registered tools from modules: {', '.join(modules)}")
 
 
 def main():
@@ -74,17 +70,15 @@ def main():
             list_tools()
             return
 
-        logger.info("Starting Clappia MCP server")
-        logger.info("CLAPPIA_API_KEY must be set as environment variable")
         app.run(transport="stdio")
 
     except KeyboardInterrupt:
-        logger.info("Server shutdown requested by user")
+        pass
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
         sys.exit(1)
     finally:
-        logger.info("MCP server shutdown complete")
+        pass
 
 
 def list_tools():
@@ -95,11 +89,11 @@ def list_tools():
             if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
             else {}
         )
-        print(f"\n=== Clappia MCP Tools ({len(tools)}) ===")
+        logger.info(f"Clappia MCP Tools ({len(tools)})")
         for tool_name in tools.keys():
-            print(f"• {tool_name}")
+            logger.info(f"• {tool_name}")
     except Exception as e:
-        print(f"Error listing tools: {e}")
+        logger.error(f"Error listing tools: {e}")
 
 
 if __name__ == "__main__":
