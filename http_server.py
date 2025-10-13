@@ -2,8 +2,8 @@ import os
 import sys
 import argparse
 from fastmcp import FastMCP
-from fastmcp.server.middleware import Middleware, MiddlewareContext
-from fastmcp.server.dependencies import get_http_headers
+from fastmcp.server.auth import OAuthProxy
+from fastmcp.server.auth.providers.jwt import JWTVerifier
 
 from src.utils.logging_utils import get_logger
 from src.tools.submissions import register_submission_tools
@@ -14,7 +14,27 @@ from src.tools.workplace import register_workplace_tools
 
 logger = get_logger(__name__)
 
-app = FastMCP("clappia-mcp-server")
+# JWT Token Verifier (uses same secret as auth server)
+token_verifier = JWTVerifier(
+    public_key="your-secret-key-min-32-chars-long!!",  # Same as auth server SECRET_KEY
+    issuer="http://localhost:9000",
+    audience="https://nonblinding-supermechanically-katina.ngrok-free.dev",
+    algorithm="HS256"
+)
+
+# OAuth Proxy
+auth = OAuthProxy(
+    upstream_authorization_endpoint="http://localhost:9000/oauth/authorize",
+    upstream_token_endpoint="http://localhost:9000/oauth/token",
+    upstream_client_id="clappia-mcp-client",  # Static client ID
+    upstream_client_secret="not-used-for-public-client",  # Not used with PKCE
+    token_verifier=token_verifier,
+    base_url="https://nonblinding-supermechanically-katina.ngrok-free.dev",
+    redirect_path="/auth/callback",
+    forward_pkce=True
+)
+
+app = FastMCP("clappia-mcp-server", auth=auth)
 
 AVAILABLE_MODULES = {
     "submissions": register_submission_tools,
@@ -25,25 +45,8 @@ AVAILABLE_MODULES = {
 }
 
 
-class APIKeyAuthMiddleware(Middleware):
-    
-    async def on_request(self, context: MiddlewareContext, call_next):
-        headers = get_http_headers()
-        
-        api_key = headers.get("x-api-key") or headers.get("x-api-key")
-        
-        if not api_key:
-            logger.warning("Request rejected: Missing API key")
-            raise ValueError("API key is required. Please provide X-API-Key header")
-        
-        
-        result = await call_next(context)
-        return result
-
-
 def register_all_tools():
-    app.add_middleware(APIKeyAuthMiddleware())
-    logger.info("✓ Registered API key authentication middleware")
+    logger.info("✓ Registered OAuth authentication")
     
     for module_name, register_func in AVAILABLE_MODULES.items():
         try:
@@ -52,10 +55,8 @@ def register_all_tools():
             logger.error(f"✗ Failed to register {module_name} tools: {str(e)}")
 
 
-
 def register_specific_tools(modules):
-    app.add_middleware(APIKeyAuthMiddleware())
-    logger.info("✓ Registered API key authentication middleware")
+    logger.info("✓ Registered OAuth authentication")
     
     for module in modules:
         if module in AVAILABLE_MODULES:
@@ -65,7 +66,6 @@ def register_specific_tools(modules):
                 logger.error(f"✗ Failed to register {module} tools: {str(e)}")
         else:
             logger.warning(f"⚠ Unknown module: {module}")
-
 
 
 def list_tools():
@@ -88,6 +88,8 @@ def list_tools():
 
 def print_startup_banner(args):
     logger.info(f"Starting Clappia MCP Server on http://{args.host}:{args.port}")
+    logger.info(f"🔐 OAuth enabled - Auth server: http://localhost:9000")
+    logger.info(f"📝 OAuth callback: http://localhost:8000/auth/callback")
 
 
 def main():
@@ -131,15 +133,13 @@ def main():
             return
         
         print_startup_banner(args)
-        app.run(transport="streamable-http")
+        app.run(transport="streamable-http", host=args.host, port=args.port)
 
     except KeyboardInterrupt:
         pass
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
         sys.exit(1)
-    finally:
-        pass
 
 
 if __name__ == "__main__":
