@@ -5,13 +5,7 @@ from jose import jwt
 import secrets
 import uvicorn
 
-# Simple in-memory storage
-users_db = {
-    "user@example.com": {
-        "password": "password123",
-        "name": "Demo User"
-    }
-}
+users_db = {"user@example.com": {"password": "password123", "name": "Demo User"}}
 
 auth_codes = {}
 tokens = {}
@@ -21,16 +15,20 @@ ALGORITHM = "HS256"
 
 app = FastAPI()
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(hours=1)
-    to_encode.update({
-        "exp": expire,
-        "iat": datetime.utcnow(),
-        "iss": "http://localhost:9000",
-        "aud": "https://nonblinding-supermechanically-katina.ngrok-free.dev"
-    })
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": datetime.utcnow(),
+            "iss": "http://localhost:9000",
+            "aud": "http://localhost:3000",
+        }
+    )
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 @app.get("/oauth/authorize")
 async def authorize(
@@ -41,9 +39,10 @@ async def authorize(
     code_challenge: str = None,
     code_challenge_method: str = None,
     scope: str = None,
-    resource: str = None  # ← Add resource parameter
+    resource: str = None,
 ):
-    return HTMLResponse(f"""
+    return HTMLResponse(
+        f"""
     <html>
         <body>
             <h2>Login to Clappia MCP</h2>
@@ -64,7 +63,9 @@ async def authorize(
             <p><small>Default: user@example.com / password123</small></p>
         </body>
     </html>
-    """)
+    """
+    )
+
 
 @app.post("/oauth/authorize")
 async def authorize_post(
@@ -77,11 +78,11 @@ async def authorize_post(
     code_challenge: str = Form(None),
     code_challenge_method: str = Form(None),
     scope: str = Form(None),
-    resource: str = Form(None)
+    resource: str = Form(None),
 ):
     if username not in users_db or users_db[username]["password"] != password:
         raise HTTPException(400, "Invalid credentials")
-    
+
     code = secrets.token_urlsafe(32)
     auth_codes[code] = {
         "username": username,
@@ -89,32 +90,17 @@ async def authorize_post(
         "redirect_uri": redirect_uri,
         "code_challenge": code_challenge,
         "code_challenge_method": code_challenge_method,
-        "scope": scope or "",
+        "scope": scope or "mcp:tools mcp:resources",
         "resource": resource,
-        "expires": datetime.utcnow() + timedelta(minutes=10)
+        "expires": datetime.utcnow() + timedelta(minutes=10),
     }
-    
+
     redirect_url = f"{redirect_uri}?code={code}"
     if state:
         redirect_url += f"&state={state}"
-    
-    return RedirectResponse(redirect_url, status_code=303) 
 
-# ← NEW: Add GET handler for callback
-@app.get("/auth/callback")
-async def auth_callback_get(code: str, state: str):
-    """Handle OAuth callback - just show success page"""
-    return HTMLResponse("""
-    <html>
-        <body>
-            <h2>✅ Authorization Successful!</h2>
-            <p>You can close this window and return to your application.</p>
-            <script>
-                setTimeout(() => window.close(), 2000);
-            </script>
-        </body>
-    </html>
-    """)
+    return RedirectResponse(redirect_url, status_code=303)
+
 
 @app.post("/oauth/token")
 async def token(
@@ -123,58 +109,81 @@ async def token(
     redirect_uri: str = Form(None),
     client_id: str = Form(None),
     client_secret: str = Form(None),
-    code_verifier: str = Form(None)
+    code_verifier: str = Form(None),
 ):
     if grant_type == "authorization_code":
         if code not in auth_codes:
             raise HTTPException(400, "Invalid authorization code")
-        
+
         code_data = auth_codes[code]
-        
+
         if datetime.utcnow() > code_data["expires"]:
             del auth_codes[code]
             raise HTTPException(400, "Authorization code expired")
-        
+
         if code_data.get("code_challenge"):
             import hashlib
             import base64
-            
-            verifier_hash = base64.urlsafe_b64encode(
-                hashlib.sha256(code_verifier.encode()).digest()
-            ).decode().rstrip('=')
-            
+
+            verifier_hash = (
+                base64.urlsafe_b64encode(
+                    hashlib.sha256(code_verifier.encode()).digest()
+                )
+                .decode()
+                .rstrip("=")
+            )
+
             if verifier_hash != code_data["code_challenge"]:
                 raise HTTPException(400, "Invalid code verifier")
-        
-        access_token = create_access_token({
-            "sub": code_data["username"],
-            "scope": code_data["scope"],
-            "client_id": client_id
-        })
-        
+
+        access_token = create_access_token(
+            {
+                "sub": code_data["username"],
+                "scope": code_data["scope"],
+                "client_id": client_id,
+            }
+        )
+
         refresh_token = secrets.token_urlsafe(32)
-        
+
         tokens[refresh_token] = {
             "username": code_data["username"],
             "client_id": client_id,
-            "scope": code_data["scope"]
+            "scope": code_data["scope"],
         }
-        
+
         del auth_codes[code]
-        
+
         return {
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": 3600,
             "refresh_token": refresh_token,
-            "scope": code_data["scope"]
+            "scope": code_data["scope"],
         }
-    
+
     raise HTTPException(400, "Unsupported grant type")
+
 
 @app.get("/.well-known/jwks.json")
 async def jwks():
     return {"keys": []}
+
+
+@app.post("/register")
+async def register_client(request: Request):
+    body = await request.json()
+    client_id = f"client_{secrets.token_urlsafe(16)}"
+
+    return {
+        "client_id": client_id,
+        "client_name": body.get("client_name", "MCP Client"),
+        "redirect_uris": body.get("redirect_uris", []),
+        "grant_types": body.get("grant_types", ["authorization_code"]),
+        "response_types": body.get("response_types", ["code"]),
+        "token_endpoint_auth_method": "none",
+    }
+
 
 @app.get("/.well-known/oauth-authorization-server")
 async def oauth_metadata():
@@ -182,12 +191,15 @@ async def oauth_metadata():
         "issuer": "http://localhost:9000",
         "authorization_endpoint": "http://localhost:9000/oauth/authorize",
         "token_endpoint": "http://localhost:9000/oauth/token",
+        "registration_endpoint": "http://localhost:9000/register",
         "jwks_uri": "http://localhost:9000/.well-known/jwks.json",
         "response_types_supported": ["code"],
         "grant_types_supported": ["authorization_code"],
         "code_challenge_methods_supported": ["S256"],
-        "token_endpoint_auth_methods_supported": ["client_secret_post", "none"]
+        "token_endpoint_auth_methods_supported": ["client_secret_post", "none"],
+        "scopes_supported": ["mcp:tools", "mcp:resources"],
     }
+
 
 if __name__ == "__main__":
     print("🔐 Starting Auth Server on http://localhost:9000")

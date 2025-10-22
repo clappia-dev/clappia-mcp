@@ -5,13 +5,16 @@ description = "MCP server that allows operations at Clappia"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "clappia-api-tools>=2.0.9",
-    "fastmcp>=2.12.4",
     "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
+    "uvicorn[standard]>=0.32.0",
+    "websockets>=14.1",
+    "httpx>=0.27.0",
     "python-multipart>=0.0.6",
     "python-jose[cryptography]>=3.5.0",
     "passlib[bcrypt]>=1.7.4",
+    "clappia-api-tools",
+    "fastmcp>=2.12.5",
+    "mcp>=1.16.0",
 ]
 
 [build-system]
@@ -28,3 +31,6 @@ packages = ["src"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
+
+[tool.uv.sources]
+clappia-api-tools = { path = "../clappia-tools" }

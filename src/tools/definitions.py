@@ -1,7 +1,16 @@
-from fastmcp import FastMCP
+"""
+definitions.py - Clappia MCP Definitions Module
+Handles all app definition-related operations with clean Pydantic models
+"""
+
+from mcp.server.fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
 from src.utils.context import get_api_key
-from src.utils.constants import CLAPPIA_APP_DEFINITION_API_BASE_URL
+from src.utils.constants import (
+    CLAPPIA_APP_DEFINITION_DEV_API_BASE_URL,
+    CLAPPIA_APP_DEFINITION_PREPROD_API_BASE_URL,
+    CLAPPIA_APP_DEFINITION_PROD_API_BASE_URL,
+)
 from clappia_api_tools import AppDefinitionAPIKeyClient as AppDefinitionClient
 from typing import Union, Optional
 from clappia_api_tools.models import (
@@ -55,14 +64,7 @@ from clappia_api_tools.models import (
     UpsertFieldPaypalPaymentGatewayRequest,
     UpsertFieldStripePaymentGatewayRequest,
     UpsertFieldButtonRequest,
-    AppDefinitionResponse,
-    PageBreakOperationResponse,
-    FieldOperationResponse,
-    UpsertSectionOperationResponse,
-    ReorderSectionOperationResponse,
     UpdateAppMetadataRequest,
-    BaseResponse
-
 )
 
 FieldRequestUnion = Union[
@@ -120,7 +122,7 @@ def _get_app_definition_client() -> AppDefinitionClient:
     api_key = get_api_key()
     return AppDefinitionClient(
         api_key=api_key,
-        base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        base_url=CLAPPIA_APP_DEFINITION_DEV_API_BASE_URL,
     )
 
 
@@ -129,60 +131,24 @@ def register_definition_tools(mcp: FastMCP):
     @mcp.tool()
     def add_section(
         request: UpsertSectionRequest,
-    ) -> UpsertSectionOperationResponse:
-        """
-        Adds a new section to a Clappia application at a specified position.
-
-        Args:
-            request (UpsertSectionRequest): The request object containing section details and the position
-                                            where the section should be added.
-
-        Returns:
-            UpsertSectionOperationResponse: The response object indicating the result of the add section operation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.add_section`.
-        """
+    ):
+        """Add a new section to a Clappia application at a specified position."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.add_section(request=request)
 
     @mcp.tool()
     def update_section(
         request: UpsertSectionRequest,
-    ) -> UpsertSectionOperationResponse:
-        """
-        Updates an existing section in a Clappia application.
-
-        Args:
-            request (UpsertSectionRequest): The request object containing updated section details and the
-                                            section identifier to be updated.
-
-        Returns:
-            UpsertSectionOperationResponse: The response object indicating the result of the update operation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.update_section`.
-        """
+    ):
+        """Update an existing section in a Clappia application."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.update_section(request=request)
 
     @mcp.tool()
     def reorder_section(
         request: ReorderSectionRequest,
-    ) -> ReorderSectionOperationResponse:
-        """
-        Reorders a section within a Clappia application.
-
-        Args:
-            request (ReorderSectionRequest): The request object containing the section identifier and the new
-                                            position to reorder the section.
-
-        Returns:
-            ReorderSectionOperationResponse: The response object indicating the result of the reorder operation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.reorder_section`.
-        """
+    ):
+        """Reorder a section within a Clappia application."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.reorder_section(request=request)
 
@@ -195,24 +161,8 @@ def register_definition_tools(mcp: FastMCP):
         field_name: str,
         request: FieldRequestUnion,
         version_variable_name: Optional[str] = None,
-    ) -> FieldOperationResponse:
-        """
-        Adds a field to a Clappia app. The field type is determined by the request object type.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            section_index (int): The index of the section where the field will be added.
-            field_index (int): The index position where the field will be placed.
-            page_index (int): The index of the page where the field will be added.
-            field_name (str): The name of the field.
-            request (FieldRequestUnion): The request object containing field configuration. The field type is determined by the specific request type.
-            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
-        Returns:
-            FieldOperationResponse: The response object containing the result of the field addition.
-
-        Raises:
-            Exception: Any error raised by the underlying field addition method.
-        """
+    ):
+        """Add a field to a Clappia app. The field type is determined by the request object type."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.add_field(
             app_id=app_id,
@@ -230,21 +180,8 @@ def register_definition_tools(mcp: FastMCP):
         field_name: str,
         request: FieldRequestUnion,
         version_variable_name: Optional[str] = None,
-    ) -> FieldOperationResponse:
-        """
-        Updates a field in a Clappia app. The field type is determined by the request object type.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            field_name (str): The name of the field.
-            request (FieldRequestUnion): The request object containing updated field configuration. The field type is determined by the specific request type.
-            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
-        Returns:
-            FieldOperationResponse: The response object containing the result of the field update.
-
-        Raises:
-            Exception: Any error raised by the underlying field update method.
-        """
+    ):
+        """Update a field in a Clappia app. The field type is determined by the request object type."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.update_field(
             app_id=app_id,
@@ -252,85 +189,50 @@ def register_definition_tools(mcp: FastMCP):
             request=request,
             version_variable_name=version_variable_name,
         )
-    
 
     @mcp.tool()
-    def reorder_field(app_id: str, source_page_index: int, target_page_index: int, source_section_index: int, target_section_index: int, index_in_target_section: int, field_name: str, version_variable_name: Optional[str] = None) -> FieldOperationResponse:
-        """
-        Reorders a field in a Clappia app.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            source_page_index (int): The index of the page where the field is currently located.
-            target_page_index (int): The index of the page where the field should be moved.
-            source_section_index (int): The index of the section where the field is currently located.
-            target_section_index (int): The index of the section where the field should be moved.
-            index_in_target_section (int): The index of the field in the target section.
-            field_name (str): The name of the field to reorder.
-            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
-        Returns:
-            FieldOperationResponse: The response object containing the result of the field reordering.
-
-        Raises:
-                Exception: Any error raised by the underlying field reordering method.
-        """
+    def reorder_field(
+        app_id: str,
+        source_page_index: int,
+        target_page_index: int,
+        source_section_index: int,
+        target_section_index: int,
+        index_in_target_section: int,
+        field_name: str,
+        version_variable_name: Optional[str] = None,
+    ):
+        """Reorder a field in a Clappia app."""
         app_definition_client = _get_app_definition_client()
-        return app_definition_client.reorder_field(app_id=app_id, source_page_index=source_page_index, target_page_index=target_page_index, source_section_index=source_section_index, target_section_index=target_section_index, index_in_target_section=index_in_target_section, field_name=field_name, version_variable_name=version_variable_name)
+        return app_definition_client.reorder_field(
+            app_id=app_id,
+            source_page_index=source_page_index,
+            target_page_index=target_page_index,
+            source_section_index=source_section_index,
+            target_section_index=target_section_index,
+            index_in_target_section=index_in_target_section,
+            field_name=field_name,
+            version_variable_name=version_variable_name,
+        )
 
     @mcp.tool()
     def add_page_break(
         request: AddPageBreakRequest,
-    ) -> PageBreakOperationResponse:
-        """
-        Adds a page break to a Clappia application at a specified position.
-
-        Args:
-            request (AddPageBreakRequest): The request object containing page break details and the position
-                                        where it should be added.
-
-        Returns:
-            PageBreakOperationResponse: The response object indicating the result of the add page break operation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.add_page_break`.
-        """
+    ):
+        """Add a page break to a Clappia application at a specified position."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.add_page_break(request=request)
 
     @mcp.tool()
     def update_page_break(
         request: UpdatePageBreakRequest,
-    ) -> PageBreakOperationResponse:
-        """
-        Updates an existing page break in a Clappia application.
-
-        Args:
-            request (UpdatePageBreakRequest): The request object containing updated page break details
-                                            and the identifier of the page break to update.
-
-        Returns:
-            PageBreakOperationResponse: The response object indicating the result of the update operation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.update_page`.
-        """
+    ):
+        """Update an existing page break in a Clappia application."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.update_page(request=request)
 
     @mcp.tool()
-    def get_app_definition(app_id: str, version_variable_name: Optional[str] = None) -> AppDefinitionResponse:
-        """
-        Fetches the complete definition of a Clappia application, including forms, fields, sections, and metadata.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
-        Returns:
-            AppDefinitionResponse: The response object containing the full app definition.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.get_definition`.
-        """
+    def get_app_definition(app_id: str, version_variable_name: Optional[str] = None):
+        """Get the complete definition of a Clappia application, including forms, fields, sections, and metadata."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.get_definition(
             app_id=app_id,
@@ -338,109 +240,53 @@ def register_definition_tools(mcp: FastMCP):
         )
 
     @mcp.tool()
-    def create_app(request: CreateAppRequest) -> BaseResponse:
-        """
-        Creates a new Clappia application with specified sections and fields.
-
-        Args:
-            request (CreateAppRequest): The request object containing app configuration details, sections, and fields.
-
-        Returns:
-            BaseResponse: The response object indicating the result of the app creation.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.create_app`.
-        """
+    def create_app(request: CreateAppRequest):
+        """Create a new Clappia application with specified sections and fields."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.create_app(request=request)
 
     @mcp.tool()
-    def update_app_metadata(app_id: str, request: UpdateAppMetadataRequest, version_variable_name: Optional[str] = None) -> AppDefinitionResponse:
-        """
-        Updates the metadata of a Clappia application.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            request (UpdateAppMetadataRequest): The request object containing updated metadata details.
-            version_variable_name (Optional[str]): The variable name representing the app version. If not specified, the live version is used.
-        Returns:
-            AppMetadataUpdateResponse: The response object indicating the result of the metadata update.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.update_app_metadata`.
-        """
+    def update_app_metadata(
+        app_id: str,
+        request: UpdateAppMetadataRequest,
+        version_variable_name: Optional[str] = None,
+    ):
+        """Update the metadata of a Clappia application."""
         app_definition_client = _get_app_definition_client()
-        return app_definition_client.update_app_metadata(app_id=app_id, request=request, version_variable_name=version_variable_name)
-    
+        return app_definition_client.update_app_metadata(
+            app_id=app_id, request=request, version_variable_name=version_variable_name
+        )
+
     @mcp.tool()
-    def get_app_versions(app_id: str) -> AppDefinitionResponse:
-        """
-        Gets the versions of a Clappia application.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-
-        Returns:
-            AppDefinitionResponse: The response object containing the app versions.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.get_app_versions`.
-        """
+    def get_app_versions(app_id: str):
+        """Get the versions of a Clappia application."""
         app_definition_client = _get_app_definition_client()
         return app_definition_client.get_app_versions(app_id=app_id)
-    
-    @mcp.tool()
-    def update_app_version(app_id: str,initial_version_name: str, new_version_name: str) -> AppDefinitionResponse:
-        """
-        Updates a specific version of a Clappia application.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            initial_version_name (str): The name of the initial version, indentifier of the version to update.
-            new_version_name (str): The name of the new version.
-
-        Returns:
-            AppDefinitionResponse: The response object containing the app versions.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.update_app_version`.
-        """
-        app_definition_client = _get_app_definition_client()
-        return app_definition_client.update_app_version(app_id=app_id, initial_version_name=initial_version_name, new_version_name=new_version_name)
-    
 
     @mcp.tool()
-    def update_live_version(app_id: str, version_variable_name: str) -> AppDefinitionResponse:
-        """
-        Updates the live version of a Clappia application.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            version_variable_name (str): The variable name representing the app version.
-
-        Returns:
-            AppDefinitionResponse: The response object containing the app versions.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.update_live_version`.
-        """
+    def update_app_version(
+        app_id: str, initial_version_name: str, new_version_name: str
+    ):
+        """Update a specific version of a Clappia application."""
         app_definition_client = _get_app_definition_client()
-        return app_definition_client.update_live_version(app_id=app_id, version_variable_name=version_variable_name)
-    
+        return app_definition_client.update_app_version(
+            app_id=app_id,
+            initial_version_name=initial_version_name,
+            new_version_name=new_version_name,
+        )
+
     @mcp.tool()
-    def create_app_version(app_id: str, version_name: str) -> AppDefinitionResponse:
-        """
-            Creates a new version of a Clappia application.
-
-        Args:
-            app_id (str): The unique identifier of the Clappia application.
-            version_name (str): The name of the new version.
-
-        Returns:
-            AppDefinitionResponse: The response object containing the app versions.
-
-        Raises:
-            Exception: Propagates any exceptions raised by `app_definition_client.create_app_version`.
-        """
+    def update_live_version(app_id: str, version_variable_name: str):
+        """Update the live version of a Clappia application."""
         app_definition_client = _get_app_definition_client()
-        return app_definition_client.create_new_app_version(app_id=app_id, version_name=version_name)
+        return app_definition_client.update_live_version(
+            app_id=app_id, version_variable_name=version_variable_name
+        )
+
+    @mcp.tool()
+    def create_app_version(app_id: str, version_name: str):
+        """Create a new version of a Clappia application."""
+        app_definition_client = _get_app_definition_client()
+        return app_definition_client.create_new_app_version(
+            app_id=app_id, version_name=version_name
+        )

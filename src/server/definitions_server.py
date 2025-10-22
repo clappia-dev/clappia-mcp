@@ -1,5 +1,5 @@
 import sys
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
 from src.tools.definitions import register_definition_tools
 
@@ -26,46 +26,5 @@ def main():
         pass
 
 
-def list_tools():
-    register_all_tools()
-    try:
-        # Access tools from FastMCP instance
-        tools = (
-            app._tool_manager._tools
-            if hasattr(app, "_tool_manager") and hasattr(app._tool_manager, "_tools")
-            else {}
-        )
-        logger.info(f"Clappia App Form MCP Tools ({len(tools)})")
-        for tool_name in tools.keys():
-            logger.info(f"• {tool_name}")
-    except Exception as e:
-        logger.error(f"Error listing tools: {e}")
-
-
 if __name__ == "__main__":
-    args = sys.argv[1:]
-
-    if "--list-tools" in args:
-        list_tools()
-    elif "--help" in args or "-h" in args:
-        print(
-            """
-        Clappia App Form MCP Server
-        
-        Usage:
-            uv run -m src.server.definitions_server                # Run server (default)
-            uv run -m src.server.definitions_server --list-tools   # List all tools
-            uv run -m src.server.definitions_server --help         # Show help
-        
-        Required Environment Variables:
-            CLAPPIA_API_KEY
-        
-        This server provides tools for:
-        - Creating and managing Clappia apps
-        - Adding and configuring various field types
-        - Managing app structure (pages, sections, fields)
-        - Updating app settings and configurations
-        """
-        )
-    else:
-        main()
+    main()
