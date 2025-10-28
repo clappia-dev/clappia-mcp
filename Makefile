@@ -25,6 +25,22 @@ error:
 	@echo "$(BLUE)Available Commands:$(NC)"
 	@echo "======================"
 	@echo ""
+	@echo "$(GREEN)Server Commands:$(NC)"
+	@echo "  make run-auth             # Run auth server on port 9000"
+	@echo "  make run-http             # Run HTTP server on port 3000"
+	@echo "  make run-form              # Run form server"
+	@echo "  make run-workflow          # Run workflow server"
+	@echo "  make run-submission        # Run submission server"
+	@echo "  make run-workplace         # Run workplace server"
+	@echo "  make run-charts            # Run charts server"
+	@echo ""
+	@echo "$(GREEN)Tunnel Commands:$(NC)"
+	@echo "  make tunnel-auth           # Forward auth server with localtunnel"
+	@echo "  make tunnel-http           # Forward HTTP server with localtunnel"
+	@echo "  make tunnel-both           # Show instructions for both tunnels"
+	@echo "  make run-auth-tunnel       # Run auth server + tunnel together"
+	@echo "  make run-http-tunnel       # Run HTTP server + tunnel together"
+	@echo ""
 	@echo "$(GREEN)Build Commands:$(NC)"
 	@echo "  make docker-build-http    # Build HTTP/SSE server (multi-platform)"
 	@echo "  make docker-build-http-amd64 # Build HTTP/SSE server (AMD64 only)"
@@ -125,6 +141,73 @@ run-charts: ## Run clappia-app-charts server
 		exit 1; \
 	fi
 	uv run -m src.server.analytics_server
+
+.PHONY: run-auth
+run-auth: ## Run auth server on port 9000
+	@echo "$(BLUE)Running Auth server on port 9000...$(NC)"
+	uv run auth_server.py
+
+.PHONY: run-http
+run-http: ## Run HTTP server on port 3000
+	@echo "$(BLUE)Running HTTP server on port 3000...$(NC)"
+	@if [ -z "$$CLAPPIA_API_KEY" ]; then \
+		echo "$(YELLOW)⚠️  CLAPPIA_API_KEY not set$(NC)"; \
+		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
+		exit 1; \
+	fi
+	uv run http_server.py
+
+.PHONY: tunnel-auth
+tunnel-auth: ## Forward auth server (port 9000) with localtunnel
+	@echo "$(BLUE)Forwarding auth server (port 9000) with localtunnel...$(NC)"
+	@echo "$(YELLOW)Make sure auth server is running first: make run-auth$(NC)"
+	lt --port 9000 --subdomain clappia-auth
+
+.PHONY: tunnel-http
+tunnel-http: ## Forward HTTP server (port 3000) with localtunnel
+	@echo "$(BLUE)Forwarding HTTP server (port 3000) with localtunnel...$(NC)"
+	@echo "$(YELLOW)Make sure HTTP server is running first: make run-http$(NC)"
+	lt --port 3000 --subdomain clappia-mcp
+
+.PHONY: tunnel-both
+tunnel-both: ## Forward both servers with localtunnel (run in separate terminals)
+	@echo "$(BLUE)Forwarding both servers with localtunnel...$(NC)"
+	@echo "$(YELLOW)Run these commands in separate terminals:$(NC)"
+	@echo "Terminal 1: make tunnel-auth"
+	@echo "Terminal 2: make tunnel-http"
+	@echo ""
+	@echo "$(GREEN)Or run servers and tunnels together:$(NC)"
+	@echo "Terminal 1: make run-auth-tunnel"
+	@echo "Terminal 2: make run-http-tunnel"
+
+.PHONY: run-auth-tunnel
+run-auth-tunnel: ## Run auth server and tunnel together
+	@echo "$(BLUE)Running auth server and tunnel together...$(NC)"
+	@echo "$(YELLOW)Starting auth server in background...$(NC)"
+	uv run auth_server.py &
+	AUTH_PID=$$!; \
+	echo "Auth server PID: $$AUTH_PID"; \
+	sleep 3; \
+	echo "$(YELLOW)Starting tunnel...$(NC)"; \
+	lt --port 9000 --subdomain clappia-auth; \
+	kill $$AUTH_PID 2>/dev/null || true
+
+.PHONY: run-http-tunnel
+run-http-tunnel: ## Run HTTP server and tunnel together
+	@echo "$(BLUE)Running HTTP server and tunnel together...$(NC)"
+	@if [ -z "$$CLAPPIA_API_KEY" ]; then \
+		echo "$(YELLOW)⚠️  CLAPPIA_API_KEY not set$(NC)"; \
+		echo "Please set your API key: export CLAPPIA_API_KEY=your_key_here"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Starting HTTP server in background...$(NC)"
+	uv run http_server.py &
+	HTTP_PID=$$!; \
+	echo "HTTP server PID: $$HTTP_PID"; \
+	sleep 3; \
+	echo "$(YELLOW)Starting tunnel...$(NC)"; \
+	lt --port 3000 --subdomain clappia-mcp; \
+	kill $$HTTP_PID 2>/dev/null || true
 
 # Docker Setup
 .PHONY: docker-setup

@@ -7,18 +7,14 @@ import uvicorn
 import hashlib
 import base64
 
-# ============================================================================
-# CONFIGURATION - Your Tunnel URLs
-# ============================================================================
-ISSUER = "https://clappia-auth.loca.lt"      # Auth server
-AUDIENCE = "https://clappia-mcp.loca.lt"     # MCP server
+ISSUER = "https://clappia-auth.loca.lt"
+AUDIENCE = "https://clappia-mcp.loca.lt"
+SECRET_KEY = "your-secret-key-min-32-chars-long!!"
+ALGORITHM = "HS256"
 
 users_db = {"user@example.com": {"password": "password123", "name": "Demo User"}}
 auth_codes = {}
 tokens = {}
-
-SECRET_KEY = "your-secret-key-min-32-chars-long!!"
-ALGORITHM = "HS256"
 
 app = FastAPI()
 
@@ -26,20 +22,27 @@ app = FastAPI()
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(hours=1)
-    to_encode.update({"exp": expire, "iat": datetime.utcnow(), "iss": ISSUER, "aud": AUDIENCE})
+    to_encode.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "iss": ISSUER,
+        "aud": AUDIENCE
+    })
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def verify_pkce(code_verifier: str, code_challenge: str) -> bool:
-    verifier_hash = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip("=")
+    verifier_hash = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).decode().rstrip("=")
     return verifier_hash == code_challenge
 
 
-async def handle_authorize_get(client_id, redirect_uri, response_type, state=None, code_challenge=None, 
-                               code_challenge_method=None, scope=None, resource=None):
-    if resource:
-        if resource.rstrip('/') != AUDIENCE.rstrip('/'):
-            raise HTTPException(400, f"Invalid resource. Expected {AUDIENCE}")
+async def handle_authorize_get(client_id, redirect_uri, response_type, state=None,
+                               code_challenge=None, code_challenge_method=None,
+                               scope=None, resource=None):
+    if resource and resource.rstrip('/') != AUDIENCE.rstrip('/'):
+        raise HTTPException(400, f"Invalid resource. Expected {AUDIENCE}")
     
     return HTMLResponse(f"""
     <html><head><title>Clappia MCP Login</title><style>
@@ -70,7 +73,8 @@ async def handle_authorize_get(client_id, redirect_uri, response_type, state=Non
 async def handle_authorize_post(username: str = Form(...), password: str = Form(...),
                                 client_id: str = Form(...), redirect_uri: str = Form(...),
                                 response_type: str = Form(...), state: str = Form(None),
-                                code_challenge: str = Form(None), code_challenge_method: str = Form(None),
+                                code_challenge: str = Form(None),
+                                code_challenge_method: str = Form(None),
                                 scope: str = Form(None), resource: str = Form(None)):
     if username not in users_db or users_db[username]["password"] != password:
         raise HTTPException(400, "Invalid credentials")
@@ -80,9 +84,13 @@ async def handle_authorize_post(username: str = Form(...), password: str = Form(
     
     code = secrets.token_urlsafe(32)
     auth_codes[code] = {
-        "username": username, "client_id": client_id, "redirect_uri": redirect_uri,
-        "code_challenge": code_challenge, "code_challenge_method": code_challenge_method,
-        "scope": scope or "mcp:tools mcp:resources", "resource": resource or AUDIENCE,
+        "username": username,
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "code_challenge": code_challenge,
+        "code_challenge_method": code_challenge_method,
+        "scope": scope or "mcp:tools mcp:resources",
+        "resource": resource or AUDIENCE,
         "expires": datetime.utcnow() + timedelta(minutes=10)
     }
     
@@ -92,48 +100,54 @@ async def handle_authorize_post(username: str = Form(...), password: str = Form(
     return RedirectResponse(redirect_url, status_code=303)
 
 
-# NEW ENDPOINTS
 @app.get("/authorize")
-async def authorize(client_id: str, redirect_uri: str, response_type: str, state: str = None,
-                   code_challenge: str = None, code_challenge_method: str = None,
-                   scope: str = None, resource: str = None):
-    return await handle_authorize_get(client_id, redirect_uri, response_type, state, 
-                                     code_challenge, code_challenge_method, scope, resource)
+async def authorize(client_id: str, redirect_uri: str, response_type: str,
+                   state: str = None, code_challenge: str = None,
+                   code_challenge_method: str = None, scope: str = None,
+                   resource: str = None):
+    return await handle_authorize_get(client_id, redirect_uri, response_type,
+                                     state, code_challenge, code_challenge_method,
+                                     scope, resource)
 
 
 @app.post("/authorize")
 async def authorize_post(username: str = Form(...), password: str = Form(...),
                         client_id: str = Form(...), redirect_uri: str = Form(...),
                         response_type: str = Form(...), state: str = Form(None),
-                        code_challenge: str = Form(None), code_challenge_method: str = Form(None),
+                        code_challenge: str = Form(None),
+                        code_challenge_method: str = Form(None),
                         scope: str = Form(None), resource: str = Form(None)):
-    return await handle_authorize_post(username, password, client_id, redirect_uri, response_type,
-                                      state, code_challenge, code_challenge_method, scope, resource)
+    return await handle_authorize_post(username, password, client_id, redirect_uri,
+                                      response_type, state, code_challenge,
+                                      code_challenge_method, scope, resource)
 
 
-# LEGACY ENDPOINTS
 @app.get("/oauth/authorize")
-async def authorize_legacy(client_id: str, redirect_uri: str, response_type: str, state: str = None,
-                          code_challenge: str = None, code_challenge_method: str = None,
-                          scope: str = None, resource: str = None):
-    return await handle_authorize_get(client_id, redirect_uri, response_type, state,
-                                     code_challenge, code_challenge_method, scope, resource)
+async def authorize_legacy(client_id: str, redirect_uri: str, response_type: str,
+                          state: str = None, code_challenge: str = None,
+                          code_challenge_method: str = None, scope: str = None,
+                          resource: str = None):
+    return await handle_authorize_get(client_id, redirect_uri, response_type,
+                                     state, code_challenge, code_challenge_method,
+                                     scope, resource)
 
 
 @app.post("/oauth/authorize")
 async def authorize_post_legacy(username: str = Form(...), password: str = Form(...),
                                client_id: str = Form(...), redirect_uri: str = Form(...),
                                response_type: str = Form(...), state: str = Form(None),
-                               code_challenge: str = Form(None), code_challenge_method: str = Form(None),
+                               code_challenge: str = Form(None),
+                               code_challenge_method: str = Form(None),
                                scope: str = Form(None), resource: str = Form(None)):
-    return await handle_authorize_post(username, password, client_id, redirect_uri, response_type,
-                                      state, code_challenge, code_challenge_method, scope, resource)
+    return await handle_authorize_post(username, password, client_id, redirect_uri,
+                                      response_type, state, code_challenge,
+                                      code_challenge_method, scope, resource)
 
 
-# TOKEN ENDPOINT
-async def handle_token(grant_type: str = Form(...), code: str = Form(None), redirect_uri: str = Form(None),
-                      client_id: str = Form(None), client_secret: str = Form(None),
-                      code_verifier: str = Form(None), refresh_token: str = Form(None), resource: str = Form(None)):
+async def handle_token(grant_type: str = Form(...), code: str = Form(None),
+                      redirect_uri: str = Form(None), client_id: str = Form(None),
+                      client_secret: str = Form(None), code_verifier: str = Form(None),
+                      refresh_token: str = Form(None), resource: str = Form(None)):
     if grant_type == "authorization_code":
         if code not in auth_codes:
             raise HTTPException(400, "Invalid code")
@@ -150,43 +164,70 @@ async def handle_token(grant_type: str = Form(...), code: str = Form(None), redi
         if resource and resource.rstrip('/') != code_data.get("resource", "").rstrip('/'):
             raise HTTPException(400, "Resource mismatch")
         
-        access_token = create_access_token({"sub": code_data["username"], "scope": code_data["scope"], "client_id": client_id})
+        access_token = create_access_token({
+            "sub": code_data["username"],
+            "scope": code_data["scope"],
+            "client_id": client_id
+        })
         refresh_token_value = secrets.token_urlsafe(32)
-        tokens[refresh_token_value] = {"username": code_data["username"], "client_id": client_id, "scope": code_data["scope"]}
+        tokens[refresh_token_value] = {
+            "username": code_data["username"],
+            "client_id": client_id,
+            "scope": code_data["scope"]
+        }
         del auth_codes[code]
         
-        return {"access_token": access_token, "token_type": "Bearer", "expires_in": 3600,
-                "refresh_token": refresh_token_value, "scope": code_data["scope"]}
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "refresh_token": refresh_token_value,
+            "scope": code_data["scope"]
+        }
     
     elif grant_type == "refresh_token":
         if refresh_token not in tokens:
             raise HTTPException(400, "Invalid refresh token")
+        
         token_data = tokens[refresh_token]
-        access_token = create_access_token({"sub": token_data["username"], "scope": token_data["scope"], "client_id": token_data["client_id"]})
+        access_token = create_access_token({
+            "sub": token_data["username"],
+            "scope": token_data["scope"],
+            "client_id": token_data["client_id"]
+        })
         new_refresh = secrets.token_urlsafe(32)
         tokens[new_refresh] = token_data
         del tokens[refresh_token]
-        return {"access_token": access_token, "token_type": "Bearer", "expires_in": 3600,
-                "refresh_token": new_refresh, "scope": token_data["scope"]}
+        
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "refresh_token": new_refresh,
+            "scope": token_data["scope"]
+        }
     
     raise HTTPException(400, "Unsupported grant")
 
 
 @app.post("/token")
-async def token(grant_type: str = Form(...), code: str = Form(None), redirect_uri: str = Form(None),
-               client_id: str = Form(None), client_secret: str = Form(None),
-               code_verifier: str = Form(None), refresh_token: str = Form(None), resource: str = Form(None)):
-    return await handle_token(grant_type, code, redirect_uri, client_id, client_secret, code_verifier, refresh_token, resource)
+async def token(grant_type: str = Form(...), code: str = Form(None),
+               redirect_uri: str = Form(None), client_id: str = Form(None),
+               client_secret: str = Form(None), code_verifier: str = Form(None),
+               refresh_token: str = Form(None), resource: str = Form(None)):
+    return await handle_token(grant_type, code, redirect_uri, client_id,
+                             client_secret, code_verifier, refresh_token, resource)
 
 
 @app.post("/oauth/token")
-async def token_legacy(grant_type: str = Form(...), code: str = Form(None), redirect_uri: str = Form(None),
-                      client_id: str = Form(None), client_secret: str = Form(None),
-                      code_verifier: str = Form(None), refresh_token: str = Form(None), resource: str = Form(None)):
-    return await handle_token(grant_type, code, redirect_uri, client_id, client_secret, code_verifier, refresh_token, resource)
+async def token_legacy(grant_type: str = Form(...), code: str = Form(None),
+                      redirect_uri: str = Form(None), client_id: str = Form(None),
+                      client_secret: str = Form(None), code_verifier: str = Form(None),
+                      refresh_token: str = Form(None), resource: str = Form(None)):
+    return await handle_token(grant_type, code, redirect_uri, client_id,
+                             client_secret, code_verifier, refresh_token, resource)
 
 
-# DISCOVERY
 @app.get("/.well-known/oauth-authorization-server")
 async def oauth_metadata(request: Request):
     return {
@@ -208,7 +249,6 @@ async def jwks():
     return {"keys": []}
 
 
-# REGISTRATION
 @app.post("/register")
 async def register_client(request: Request):
     body = await request.json()
@@ -224,10 +264,7 @@ async def register_client(request: Request):
 
 
 if __name__ == "__main__":
-    print("=" * 80)
-    print("🔐 Auth Server")
-    print(f"   URL:      {ISSUER}")
-    print(f"   For MCP:  {AUDIENCE}")
-    print(f"   Login:    user@example.com / password123")
-    print("=" * 80)
+    print(f"Auth Server: {ISSUER}")
+    print(f"For MCP: {AUDIENCE}")
+    print(f"Login: user@example.com / password123")
     uvicorn.run(app, host="0.0.0.0", port=9000)
