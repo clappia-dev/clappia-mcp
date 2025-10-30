@@ -1,4 +1,5 @@
 import sys
+import logging
 import uvicorn
 from pydantic import AnyHttpUrl
 from mcp.server.fastmcp import FastMCP
@@ -9,18 +10,17 @@ from fastapi.responses import JSONResponse
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from src.utils.logging_utils import get_logger
 from src.tools.submissions import register_submission_tools
 from src.tools.definitions import register_definition_tools
 from src.tools.workflows import register_workflow_tools
 from src.tools.analytics import register_analytics_tools
 from src.tools.workplace import register_workplace_tools
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
-ISSUER = "https://clappia-auth.loca.lt"
+ISSUER = "https://preprod-dev.clappia.com"
 AUDIENCE = "https://clappia-mcp.loca.lt"
-SECRET_KEY = "your-secret-key-min-32-chars-long!!"
+SECRET_KEY = "clappia_access_test_secret_key"  
 ALGORITHM = "HS256"
 
 
@@ -39,8 +39,7 @@ class JWTTokenVerifier(TokenVerifier):
                 scopes=scopes,
                 expires_at=payload.get("exp")
             )
-        except JWTError as e:
-            logger.error(f"Token validation failed: {e}")
+        except JWTError:
             return None
 
 
@@ -64,29 +63,13 @@ AVAILABLE_MODULES = {
 
 
 def register_all_tools():
-    """Register all tools from all modules"""
-    logger.info("Registering tools...")
-    
-    for module_name, register_func in AVAILABLE_MODULES.items():
+    for register_func in AVAILABLE_MODULES.values():
         try:
-            logger.info(f"  - {module_name}")
             register_func(app)
+            logger.info(f"Tools registered for {register_func.__name__}")
         except Exception as e:
-            logger.error(f"Failed to register {module_name}: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
-    
-    # Check if tools were registered
-    if hasattr(app, '_tool_manager') and hasattr(app._tool_manager, '_tools'):
-        tool_count = len(app._tool_manager._tools)
-        logger.info(f"Total tools registered: {tool_count}")
-        if tool_count > 0:
-            logger.info(f"Tool names: {list(app._tool_manager._tools.keys())}")
-    else:
-        logger.warning("Could not verify tool registration")
+            logger.error(f"Failed to register tools for {register_func.__name__}: {e}")
 
-
-# Register tools at module level
 register_all_tools()
 
 
@@ -111,8 +94,6 @@ class WWWAuthenticateMiddleware(BaseHTTPMiddleware):
 
 def main():
     try:
-        logger.info(f"Starting Clappia MCP Server at {AUDIENCE}")
-        
         starlette_app = app.streamable_http_app()
         starlette_app.routes.append(Route("/.well-known/oauth-protected-resource", protected_resource_metadata))
         starlette_app.add_middleware(WWWAuthenticateMiddleware)
@@ -122,9 +103,7 @@ def main():
     except KeyboardInterrupt:
         logger.info("Server stopped")
     except Exception as e:
-        logger.error(f"Error: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
+        logger.error(f"Server error: {e}")
         sys.exit(1)
 
 
