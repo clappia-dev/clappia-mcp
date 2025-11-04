@@ -42,20 +42,22 @@ LABEL org.opencontainers.image.platform.detected="${TARGETPLATFORM}"
 LABEL org.opencontainers.image.platform.build="${BUILDPLATFORM}"
 
 # Usage and environment metadata
-LABEL usage="docker run -p 8000:8000 -e CLAPPIA_API_KEY=your_key clappia-mcp:latest"
-LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
+LABEL usage="docker run -p 8000:8000 -e ENVIRONMENT=prod -e WORKERS=2 clappia-mcp:latest"
+LABEL environment.ENVIRONMENT="Optional: Environment selection (dev/qa/prod). Default: prod"
+LABEL environment.WORKERS="Optional: Number of worker processes. Default: 2. Requires ENVIRONMENT=prod for multiple workers"
 LABEL ports.exposed="8000 (HTTP/SSE endpoint)"
 LABEL volumes.recommended="None required"
 
 # Keywords for Docker Hub search
-LABEL keywords="clappia,mcp,model-context-protocol,ai,no-code,workflow,forms,automation,claude,openai,http,sse,web"
+LABEL keywords="clappia,mcp,model-context-protocol,ai,no-code,workflow,forms,automation,claude,openai,http,sse,web,async"
 LABEL category="Development Tools, AI/ML, Automation, Web Services"
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies with platform-specific optimizations
-RUN apt-get update && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
@@ -64,10 +66,11 @@ RUN echo "Building for platform: ${TARGETPLATFORM:-unknown}" && \
     echo "Build platform: ${BUILDPLATFORM:-unknown}"
 
 # Install uv for dependency management
-RUN pip install uv
+RUN pip install --no-cache-dir uv
 
-# Copy dependency files and README
-COPY pyproject.toml uv.lock README.md ./
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+COPY README.md ./ 2>/dev/null || true
 
 # Install Python dependencies
 RUN uv sync --frozen
@@ -80,24 +83,27 @@ RUN useradd --create-home --shell /bin/bash app && \
     chown -R app:app /app
 USER app
 
-# Health check
+# Health check - use curl (simpler and more reliable)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/sse', timeout=5)" || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Set default environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONPATH=/app
+ENV ENVIRONMENT=prod
+ENV WORKERS=2
 
 # Expose port
 EXPOSE 8000
 
 # Run the server
-CMD ["uv", "run", "http_server.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "http_server.py"]
 
 # Additional documentation as labels
 LABEL readme.overview="Clappia MCP Server with HTTP/SSE transport enables AI assistants to seamlessly integrate with Clappia's no-code platform through web-based communication."
-LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• HTTP/SSE transport for web integration\n• Workspace management\n• Form definitions and structure access\n• Workflow automation\n• Submission data handling\n• Analytics and reporting\n• Secure API authentication\n• Health check endpoint"
-LABEL readme.requirements="• Docker installed\n• Clappia API key\n• Network access to Clappia services\n• Port 8000 available"
-LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -p 8000:8000 -e CLAPPIA_API_KEY=your_key clappia-mcp:latest\n3. Access SSE endpoint at http://localhost:8000/sse"
-LABEL readme.endpoints="• SSE Endpoint: /sse\n• Authentication: X-API-Key header required"
+LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• Async HTTP server with multiple workers\n• HTTP/SSE transport for web integration\n• Workspace management\n• Form definitions and structure access\n• Workflow automation\n• Submission data handling\n• Analytics and reporting\n• OAuth 2.0 authentication\n• Health check endpoint"
+LABEL readme.requirements="• Docker installed\n• Network access to Clappia services\n• Port 8000 available"
+LABEL readme.quickstart="1. docker run -p 8000:8000 -e ENVIRONMENT=prod -e WORKERS=2 clappia-mcp:latest\n2. Access health endpoint: curl http://localhost:8000/health\n3. Scale workers: docker run -p 8000:8000 -e ENVIRONMENT=prod -e WORKERS=4 clappia-mcp:latest"
+LABEL readme.endpoints="• Health: GET /health\n• OAuth Metadata: GET /.well-known/oauth-protected-resource\n• MCP SSE: /sse (requires OAuth token)\n• Authentication: Bearer token via Authorization header"
+LABEL readme.configuration="Environment Variables:\n• ENVIRONMENT: dev/qa/prod (default: prod)\n• WORKERS: Number of worker processes (default: 2, requires ENVIRONMENT=prod)"

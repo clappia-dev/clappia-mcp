@@ -30,8 +30,8 @@ LABEL architecture="multi-platform"
 LABEL compatibility="Intel x86_64, Apple Silicon ARM64"
 
 # Usage and environment metadata
-LABEL usage="docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:latest"
-LABEL environment.CLAPPIA_API_KEY="Required: Your Clappia API key for authentication"
+LABEL usage="docker run -e ENVIRONMENT=prod okaru413/clappia-mcp:latest"
+LABEL environment.ENVIRONMENT="Optional: Environment selection (dev/qa/prod). Default: prod"
 LABEL ports.exposed="None (MCP uses stdio)"
 LABEL volumes.recommended="None required"
 
@@ -53,6 +53,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Set default environment variables with documentation
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV ENVIRONMENT=prod
 
 # Run the MCP server
 CMD ["uv", "run", "mcp_server.py"]
@@ -60,5 +61,5 @@ CMD ["uv", "run", "mcp_server.py"]
 # Additional documentation as labels
 LABEL readme.overview="Clappia MCP Server enables AI assistants to seamlessly integrate with Clappia's no-code platform through the Model Context Protocol."
 LABEL readme.features="• Multi-platform support (Intel & Apple Silicon)\n• Workspace management\n• Form definitions and structure access\n• Workflow automation\n• Submission data handling\n• Analytics and reporting\n• Secure API authentication"
-LABEL readme.requirements="• Docker installed\n• Clappia API key\n• Network access to Clappia services"
-LABEL readme.quickstart="1. Get API key from Clappia\n2. docker run -e CLAPPIA_API_KEY=your_key okaru413/clappia-mcp:latest"
+LABEL readme.requirements="• Docker installed\n• Network access to Clappia services"
+LABEL readme.quickstart="1. docker run -e ENVIRONMENT=prod okaru413/clappia-mcp:latest"

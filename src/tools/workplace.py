@@ -8,14 +8,10 @@ from pydantic import EmailStr
 
 from mcp.server.fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
-from src.utils.context import get_api_key
-from src.utils.constants import (
-    CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PREPROD_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PROD_API_BASE_URL,
-)
-from clappia_api_tools import WorkplaceAPIKeyClient as WorkplaceClient
-from clappia_api_tools.models.permissions import Permission
+from src.utils.context import get_auth_token
+from src.utils.constants import CLAPPIA_WORKPLACE_API_BASE_URL
+from clappia_api_tools.models.workplace import Permission
+from clappia_api_tools import WorkplaceAuthTokenClient
 
 from clappia_api_tools.models.request import (
     AddUserToWorkplaceRequest,
@@ -27,18 +23,20 @@ from clappia_api_tools.models.request import (
 logger = get_logger(__name__)
 
 
-def _get_workplace_client() -> WorkplaceClient:
-    api_key = get_api_key()
-    return WorkplaceClient(
-        api_key=api_key,
-        base_url=CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
+def _get_workplace_client(workplace_id: str) -> WorkplaceAuthTokenClient:
+    auth_token = get_auth_token()
+    return WorkplaceAuthTokenClient(
+        auth_token=auth_token,
+        workplace_id=workplace_id,
+        base_url=CLAPPIA_WORKPLACE_API_BASE_URL,
     )
 
 
 def register_workplace_tools(mcp: FastMCP):
 
     @mcp.tool()
-    def add_user_to_workplace(
+    async def add_user_to_workplace(
+        workplace_id: str,
         first_name: str,
         last_name: str,
         email_address: EmailStr | None = None,
@@ -46,7 +44,17 @@ def register_workplace_tools(mcp: FastMCP):
         group_names: list[str] | None = None,
         attributes: dict[str, str] | None = None,
     ):
-        """Add a new user to the Clappia workplace."""
+        """Add user to workplace.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            first_name: ASK USER - User's first name
+            last_name: ASK USER - User's last name
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+            group_names: List of group names (optional)
+            attributes: Custom attributes dict (optional)
+        """
 
         request = AddUserToWorkplaceRequest(
             first_name=first_name,
@@ -57,16 +65,27 @@ def register_workplace_tools(mcp: FastMCP):
             attributes=attributes or {},
         )
 
-        workplace_client = _get_workplace_client()
-        return workplace_client.add_user_to_workplace(request)
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.add_user_to_workplace(request)
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def update_workplace_user_details(
+    async def update_workplace_user_details(
+        workplace_id: str,
         updated_details: dict[str, str],
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Update workplace user details in Clappia."""
+        """Update workplace user details.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            updated_details: ASK USER - Dict of fields to update (e.g., {'first_name': 'John'})
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
 
         request = UpdateWorkplaceUserDetailsRequest(
             updated_details=updated_details,
@@ -74,16 +93,27 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
 
-        workplace_client = _get_workplace_client()
-        return workplace_client.update_workplace_user_details(request)
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.update_workplace_user_details(request)
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def update_workplace_user_attributes(
+    async def update_workplace_user_attributes(
+        workplace_id: str,
         attributes: dict[str, str],
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Update workplace user attributes in Clappia."""
+        """Update workplace user custom attributes.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            attributes: ASK USER - Dict of attribute names and values to update
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
 
         request = UpdateWorkplaceUserAttributesRequest(
             attributes=attributes,
@@ -91,79 +121,143 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
 
-        workplace_client = _get_workplace_client()
-        return workplace_client.update_workplace_user_attributes(request)
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.update_workplace_user_attributes(request)
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def update_workplace_user_role(
+    async def update_workplace_user_role(
+        workplace_id: str,
         role: Literal["Workplace Manager", "App Builder", "User"] = "User",
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Update workplace user role in Clappia."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.update_workplace_user_role(
-            email_address=email_address,
-            phone_number=phone_number,
-            role=role,
-        )
+        """Update workplace user role. Options: "Workplace Manager", "App Builder", "User".
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            role: Role to assign (default: "User")
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.update_workplace_user_role(
+                email_address=email_address,
+                phone_number=phone_number,
+                role=role,
+            )
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def update_workplace_user_groups(
+    async def update_workplace_user_groups(
+        workplace_id: str,
         group_names: list[str],
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Update workplace user groups in Clappia."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.update_workplace_user_groups(
-            email_address=email_address,
-            phone_number=phone_number,
-            group_names=group_names,
-        )
+        """Update workplace user group membership.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            group_names: ASK USER - List of group names to assign
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.update_workplace_user_groups(
+                email_address=email_address,
+                phone_number=phone_number,
+                group_names=group_names,
+            )
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def add_user_to_app(
+    async def add_user_to_app(
         app_id: str,
+        workplace_id: str,
         permissions: Permission,
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Add a user to a specific Clappia app with permissions."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.add_user_to_app(
-            app_id=app_id,
-            permissions=permissions,
-            email_address=email_address,
-            phone_number=phone_number,
-        )
+        """Grant workplace user access to app.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            permissions: ASK USER - Permission object specifying access level
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.add_user_to_app(
+                app_id=app_id,
+                permissions=permissions,
+                email_address=email_address,
+                phone_number=phone_number,
+            )
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def get_workplace_apps():
-        """Get all apps available in the Clappia workplace."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.get_workplace_apps()
+    async def get_workplace_apps(workplace_id: str):
+        """Get all apps in workplace.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.get_workplace_apps()
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def get_workplace_user_apps(
+    async def get_workplace_user_apps(
+        workplace_id: str,
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
     ):
-        """Get apps accessible to a specific workplace user."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.get_workplace_user_apps(
-            email_address=email_address,
-            phone_number=phone_number,
-        )
+        """Get apps accessible to workplace user.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            email_address: User email (required if phone_number not provided)
+            phone_number: User phone number (required if email_address not provided)
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.get_workplace_user_apps(
+                email_address=email_address,
+                phone_number=phone_number,
+            )
+        finally:
+            await workplace_client.close()
 
     @mcp.tool()
-    def get_workplace_users(
+    async def get_workplace_users(
+        workplace_id: str,
         page_size: int = 50,
         token: str | None = None,
     ):
-        """Get workplace users with pagination support."""
-        workplace_client = _get_workplace_client()
-        return workplace_client.get_workplace_users(
-            page_size=page_size,
-            token=token,
-        )
+        """Get paginated list of workplace users.
+
+        Args:
+            workplace_id: ASK USER - Workplace identifier
+            page_size: Number of users per page (default: 50)
+            token: Pagination token for next page (optional)
+        """
+        workplace_client = _get_workplace_client(workplace_id)
+        try:
+            return await workplace_client.get_workplace_users(
+                page_size=page_size,
+                token=token,
+            )
+        finally:
+            await workplace_client.close()

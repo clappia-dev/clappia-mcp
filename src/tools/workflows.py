@@ -5,13 +5,9 @@ Handles all workflow-related operations with clean Pydantic models
 
 from mcp.server.fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
-from src.utils.context import get_api_key
-from src.utils.constants import (
-    CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PREPROD_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PROD_API_BASE_URL,
-)
-from clappia_api_tools import WorkflowDefinitionAPIKeyClient as WorkflowDefinitionClient
+from src.utils.context import get_auth_token
+from src.utils.constants import CLAPPIA_WORKFLOW_DEFINITION_API_BASE_URL
+from clappia_api_tools import WorkflowDefinitionAuthTokenClient
 from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
@@ -57,11 +53,14 @@ WorkflowStepRequestUnion = Union[
 logger = get_logger(__name__)
 
 
-def _get_workflow_definition_client() -> WorkflowDefinitionClient:
-    api_key = get_api_key()
-    return WorkflowDefinitionClient(
-        api_key=api_key,
-        base_url=CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
+def _get_workflow_definition_client(
+    workplace_id: str,
+) -> WorkflowDefinitionAuthTokenClient:
+    auth_token = get_auth_token()
+    return WorkflowDefinitionAuthTokenClient(
+        auth_token=auth_token,
+        workplace_id=workplace_id,
+        base_url=CLAPPIA_WORKFLOW_DEFINITION_API_BASE_URL,
     )
 
 
@@ -69,72 +68,123 @@ def register_workflow_tools(mcp: FastMCP):
     """Register all workflow-related tools with the FastMCP server"""
 
     @mcp.tool()
-    def get_app_workflow(
+    async def get_app_workflow(
         app_id: str,
+        workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         version_variable_name: Optional[str] = None,
     ):
-        """Retrieve the workflow configuration for a Clappia app."""
+        """Get workflow configuration for app.
 
-        workflow_definition_client = _get_workflow_definition_client()
-        return workflow_definition_client.get_workflow(
-            app_id=app_id,
-            trigger_type=trigger_type,
-            version_variable_name=version_variable_name,
-        )
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            trigger_type: ASK USER - Trigger type: "newSubmission", "editSubmission", or "reviewSubmission"
+            version_variable_name: App version variable name (optional)
+        """
+
+        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        try:
+            return await workflow_definition_client.get_workflow(
+                app_id=app_id,
+                trigger_type=trigger_type,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await workflow_definition_client.close()
 
     @mcp.tool()
-    def add_workflow_step(
+    async def add_workflow_step(
         app_id: str,
+        workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         request: WorkflowStepRequestUnion,
         step_variable_name: Optional[str] = None,
         parent_step_variable_name: Optional[str] = None,
         version_variable_name: Optional[str] = None,
     ):
-        """Add a workflow step to a Clappia app's workflow. The step type is determined by the request object type."""
-        workflow_definition_client = _get_workflow_definition_client()
-        return workflow_definition_client.add(
-            app_id=app_id,
-            trigger_type=trigger_type,
-            request=request,
-            step_variable_name=step_variable_name,
-            parent_step_variable_name=parent_step_variable_name,
-            version_variable_name=version_variable_name,
-        )
+        """Add workflow step to app. Step type determined by request object type.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            trigger_type: ASK USER - Trigger type: "newSubmission", "editSubmission", or "reviewSubmission"
+            request: ASK USER - Workflow step definition request object (type determines step type)
+            step_variable_name: Unique variable name for the step (optional)
+            parent_step_variable_name: Parent step variable name if nested step (optional)
+            version_variable_name: App version variable name (optional)
+        """
+        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        try:
+            return await workflow_definition_client.add(
+                app_id=app_id,
+                trigger_type=trigger_type,
+                request=request,
+                step_variable_name=step_variable_name,
+                parent_step_variable_name=parent_step_variable_name,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await workflow_definition_client.close()
 
     @mcp.tool()
-    def update_workflow_step(
+    async def update_workflow_step(
         app_id: str,
+        workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         step_variable_name: str,
         request: WorkflowStepRequestUnion,
         version_variable_name: Optional[str] = None,
     ):
-        """Update a workflow step in a Clappia app's workflow. The step type is determined by the request object type."""
-        workflow_definition_client = _get_workflow_definition_client()
-        return workflow_definition_client.update(
-            app_id=app_id,
-            trigger_type=trigger_type,
-            step_variable_name=step_variable_name,
-            request=request,
-            version_variable_name=version_variable_name,
-        )
+        """Update workflow step. Step type must match existing type.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            trigger_type: ASK USER - Trigger type: "newSubmission", "editSubmission", or "reviewSubmission"
+            step_variable_name: ASK USER - Variable name of step to update
+            request: ASK USER - Workflow step definition request object with updated configuration
+            version_variable_name: App version variable name (optional)
+        """
+        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        try:
+            return await workflow_definition_client.update(
+                app_id=app_id,
+                trigger_type=trigger_type,
+                step_variable_name=step_variable_name,
+                request=request,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await workflow_definition_client.close()
 
     @mcp.tool()
-    def reorder_step(
+    async def reorder_step(
         app_id: str,
+        workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         step_variable_name: str,
         parent_step_variable_name: str,
         version_variable_name: Optional[str] = None,
     ):
-        """Reorder a step in a Clappia app's workflow."""
-        workflow_definition_client = _get_workflow_definition_client()
-        return workflow_definition_client.reorder_step(
-            app_id=app_id,
-            trigger_type=trigger_type,
-            step_variable_name=step_variable_name,
-            parent_step_variable_name=parent_step_variable_name,
-            version_variable_name=version_variable_name,
-        )
+        """Reorder workflow step.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            trigger_type: ASK USER - Trigger type: "newSubmission", "editSubmission", or "reviewSubmission"
+            step_variable_name: ASK USER - Variable name of step to move
+            parent_step_variable_name: ASK USER - Variable name of new parent step
+            version_variable_name: App version variable name (optional)
+        """
+        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        try:
+            return await workflow_definition_client.reorder_step(
+                app_id=app_id,
+                trigger_type=trigger_type,
+                step_variable_name=step_variable_name,
+                parent_step_variable_name=parent_step_variable_name,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await workflow_definition_client.close()

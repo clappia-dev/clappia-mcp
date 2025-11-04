@@ -5,13 +5,9 @@ Handles all submission management operations with clean Pydantic models
 
 from mcp.server.fastmcp import FastMCP
 from src.utils.logging_utils import get_logger
-from src.utils.context import get_api_key
-from src.utils.constants import (
-    CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PREPROD_API_BASE_URL,
-    CLAPPIA_EXTERNAL_PROD_API_BASE_URL,
-)
-from clappia_api_tools import SubmissionAPIKeyClient as SubmissionClient
+from src.utils.context import get_auth_token
+from src.utils.constants import CLAPPIA_SUBMISSIONS_API_BASE_URL
+from clappia_api_tools import SubmissionAuthTokenClient
 from clappia_api_tools.models import (
     GetSubmissionsRequest,
     GetSubmissionsAggregationRequest,
@@ -25,11 +21,12 @@ from clappia_api_tools.models import (
 logger = get_logger(__name__)
 
 
-def _get_submission_client() -> SubmissionClient:
-    api_key = get_api_key()
-    return SubmissionClient(
-        api_key=api_key,
-        base_url=CLAPPIA_EXTERNAL_DEV_API_BASE_URL,
+def _get_submission_client(workplace_id: str) -> SubmissionAuthTokenClient:
+    auth_token = get_auth_token()
+    return SubmissionAuthTokenClient(
+        auth_token=auth_token,
+        workplace_id=workplace_id,
+        base_url=CLAPPIA_SUBMISSIONS_API_BASE_URL,
     )
 
 
@@ -37,96 +34,157 @@ def register_submission_tools(mcp: FastMCP):
     """Register all submission-related tools with the FastMCP server"""
 
     @mcp.tool()
-    def get_submissions(request: GetSubmissionsRequest):
-        """Retrieve submissions from a Clappia app with optional filtering."""
-        submission_client = _get_submission_client()
-        return submission_client.get_submissions(
-            app_id=request.app_id,
-            page_size=request.page_size,
-            forward=request.forward,
-            filters=request.filters,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+    async def get_submissions(
+        app_id: str,
+        workplace_id: str,
+        request: GetSubmissionsRequest,
+    ):
+        """Get submissions from app with filtering and pagination.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - GetSubmissionsRequest object with filters, pagination, sorting, and field selection
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.get_submissions(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def get_submissions_aggregation(
+    async def get_submissions_aggregation(
+        app_id: str,
+        workplace_id: str,
         request: GetSubmissionsAggregationRequest,
     ):
-        """Aggregate and analyze Clappia submissions with various metrics and grouping options."""
-        submission_client = _get_submission_client()
-        return submission_client.get_submissions_aggregation(
-            app_id=request.app_id,
-            dimensions=request.dimensions,
-            aggregation_dimensions=request.aggregation_dimensions,
-            x_axis_labels=request.x_axis_labels,
-            forward=request.forward,
-            page_size=request.page_size,
-            filters=request.filters,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+        """Aggregate submissions with metrics and grouping.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - GetSubmissionsAggregationRequest object with aggregation config, grouping, and filters
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.get_submissions_aggregation(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def create_submission(
+    async def create_submission(
+        app_id: str,
+        workplace_id: str,
         request: CreateSubmissionRequest,
     ):
-        """Create a new submission in a Clappia app."""
-        submission_client = _get_submission_client()
-        return submission_client.create_submission(
-            app_id=request.app_id,
-            data=request.data,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+        """Create new submission in app.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - CreateSubmissionRequest object with field values and submission metadata
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.create_submission(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def edit_submission(request: EditSubmissionRequest):
-        """Edit an existing submission in a Clappia app."""
-        submission_client = _get_submission_client()
-        return submission_client.edit_submission(
-            app_id=request.app_id,
-            submission_id=request.submission_id,
-            data=request.data,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+    async def edit_submission(
+        app_id: str,
+        workplace_id: str,
+        request: EditSubmissionRequest,
+    ):
+        """Edit existing submission in app.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - EditSubmissionRequest object with submission ID and updated field values
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.edit_submission(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def update_submission_status(
+    async def update_submission_status(
+        app_id: str,
+        workplace_id: str,
         request: UpdateSubmissionStatusRequest,
     ):
-        """Update the status of a submission in a Clappia app."""
-        submission_client = _get_submission_client()
-        return submission_client.update_status(
-            app_id=request.app_id,
-            submission_id=request.submission_id,
-            status_name=request.status_name,
-            comments=request.comments,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+        """Update submission status.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - UpdateSubmissionStatusRequest object with submission ID and new status
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.update_status(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def get_submissions_in_excel(
+    async def get_submissions_in_excel(
+        app_id: str,
+        workplace_id: str,
         request: GetSubmissionsInExcelRequest,
     ):
-        """Get submissions in Excel format from a Clappia app with optional filtering."""
-        submission_client = _get_submission_client()
-        return submission_client.get_submissions_in_excel(
-            app_id=request.app_id,
-            requesting_user_email_address=str(request.requesting_user_email_address),
-            filters=request.filters,
-            field_names=request.field_names,
-            format=request.format,
-        )
+        """Export submissions to Excel format.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - GetSubmissionsInExcelRequest object with filters and export configuration
+        """
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.get_submissions_in_excel(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
 
     @mcp.tool()
-    def update_submission_owners(
+    async def update_submission_owners(
+        app_id: str,
+        workplace_id: str,
         request: UpdateSubmissionOwnersRequest,
     ):
-        """Update the owners of a submission in a Clappia app."""
+        """Update owners assigned to submission.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - UpdateSubmissionOwnersRequest object with submission ID and new owner email addresses
+        """
         email_ids = [str(email) for email in request.email_ids]
 
-        submission_client = _get_submission_client()
-        return submission_client.update_owners(
-            app_id=request.app_id,
-            submission_id=request.submission_id,
-            email_ids=email_ids,
-            requesting_user_email_address=request.requesting_user_email_address,
-        )
+        submission_client = _get_submission_client(workplace_id)
+        try:
+            return await submission_client.update_owners(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()

@@ -118,7 +118,7 @@ open https://<your_workplace>.clappia.com
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
-        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "-e", "ENVIRONMENT=prod",
         "okaru413/clappia-mcp-form:1.0.0"
       ]
     },
@@ -126,7 +126,7 @@ open https://<your_workplace>.clappia.com
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
-        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "-e", "ENVIRONMENT=prod",
         "okaru413/clappia-mcp-workflow:1.0.0"
       ]
     },
@@ -134,7 +134,7 @@ open https://<your_workplace>.clappia.com
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
-        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "-e", "ENVIRONMENT=prod",
         "okaru413/clappia-mcp-charts:1.0.0"
       ]
     },
@@ -142,7 +142,7 @@ open https://<your_workplace>.clappia.com
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
-        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "-e", "ENVIRONMENT=prod",
         "okaru413/clappia-mcp-submission:1.0.0"
       ]
     },
@@ -150,7 +150,7 @@ open https://<your_workplace>.clappia.com
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
-        "-e", "CLAPPIA_API_KEY=your_api_key",
+        "-e", "ENVIRONMENT=prod",
         "okaru413/clappia-mcp-workplace:1.0.0"
       ]
     }
@@ -159,7 +159,6 @@ open https://<your_workplace>.clappia.com
 ```
 
 **Important:** 
--  Replace `your_api_key` with your actual Clappia API key
 -  After making changes, **close Claude Desktop completely** and reopen it
 -  If servers don't appear, close and reopen Claude Desktop again
 
@@ -251,10 +250,8 @@ docker-compose down
 Create a `.env` file with your configuration:
 
 ```bash
-# Required
-CLAPPIA_API_KEY=your_actual_api_key_here
-
 # Optional
+ENVIRONMENT=prod
 PYTHONUNBUFFERED=1
 PYTHONDONTWRITEBYTECODE=1
 PYTHONPATH=/app
