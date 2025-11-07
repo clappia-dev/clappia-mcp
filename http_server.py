@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.applications import Starlette
 
 from src.utils.jwt_utils import JWTTokenVerifier, get_jwt_config
-from src.utils.enums import Environment
+from src.utils.constants import OAUTH_CONSTANTS
 from src.tools.submissions import register_submission_tools
 from src.tools.definitions import register_definition_tools
 from src.tools.workflows import register_workflow_tools
@@ -74,6 +74,26 @@ async def protected_resource_metadata(request: Request):
     )
 
 
+async def oauth_authorization_server_metadata(request: Request):
+    return JSONResponse(
+        {
+            "issuer": OAUTH_CONSTANTS["DEFAULT_ISSUER"],
+            "authorization_endpoint": OAUTH_CONSTANTS["AUTHORIZATION_ENDPOINT"],
+            "token_endpoint": OAUTH_CONSTANTS["TOKEN_ENDPOINT"],
+            "registration_endpoint": OAUTH_CONSTANTS["REGISTRATION_ENDPOINT"],
+            "response_types_supported": OAUTH_CONSTANTS["RESPONSE_TYPES_SUPPORTED"],
+            "grant_types_supported": OAUTH_CONSTANTS["GRANT_TYPES_SUPPORTED"],
+            "code_challenge_methods_supported": OAUTH_CONSTANTS[
+                "CODE_CHALLENGE_METHODS_SUPPORTED"
+            ],
+            "token_endpoint_auth_methods_supported": OAUTH_CONSTANTS[
+                "TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED"
+            ],
+            "scopes_supported": OAUTH_CONSTANTS["SCOPES_SUPPORTED"],
+        }
+    )
+
+
 async def debug_info(request: Request):
     try:
         tools = await mcp_app.list_tools()
@@ -131,6 +151,13 @@ def create_app() -> Starlette:
     starlette_app.routes.insert(
         2, Route("/.well-known/oauth-protected-resource", protected_resource_metadata)
     )
+    starlette_app.routes.insert(
+        3,
+        Route(
+            "/.well-known/oauth-authorization-server",
+            oauth_authorization_server_metadata,
+        ),
+    )
 
     starlette_app.add_middleware(WWWAuthenticateMiddleware)
 
@@ -157,46 +184,20 @@ print("=" * 50 + "\n")
 
 def main():
     try:
-        workers = int(os.getenv("WORKERS", 1))
-        environment = Environment.from_env(default=Environment.DEV)
-        is_production = environment.is_production()
+        port = int(os.getenv("PORT", 8080))
 
-        logger.info(f"🚀 Starting MCP server on http://0.0.0.0:8000")
+        logger.info(f"🚀 Starting MCP server on http://0.0.0.0:{port}")
         logger.info(f"📋 Issuer: {ISSUER}")
         logger.info(f"🎯 Audience: {AUDIENCE}")
-        logger.info(f"🌍 Environment: {environment.value}")
 
-        if is_production and workers > 1:
-            logger.info(
-                f"👷 Production mode: Using {workers} workers via import string"
-            )
-            logger.info(
-                f"💡 Running with: uvicorn http_server:app --host 0.0.0.0 --port 8000 --workers {workers}"
-            )
-            uvicorn.run(
-                "http_server:app",
-                host="0.0.0.0",
-                port=8000,
-                workers=workers,
-                log_level="info",
-                limit_concurrency=1000,
-                timeout_keep_alive=65,
-            )
-        else:
-            if workers > 1:
-                logger.warning(
-                    "⚠️  Multiple workers require production mode. Using 1 worker for dev/qa."
-                )
-            logger.info("🔧 Dev/QA mode: Single worker with direct app object")
-            uvicorn.run(
-                app,
-                host="0.0.0.0",
-                port=8000,
-                log_level="info",
-                limit_concurrency=1000,
-                timeout_keep_alive=65,
-            )
-
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=port,
+            log_level="info",
+            limit_concurrency=1000,
+            timeout_keep_alive=65,
+        )
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:

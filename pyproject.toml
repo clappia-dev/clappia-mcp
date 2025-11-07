@@ -9,7 +9,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "python-dotenv>=1.0.0",
     "mcp>=1.19.0",
-    "clappia-api-tools>=2.0.10",
+    "clappia-api-tools>=2.0.12",
 ]
 
 [build-system]
@@ -26,6 +26,3 @@ packages = ["src"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
-
-[tool.uv.sources]
-clappia-api-tools = { path = "../clappia-tools" }
