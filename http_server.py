@@ -94,6 +94,42 @@ async def oauth_authorization_server_metadata(request: Request):
     )
 
 
+async def openid_configuration(request: Request):
+    return JSONResponse(
+        {
+            "issuer": OAUTH_CONSTANTS["DEFAULT_ISSUER"],
+            "authorization_endpoint": OAUTH_CONSTANTS["AUTHORIZATION_ENDPOINT"],
+            "token_endpoint": OAUTH_CONSTANTS["TOKEN_ENDPOINT"],
+            "registration_endpoint": OAUTH_CONSTANTS["REGISTRATION_ENDPOINT"],
+            "response_types_supported": OAUTH_CONSTANTS["RESPONSE_TYPES_SUPPORTED"],
+            "grant_types_supported": OAUTH_CONSTANTS["GRANT_TYPES_SUPPORTED"],
+            "code_challenge_methods_supported": OAUTH_CONSTANTS[
+                "CODE_CHALLENGE_METHODS_SUPPORTED"
+            ],
+            "token_endpoint_auth_methods_supported": OAUTH_CONSTANTS[
+                "TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED"
+            ],
+            "scopes_supported": OAUTH_CONSTANTS["SCOPES_SUPPORTED"],
+        }
+    )
+
+
+async def root_endpoint(request: Request):
+    return JSONResponse(
+        {
+            "server": "clappia-mcp-server",
+            "version": "1.0.0",
+            "endpoints": {
+                "health": "/health",
+                "debug": "/debug",
+                "oauth_protected_resource": "/.well-known/oauth-protected-resource",
+                "oauth_authorization_server": "/.well-known/oauth-authorization-server",
+                "openid_configuration": "/.well-known/openid-configuration",
+            },
+        }
+    )
+
+
 async def debug_info(request: Request):
     try:
         tools = await mcp_app.list_tools()
@@ -146,16 +182,52 @@ class WWWAuthenticateMiddleware(BaseHTTPMiddleware):
 def create_app() -> Starlette:
     starlette_app = mcp_app.streamable_http_app()
 
-    starlette_app.routes.insert(0, Route("/health", health_check))
-    starlette_app.routes.insert(1, Route("/debug", debug_info))
+    starlette_app.routes.insert(0, Route("/", root_endpoint))
+    starlette_app.routes.insert(1, Route("/health", health_check))
+    starlette_app.routes.insert(2, Route("/debug", debug_info))
     starlette_app.routes.insert(
-        2, Route("/.well-known/oauth-protected-resource", protected_resource_metadata)
+        3, Route("/.well-known/oauth-protected-resource", protected_resource_metadata)
     )
     starlette_app.routes.insert(
-        3,
+        4,
+        Route(
+            "/.well-known/oauth-protected-resource/mcp",
+            protected_resource_metadata,
+        ),
+    )
+    starlette_app.routes.insert(
+        5,
         Route(
             "/.well-known/oauth-authorization-server",
             oauth_authorization_server_metadata,
+        ),
+    )
+    starlette_app.routes.insert(
+        6,
+        Route(
+            "/.well-known/oauth-authorization-server/mcp",
+            oauth_authorization_server_metadata,
+        ),
+    )
+    starlette_app.routes.insert(
+        7,
+        Route(
+            "/.well-known/openid-configuration",
+            openid_configuration,
+        ),
+    )
+    starlette_app.routes.insert(
+        8,
+        Route(
+            "/.well-known/openid-configuration/mcp",
+            openid_configuration,
+        ),
+    )
+    starlette_app.routes.insert(
+        9,
+        Route(
+            "/mcp/.well-known/openid-configuration",
+            openid_configuration,
         ),
     )
 
