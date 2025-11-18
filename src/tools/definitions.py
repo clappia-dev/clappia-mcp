@@ -7,8 +7,15 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import EmailStr
 from src.utils.logging_utils import get_logger
 from src.utils.context import get_auth_token
-from src.utils.constants import CLAPPIA_APP_DEFINITION_API_BASE_URL
-from clappia_api_tools import AppDefinitionAuthTokenClient
+from src.utils.constants import (
+    CLAPPIA_APP_DEFINITION_API_BASE_URL,
+    CLAPPIA_FILE_MANAGEMENT_API_BASE_URL,
+)
+from clappia_api_tools import (
+    AppDefinitionAuthTokenClient,
+    FileManagementAuthTokenClient,
+)
+from clappia_api_tools.models.definition import ExternalTemplateDefinition
 from typing import Union, Optional
 from clappia_api_tools.models import (
     AddPageBreakRequest,
@@ -116,10 +123,16 @@ logger = get_logger(__name__)
 
 def _get_app_definition_client(workplace_id: str) -> AppDefinitionAuthTokenClient:
     auth_token = get_auth_token()
+    file_management_client = FileManagementAuthTokenClient(
+        auth_token=auth_token,
+        workplace_id=workplace_id,
+        base_url=CLAPPIA_FILE_MANAGEMENT_API_BASE_URL,
+    )
     return AppDefinitionAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
         base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        file_management_client=file_management_client,
     )
 
 
@@ -509,6 +522,124 @@ def register_definition_tools(mcp: FastMCP):
         try:
             return await app_definition_client.update_live_version(
                 app_id=app_id, version_variable_name=version_variable_name
+            )
+        finally:
+            await app_definition_client.close()
+
+    @mcp.tool()
+    async def add_new_app_template(
+        app_id: str,
+        workplace_id: str,
+        definition: ExternalTemplateDefinition,
+        body_html: str,
+        header_html: str | None = None,
+        footer_html: str | None = None,
+        version_variable_name: str | None = None,
+    ):
+        """Add new app template.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            definition: ASK USER - Template definition
+            body_html: ASK USER - Template body HTML
+            header_html: ASK USER - Template header HTML (optional)
+            footer_html: ASK USER - Template footer HTML (optional)
+            version_variable_name: App version variable name (optional)
+        """
+        app_definition_client = _get_app_definition_client(workplace_id)
+        try:
+            return await app_definition_client.add_new_app_template(
+                app_id=app_id,
+                definition=definition,
+                body_html=body_html,
+                header_html=header_html,
+                footer_html=footer_html,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await app_definition_client.close()
+
+    @mcp.tool()
+    async def update_app_template(
+        app_id: str,
+        workplace_id: str,
+        index: int,
+        definition: ExternalTemplateDefinition,
+        body_html: str,
+        header_html: str | None = None,
+        footer_html: str | None = None,
+        version_variable_name: str | None = None,
+    ):
+        """Update app template.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            index: ASK USER - Template index
+            definition: ASK USER - Template definition
+            body_html: ASK USER - Template body HTML
+            header_html: ASK USER - Template header HTML (optional)
+            footer_html: ASK USER - Template footer HTML (optional)
+            version_variable_name: App version variable name (optional)
+        """
+        app_definition_client = _get_app_definition_client(workplace_id)
+        try:
+            return await app_definition_client.update_app_template(
+                app_id=app_id,
+                index=index,
+                definition=definition,
+                body_html=body_html,
+                header_html=header_html,
+                footer_html=footer_html,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await app_definition_client.close()
+
+    @mcp.tool()
+    async def get_app_templates(
+        app_id: str,
+        workplace_id: str,
+        version_variable_name: str | None = None,
+    ):
+        """Get app templates.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            version_variable_name: App version variable name (optional)
+        """
+        app_definition_client = _get_app_definition_client(workplace_id)
+        try:
+            return await app_definition_client.get_app_templates(
+                app_id=app_id,
+                version_variable_name=version_variable_name,
+            )
+        finally:
+            await app_definition_client.close()
+
+    @mcp.tool()
+    async def update_app_icon(
+        app_id: str,
+        workplace_id: str,
+        icon_public_url: str,
+        version_variable_name: str | None = None,
+    ):
+        """Update app icon.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            icon_public_url: ASK USER - App icon public URL
+            version_variable_name: App version variable name (optional)
+        """
+        app_definition_client = _get_app_definition_client(workplace_id)
+        try:
+            return await app_definition_client.update_app_icon(
+                app_id=app_id,
+                icon_public_url=icon_public_url,
+                version_variable_name=version_variable_name,
             )
         finally:
             await app_definition_client.close()
