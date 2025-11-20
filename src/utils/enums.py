@@ -20,7 +20,7 @@ class Environment(str, Enum):
         except ValueError:
             raise ValueError(
                 f"Invalid ENVIRONMENT value: {value}. Must be one of: {', '.join([e.value for e in cls])}"
-            )
+            ) from None
 
     @classmethod
     def from_env(

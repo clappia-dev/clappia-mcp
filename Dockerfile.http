@@ -36,10 +36,12 @@ ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
+ARG ENVIRONMENT=prod
 
 # Set platform-specific labels
 LABEL org.opencontainers.image.platform.detected="${TARGETPLATFORM}"
 LABEL org.opencontainers.image.platform.build="${BUILDPLATFORM}"
+LABEL clappia.environment="${ENVIRONMENT}"
 
 # Usage and environment metadata
 LABEL usage="docker run -p 8000:8000 -e ENVIRONMENT=prod -e WORKERS=2 clappia-mcp:latest"
@@ -70,7 +72,6 @@ RUN pip install --no-cache-dir uv
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
-COPY README.md ./ 2>/dev/null || true
 
 # Install Python dependencies
 RUN uv sync --frozen
@@ -91,7 +92,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONPATH=/app
-ENV ENVIRONMENT=prod
+ENV ENVIRONMENT=${ENVIRONMENT}
 ENV WORKERS=2
 
 # Expose port

@@ -18,6 +18,40 @@ install:
 	uv sync
 	@echo "$(GREEN)✅ Dependencies installed$(NC)"
 
+.PHONY: install-dev
+install-dev:
+	@echo "$(BLUE)Installing dependencies with dev tools...$(NC)"
+	uv sync --extra dev
+	@echo "$(GREEN)✅ Dependencies installed$(NC)"
+
+.PHONY: lint
+lint:
+	@echo "$(BLUE)Running linter...$(NC)"
+	uv run ruff check .
+	@echo "$(GREEN)✅ Linting completed$(NC)"
+
+.PHONY: lint-fix
+lint-fix:
+	@echo "$(BLUE)Running linter with auto-fix...$(NC)"
+	uv run ruff check --fix .
+	@echo "$(GREEN)✅ Linting completed$(NC)"
+
+.PHONY: format
+format:
+	@echo "$(BLUE)Formatting code...$(NC)"
+	uv run ruff format .
+	@echo "$(GREEN)✅ Formatting completed$(NC)"
+
+.PHONY: format-check
+format-check:
+	@echo "$(BLUE)Checking code formatting...$(NC)"
+	uv run ruff format --check .
+	@echo "$(GREEN)✅ Format check completed$(NC)"
+
+.PHONY: check
+check: lint format-check
+	@echo "$(GREEN)✅ All checks passed$(NC)"
+
 .PHONY: clean
 clean:
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
@@ -34,6 +68,7 @@ build-http:
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
 		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
 		--build-arg VERSION=$(VERSION) \
+		--build-arg ENVIRONMENT=prod \
 		-t $(DOCKER_IMAGE):$(VERSION) \
 		-t $(DOCKER_IMAGE):latest \
 		--load \
@@ -68,6 +103,7 @@ push:
 		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
 		--build-arg VCS_REF=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
 		--build-arg VERSION=$(VERSION) \
+		--build-arg ENVIRONMENT=prod \
 		-t $(DOCKER_IMAGE):$(VERSION) \
 		-t $(DOCKER_IMAGE):latest \
 		--push \
@@ -78,13 +114,13 @@ push:
 deploy: clean install build-http push
 	@echo "$(GREEN)🎉 Deployment completed!$(NC)"
 
-.PHONY: deploy-gcp
-deploy-gcp: 
-	@echo "$(BLUE)Setting up GCP project...$(NC)"
+.PHONY: deploy-dev
+deploy-dev:
+	@echo "$(BLUE)Setting up GCP project for DEV environment...$(NC)"
 	gcloud config set project model-osprey-471909-q3
 	@echo "$(BLUE)Compiling requirements.txt...$(NC)"
 	uv pip compile pyproject.toml -o requirements.txt
-	@echo "$(BLUE)Deploying to Google Cloud Run...$(NC)"
+	@echo "$(BLUE)Deploying to Google Cloud Run (DEV)...$(NC)"
 	gcloud run deploy clappia-mcp-server \
 		--source . \
 		--platform managed \
@@ -96,6 +132,51 @@ deploy-gcp:
 		--min-instances 0 \
 		--max-instances 2 \
 		--port 8080 \
+		--set-env-vars ENVIRONMENT=dev \
 		--clear-base-image
-	@echo "$(GREEN)✅ GCP deployment completed!$(NC)"
+	@echo "$(GREEN)✅ GCP DEV deployment completed!$(NC)"
+
+.PHONY: deploy-qa
+deploy-qa:
+	@echo "$(BLUE)Setting up GCP project for QA environment...$(NC)"
+	gcloud config set project model-osprey-471909-q3
+	@echo "$(BLUE)Compiling requirements.txt...$(NC)"
+	uv pip compile pyproject.toml -o requirements.txt
+	@echo "$(BLUE)Deploying to Google Cloud Run (QA)...$(NC)"
+	gcloud run deploy clappia-mcp-server-qa \
+		--source . \
+		--platform managed \
+		--region europe-west1 \
+		--allow-unauthenticated \
+		--memory 8Gi \
+		--cpu 2 \
+		--timeout 300 \
+		--min-instances 0 \
+		--max-instances 2 \
+		--port 8080 \
+		--set-env-vars ENVIRONMENT=qa \
+		--clear-base-image
+	@echo "$(GREEN)✅ GCP QA deployment completed!$(NC)"
+
+.PHONY: deploy-prod
+deploy-prod:
+	@echo "$(BLUE)Setting up GCP project for PROD environment...$(NC)"
+	gcloud config set project model-osprey-471909-q3
+	@echo "$(BLUE)Compiling requirements.txt...$(NC)"
+	uv pip compile pyproject.toml -o requirements.txt
+	@echo "$(BLUE)Deploying to Google Cloud Run (PROD)...$(NC)"
+	gcloud run deploy clappia-mcp-server-prod \
+		--source . \
+		--platform managed \
+		--region europe-west1 \
+		--allow-unauthenticated \
+		--memory 8Gi \
+		--cpu 2 \
+		--timeout 300 \
+		--min-instances 0 \
+		--max-instances 2 \
+		--port 8080 \
+		--set-env-vars ENVIRONMENT=prod \
+		--clear-base-image
+	@echo "$(GREEN)✅ GCP PROD deployment completed!$(NC)"
 

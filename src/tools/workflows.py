@@ -3,18 +3,21 @@ workflows.py - Clappia MCP Workflows Module
 Handles all workflow-related operations with clean Pydantic models
 """
 
-from mcp.server.fastmcp import FastMCP
-from src.utils.logging_utils import get_logger
-from src.utils.context import get_auth_token
-from src.utils.constants import CLAPPIA_WORKFLOW_DEFINITION_API_BASE_URL
+import logging
+from typing import Literal, Union
+
 from clappia_api_tools import WorkflowDefinitionAuthTokenClient
 from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
     UpsertCodeWorkflowStepRequest,
     UpsertConditionWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
     UpsertDatabaseWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
     UpsertEmailWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
     UpsertLoopWorkflowStepRequest,
     UpsertMobileNotificationWorkflowStepRequest,
     UpsertRestApiWorkflowStepRequest,
@@ -22,13 +25,11 @@ from clappia_api_tools.models import (
     UpsertSmsWorkflowStepRequest,
     UpsertWaitWorkflowStepRequest,
     UpsertWhatsAppWorkflowStepRequest,
-    UpsertCreateSubmissionWorkflowStepRequest,
-    UpsertDeleteSubmissionWorkflowStepRequest,
-    UpsertFindSubmissionWorkflowStepRequest,
-    UpsertEditSubmissionWorkflowStepRequest,
 )
+from mcp.server.fastmcp import FastMCP
 
-from typing import Literal, Optional, Union
+from src.utils.constants import WORKFLOW_DEFINITION_API_BASE_URL
+from src.utils.context import get_auth_token
 
 WorkflowStepRequestUnion = Union[
     UpsertAiWorkflowStepRequest,
@@ -50,7 +51,7 @@ WorkflowStepRequestUnion = Union[
     UpsertEditSubmissionWorkflowStepRequest,
 ]
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _get_workflow_definition_client(
@@ -60,7 +61,7 @@ def _get_workflow_definition_client(
     return WorkflowDefinitionAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_WORKFLOW_DEFINITION_API_BASE_URL,
+        base_url=WORKFLOW_DEFINITION_API_BASE_URL,
     )
 
 
@@ -72,7 +73,7 @@ def register_workflow_tools(mcp: FastMCP):
         app_id: str,
         workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Get workflow configuration for app.
 
@@ -99,9 +100,9 @@ def register_workflow_tools(mcp: FastMCP):
         workplace_id: str,
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         request: WorkflowStepRequestUnion,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ):
         """Add workflow step to app. Step type determined by request object type.
 
@@ -134,7 +135,7 @@ def register_workflow_tools(mcp: FastMCP):
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         step_variable_name: str,
         request: WorkflowStepRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Update workflow step. Step type must match existing type.
 
@@ -165,7 +166,7 @@ def register_workflow_tools(mcp: FastMCP):
         trigger_type: Literal["newSubmission", "editSubmission", "reviewSubmission"],
         step_variable_name: str,
         parent_step_variable_name: str,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Reorder workflow step.
 

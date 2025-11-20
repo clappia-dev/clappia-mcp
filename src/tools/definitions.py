@@ -3,72 +3,74 @@ definitions.py - Clappia MCP Definitions Module
 Handles all app definition-related operations with clean Pydantic models
 """
 
-from mcp.server.fastmcp import FastMCP
-from pydantic import EmailStr
-from src.utils.logging_utils import get_logger
-from src.utils.context import get_auth_token
-from src.utils.constants import (
-    CLAPPIA_APP_DEFINITION_API_BASE_URL,
-    CLAPPIA_FILE_MANAGEMENT_API_BASE_URL,
-)
+import logging
+from typing import Union
+
 from clappia_api_tools import (
     AppDefinitionAuthTokenClient,
     FileManagementAuthTokenClient,
 )
-from clappia_api_tools.models.definition import ExternalTemplateDefinition
-from typing import Union, Optional
 from clappia_api_tools.models import (
     AddPageBreakRequest,
     ExternalPageDefinition,
+    UpdateAppMetadataRequest,
     UpdatePageBreakRequest,
-    UpsertSectionRequest,
-    UpsertFieldTextRequest,
-    UpsertFieldTextAreaRequest,
-    UpsertFieldDependencyAppRequest,
-    UpsertFieldRestApiRequest,
     UpsertFieldAddressRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldButtonRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCounterRequest,
     UpsertFieldDatabaseRequest,
     UpsertFieldDateRequest,
-    UpsertFieldAIRequest,
-    UpsertFieldCodeRequest,
-    UpsertFieldCodeReaderRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
     UpsertFieldEmailInputRequest,
     UpsertFieldEmojiRequest,
     UpsertFieldFileRequest,
+    UpsertFieldFormulaRequest,
     UpsertFieldGpsLocationRequest,
+    UpsertFieldImageViewerRequest,
     UpsertFieldLiveTrackingRequest,
     UpsertFieldManualAddressRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldPdfViewerRequest,
     UpsertFieldPhoneNumberRequest,
     UpsertFieldProgressBarRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldRichTextEditorRequest,
     UpsertFieldSignatureRequest,
-    UpsertFieldCounterRequest,
     UpsertFieldSliderRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldTextRequest,
     UpsertFieldTimeRequest,
     UpsertFieldToggleRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldUrlInputRequest,
     UpsertFieldValidationRequest,
     UpsertFieldVideoViewerRequest,
     UpsertFieldVoiceRequest,
-    UpsertFieldFormulaRequest,
-    UpsertFieldImageViewerRequest,
-    UpsertFieldRichTextEditorRequest,
-    UpsertFieldNfcReaderRequest,
-    UpsertFieldNumberInputRequest,
-    UpsertFieldPdfViewerRequest,
-    UpsertFieldReadOnlyFileRequest,
-    UpsertFieldReadOnlyTextRequest,
-    UpsertFieldTagsRequest,
-    UpsertFieldUniqueSequentialRequest,
-    UpsertFieldDropdownRequest,
-    UpsertFieldRadioRequest,
-    UpsertFieldUrlInputRequest,
-    UpsertFieldCheckboxRequest,
-    UpsertFieldRazorpayPaymentGatewayRequest,
-    UpsertFieldEazypayPaymentGatewayRequest,
-    UpsertFieldPaypalPaymentGatewayRequest,
-    UpsertFieldStripePaymentGatewayRequest,
-    UpsertFieldButtonRequest,
-    UpdateAppMetadataRequest,
+    UpsertSectionRequest,
 )
+from clappia_api_tools.models.definition import ExternalTemplateDefinition
+from mcp.server.fastmcp import FastMCP
+from pydantic import EmailStr
+
+from src.utils.constants import (
+    APP_DEFINITION_API_BASE_URL,
+    FILE_MANAGEMENT_API_BASE_URL,
+)
+from src.utils.context import get_auth_token
 
 FieldRequestUnion = Union[
     UpsertFieldTextRequest,
@@ -118,7 +120,7 @@ FieldRequestUnion = Union[
     UpsertFieldButtonRequest,
 ]
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _get_app_definition_client(workplace_id: str) -> AppDefinitionAuthTokenClient:
@@ -126,12 +128,12 @@ def _get_app_definition_client(workplace_id: str) -> AppDefinitionAuthTokenClien
     file_management_client = FileManagementAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_FILE_MANAGEMENT_API_BASE_URL,
+        base_url=FILE_MANAGEMENT_API_BASE_URL,
     )
     return AppDefinitionAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_APP_DEFINITION_API_BASE_URL,
+        base_url=APP_DEFINITION_API_BASE_URL,
         file_management_client=file_management_client,
     )
 
@@ -144,7 +146,7 @@ def register_definition_tools(mcp: FastMCP):
         section_index: int,
         workplace_id: str,
         request: UpsertSectionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Add section to app.
 
@@ -175,7 +177,7 @@ def register_definition_tools(mcp: FastMCP):
         section_index: int,
         workplace_id: str,
         request: UpsertSectionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Update section in app.
 
@@ -282,7 +284,7 @@ def register_definition_tools(mcp: FastMCP):
         workplace_id: str,
         field_name: str,
         request: FieldRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Update field in app. Field type must match existing type.
 
@@ -449,7 +451,7 @@ def register_definition_tools(mcp: FastMCP):
         app_id: str,
         workplace_id: str,
         request: UpdateAppMetadataRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Update app metadata (name, description, icon, category).
 

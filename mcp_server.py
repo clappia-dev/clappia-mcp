@@ -1,14 +1,15 @@
+import logging
 import sys
-from mcp.server.fastmcp import FastMCP
-from src.utils.logging_utils import get_logger
-from src.tools.submissions import register_submission_tools
-from src.tools.definitions import register_definition_tools
-from src.tools.workflows import register_workflow_tools
-from src.tools.analytics import register_analytics_tools
-from src.tools.workplace import register_workplace_tools
-from src.tools.auth import register_auth_tools
 
-logger = get_logger(__name__)
+from mcp.server.fastmcp import FastMCP
+
+from src.tools.analytics import register_analytics_tools
+from src.tools.definitions import register_definition_tools
+from src.tools.submissions import register_submission_tools
+from src.tools.workflows import register_workflow_tools
+from src.tools.workplace import register_workplace_tools
+
+logger = logging.getLogger(__name__)
 
 app = FastMCP("clappia-mcp-server")
 
@@ -19,7 +20,6 @@ AVAILABLE_MODULES = {
     "workflows": register_workflow_tools,
     "analytics": register_analytics_tools,
     "workplace": register_workplace_tools,
-    "auth": register_auth_tools,
 }
 
 

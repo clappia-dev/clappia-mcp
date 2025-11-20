@@ -1,25 +1,24 @@
-import sys
-import os
 import logging
+import os
+import sys
+
 import uvicorn
-from pydantic import AnyHttpUrl
-from mcp.server.fastmcp import FastMCP
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.fastmcp import FastMCP
+from pydantic import AnyHttpUrl
+from starlette.applications import Starlette
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
-from starlette.requests import Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.applications import Starlette
 
-from src.utils.jwt_utils import JWTTokenVerifier, get_jwt_config
-from src.utils.constants import OAUTH_CONSTANTS
-from src.tools.submissions import register_submission_tools
-from src.tools.definitions import register_definition_tools
-from src.tools.workflows import register_workflow_tools
 from src.tools.analytics import register_analytics_tools
+from src.tools.definitions import register_definition_tools
+from src.tools.submissions import register_submission_tools
+from src.tools.workflows import register_workflow_tools
 from src.tools.workplace import register_workplace_tools
-from src.tools.auth import register_auth_tools
-
+from src.utils.constants import OAUTH_CONSTANTS
+from src.utils.jwt_utils import JWTTokenVerifier, get_jwt_config
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,6 @@ def register_all_tools():
         "workflows": register_workflow_tools,
         "analytics": register_analytics_tools,
         "workplace": register_workplace_tools,
-        "auth": register_auth_tools,
     }
     for register_func in AVAILABLE_MODULES.values():
         try:
@@ -59,11 +57,11 @@ def register_all_tools():
 register_all_tools()
 
 
-async def health_check(request: Request):
+async def health_check(_request: Request):
     return JSONResponse({"status": "ok"})
 
 
-async def protected_resource_metadata(request: Request):
+async def protected_resource_metadata(_request: Request):
     return JSONResponse(
         {
             "resource": AUDIENCE,
@@ -74,7 +72,7 @@ async def protected_resource_metadata(request: Request):
     )
 
 
-async def oauth_authorization_server_metadata(request: Request):
+async def oauth_authorization_server_metadata(_request: Request):
     return JSONResponse(
         {
             "issuer": OAUTH_CONSTANTS["DEFAULT_ISSUER"],
@@ -94,7 +92,7 @@ async def oauth_authorization_server_metadata(request: Request):
     )
 
 
-async def openid_configuration(request: Request):
+async def openid_configuration(_request: Request):
     return JSONResponse(
         {
             "issuer": OAUTH_CONSTANTS["DEFAULT_ISSUER"],
@@ -114,7 +112,7 @@ async def openid_configuration(request: Request):
     )
 
 
-async def root_endpoint(request: Request):
+async def root_endpoint(_request: Request):
     return JSONResponse(
         {
             "server": "clappia-mcp-server",
@@ -126,21 +124,19 @@ async def root_endpoint(request: Request):
                 "oauth_authorization_server": "/.well-known/oauth-authorization-server",
                 "openid_configuration": "/.well-known/openid-configuration",
             },
+            "environment": os.getenv("ENVIRONMENT", "unknown"),
         }
     )
 
 
-async def debug_info(request: Request):
+async def debug_info(_request: Request):
     try:
         tools = await mcp_app.list_tools()
         routes_list = []
         for route in app.routes:
             if hasattr(route, "path"):
                 methods = getattr(route, "methods", None)
-                if methods:
-                    methods_str = ",".join(str(m) for m in methods)
-                else:
-                    methods_str = "ANY"
+                methods_str = ",".join(str(m) for m in methods) if methods else "ANY"
                 routes_list.append(f"{route.path} [{methods_str}]")
             else:
                 routes_list.append(f"{type(route).__name__}")
@@ -244,10 +240,7 @@ print("REGISTERED ROUTES:")
 for route in app.routes:
     if hasattr(route, "path"):
         methods = getattr(route, "methods", None)
-        if methods:
-            methods_str = ",".join(str(m) for m in methods)
-        else:
-            methods_str = "ANY"
+        methods_str = ",".join(str(m) for m in methods) if methods else "ANY"
         print(f"  {route.path} - {methods_str}")
     else:
         print(f"  {type(route).__name__}")

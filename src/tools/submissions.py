@@ -3,22 +3,24 @@ submissions.py - Clappia MCP Submissions Module using Modern Pydantic Approach
 Handles all submission management operations with clean Pydantic models
 """
 
-from mcp.server.fastmcp import FastMCP
-from src.utils.logging_utils import get_logger
-from src.utils.context import get_auth_token
-from src.utils.constants import CLAPPIA_SUBMISSIONS_API_BASE_URL
+import logging
+
 from clappia_api_tools import SubmissionAuthTokenClient
 from clappia_api_tools.models import (
-    GetSubmissionsRequest,
-    GetSubmissionsAggregationRequest,
     CreateSubmissionRequest,
     EditSubmissionRequest,
-    UpdateSubmissionStatusRequest,
-    UpdateSubmissionOwnersRequest,
+    GetSubmissionsAggregationRequest,
     GetSubmissionsInExcelRequest,
+    GetSubmissionsRequest,
+    UpdateSubmissionOwnersRequest,
+    UpdateSubmissionStatusRequest,
 )
+from mcp.server.fastmcp import FastMCP
 
-logger = get_logger(__name__)
+from src.utils.constants import SUBMISSIONS_API_BASE_URL
+from src.utils.context import get_auth_token
+
+logger = logging.getLogger(__name__)
 
 
 def _get_submission_client(workplace_id: str) -> SubmissionAuthTokenClient:
@@ -26,7 +28,7 @@ def _get_submission_client(workplace_id: str) -> SubmissionAuthTokenClient:
     return SubmissionAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_SUBMISSIONS_API_BASE_URL,
+        base_url=SUBMISSIONS_API_BASE_URL,
     )
 
 
@@ -178,8 +180,6 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - UpdateSubmissionOwnersRequest object with submission ID and new owner email addresses
         """
-        email_ids = [str(email) for email in request.email_ids]
-
         submission_client = _get_submission_client(workplace_id)
         try:
             return await submission_client.update_owners(

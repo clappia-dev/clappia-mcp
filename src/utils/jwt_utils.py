@@ -5,10 +5,11 @@ Handles JWT token verification and related authentication logic.
 """
 
 import logging
-from typing import Optional
-from jose import jwt, JWTError
+
+from jose import JWTError, jwt
 from mcp.server.auth.provider import AccessToken, TokenVerifier
-from .constants import JWT_ISSUER, JWT_AUDIENCE, JWT_SECRET_KEY, JWT_ALGORITHM
+
+from .constants import JWT_ALGORITHM, JWT_AUDIENCE, JWT_ISSUER, JWT_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 class JWTTokenVerifier(TokenVerifier):
     """Verifies JWT tokens for MCP OAuth flow"""
 
-    async def verify_token(self, token: str) -> Optional[AccessToken]:
+    async def verify_token(self, token: str) -> AccessToken | None:
         """
         Verify a JWT token and return an AccessToken if valid.
 

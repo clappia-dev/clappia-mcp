@@ -33,6 +33,7 @@ MCP server for managing [Clappia](https://www.clappia.com) applications through 
 ### 1. Install Prerequisites
 
 **macOS:**
+
 ```bash
 brew install mcp-proxy
 ```
@@ -54,6 +55,7 @@ Download and install Node.js 20+ from [nodejs.org](https://nodejs.org/)
 4. Save and completely restart Claude Desktop
 
 **macOS Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -71,6 +73,7 @@ Download and install Node.js 20+ from [nodejs.org](https://nodejs.org/)
 ```
 
 **Windows Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -126,28 +129,31 @@ clappia-mcp/
     └── utils/              # Utilities
         ├── constants.py
         ├── context.py
-        ├── jwt_utils.py
-        └── logging_utils.py
+        └── jwt_utils.py
 ```
 
 ## Troubleshooting
 
 **Tools not appearing**
+
 - Verify MCP Proxy (macOS) or Node.js 20+ (Windows) is installed
 - Check API key is correct with no extra spaces
 - Completely quit and restart Claude Desktop (may need to do twice)
 
 **Connection errors**
+
 - Verify API key validity and permissions
 - Check network connectivity
 - Review JSON configuration syntax
 
 **Tool execution failures**
+
 - Verify all required parameters
 - Ensure correct App ID format
 - Check error messages for specific guidance
 
 **Slow performance**
+
 - Reduce pagination page sizes
 - Optimize data filters
 - Consider upgrading Claude account

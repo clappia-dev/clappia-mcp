@@ -2,16 +2,15 @@
 Context utilities for API key authentication
 """
 
-import os
-from typing import Optional
+import logging
+
+from dotenv import load_dotenv
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
-from src.utils.logging_utils import get_logger
-from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_auth_token() -> str:
@@ -34,7 +33,7 @@ def get_token_from_headers() -> str | None:
         return None
 
 
-def get_access_token_object() -> Optional[AccessToken]:
+def get_access_token_object() -> AccessToken | None:
     """
     Get the full AccessToken object with all token information.
 

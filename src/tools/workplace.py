@@ -3,24 +3,23 @@ workplace.py - Clappia MCP Workplace Module using Modern Pydantic Approach
 Handles all workplace user management operations with clean Pydantic models
 """
 
+import logging
 from typing import Literal
-from pydantic import EmailStr
 
-from mcp.server.fastmcp import FastMCP
-from src.utils.logging_utils import get_logger
-from src.utils.context import get_auth_token
-from src.utils.constants import CLAPPIA_WORKPLACE_API_BASE_URL
-from clappia_api_tools.models.workplace import Permission
 from clappia_api_tools import WorkplaceAuthTokenClient
-
 from clappia_api_tools.models.request import (
     AddUserToWorkplaceRequest,
-    UpdateWorkplaceUserDetailsRequest,
     UpdateWorkplaceUserAttributesRequest,
+    UpdateWorkplaceUserDetailsRequest,
 )
+from clappia_api_tools.models.workplace import Permission
+from mcp.server.fastmcp import FastMCP
+from pydantic import EmailStr
 
+from src.utils.constants import WORKPLACE_API_BASE_URL
+from src.utils.context import get_auth_token
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _get_workplace_client(workplace_id: str) -> WorkplaceAuthTokenClient:
@@ -28,7 +27,7 @@ def _get_workplace_client(workplace_id: str) -> WorkplaceAuthTokenClient:
     return WorkplaceAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_WORKPLACE_API_BASE_URL,
+        base_url=WORKPLACE_API_BASE_URL,
     )
 
 

@@ -3,24 +3,26 @@ analytics.py - Clappia MCP Analytics Module
 Handles all analytics-related operations with clean Pydantic models
 """
 
-from mcp.server.fastmcp import FastMCP
-from src.utils.logging_utils import get_logger
-from src.utils.context import get_auth_token
-from src.utils.constants import CLAPPIA_ANALYTICS_API_BASE_URL
+import logging
+from typing import Union
+
 from clappia_api_tools import AnalyticsAuthTokenClient
 from clappia_api_tools.models import (
-    UpsertSummaryChartDefinitionRequest,
     UpsertBarChartDefinitionRequest,
-    UpsertPieChartDefinitionRequest,
-    UpsertDoughnutChartDefinitionRequest,
-    UpsertLineChartDefinitionRequest,
     UpsertDataTableChartDefinitionRequest,
-    UpsertMapChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
     UpsertGanttChartDefinitionRequest,
+    UpsertLineChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertSummaryChartDefinitionRequest,
 )
-from typing import Union, Optional
+from mcp.server.fastmcp import FastMCP
 
-logger = get_logger(__name__)
+from src.utils.constants import ANALYTICS_API_BASE_URL
+from src.utils.context import get_auth_token
+
+logger = logging.getLogger(__name__)
 
 
 ChartDefinitionRequestUnion = Union[
@@ -40,7 +42,7 @@ def _get_analytics_client(workplace_id: str) -> AnalyticsAuthTokenClient:
     return AnalyticsAuthTokenClient(
         auth_token=auth_token,
         workplace_id=workplace_id,
-        base_url=CLAPPIA_ANALYTICS_API_BASE_URL,
+        base_url=ANALYTICS_API_BASE_URL,
     )
 
 
@@ -54,7 +56,7 @@ def register_analytics_tools(mcp: FastMCP):
         chart_index: int,
         chart_title: str,
         request: ChartDefinitionRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Add chart to app analytics dashboard.
 
@@ -80,7 +82,7 @@ def register_analytics_tools(mcp: FastMCP):
         workplace_id: str,
         chart_index: int,
         request: ChartDefinitionRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Update chart in app analytics dashboard.
 
@@ -105,7 +107,7 @@ def register_analytics_tools(mcp: FastMCP):
         workplace_id: str,
         source_index: int,
         target_index: int,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ):
         """Reorder charts in app analytics dashboard.
 
@@ -129,7 +131,7 @@ def register_analytics_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def get_app_charts(
-        app_id: str, workplace_id: str, version_variable_name: Optional[str] = None
+        app_id: str, workplace_id: str, version_variable_name: str | None = None
     ):
         """Get all charts in app analytics dashboard.
 
