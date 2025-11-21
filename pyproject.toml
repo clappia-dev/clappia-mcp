@@ -9,7 +9,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "python-dotenv>=1.0.0",
     "mcp>=1.19.0",
-    "clappia-api-tools>=2.0.20",
+    "clappia-api-tools>=2.0.21",
 ]
 
 [project.optional-dependencies]
