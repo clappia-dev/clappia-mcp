@@ -14,6 +14,7 @@ from starlette.routing import Route
 
 from src.tools.analytics import register_analytics_tools
 from src.tools.definitions import register_definition_tools
+from src.tools.file import register_file_management_tools
 from src.tools.submissions import register_submission_tools
 from src.tools.workflows import register_workflow_tools
 from src.tools.workplace import register_workplace_tools
@@ -42,6 +43,7 @@ def register_all_tools():
     AVAILABLE_MODULES = {
         "submissions": register_submission_tools,
         "definitions": register_definition_tools,
+        "files": register_file_management_tools,
         "workflows": register_workflow_tools,
         "analytics": register_analytics_tools,
         "workplace": register_workplace_tools,

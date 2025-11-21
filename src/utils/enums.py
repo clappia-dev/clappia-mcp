@@ -5,6 +5,7 @@ This module contains all enum definitions used across the Clappia MCP server.
 """
 
 from enum import Enum
+from typing import Optional
 
 
 class Environment(str, Enum):
@@ -24,7 +25,7 @@ class Environment(str, Enum):
 
     @classmethod
     def from_env(
-        cls, env_var: str = "ENVIRONMENT", default: "Environment" = None
+        cls, env_var: str = "ENVIRONMENT", default: Optional["Environment"] = None
     ) -> "Environment":
         import os
 

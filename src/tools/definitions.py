@@ -529,13 +529,13 @@ def register_definition_tools(mcp: FastMCP):
             await app_definition_client.close()
 
     @mcp.tool()
-    async def add_new_app_template(
+    async def add_new_print_template(
         app_id: str,
         workplace_id: str,
         definition: ExternalTemplateDefinition,
-        body_html: str,
-        header_html: str | None = None,
-        footer_html: str | None = None,
+        body_html_string: str,
+        header_html_string: str | None = None,
+        footer_html_string: str | None = None,
         version_variable_name: str | None = None,
     ):
         """Add new app template.
@@ -544,19 +544,19 @@ def register_definition_tools(mcp: FastMCP):
             app_id: ASK USER - App identifier
             workplace_id: ASK USER - Workplace identifier
             definition: ASK USER - Template definition
-            body_html: ASK USER - Template body HTML
-            header_html: ASK USER - Template header HTML (optional)
-            footer_html: ASK USER - Template footer HTML (optional)
+            body_html_string: ASK USER - Template body HTML
+            header_html_string: ASK USER - Template header HTML (optional)
+            footer_html_string: ASK USER - Template footer HTML (optional)
             version_variable_name: App version variable name (optional)
         """
         app_definition_client = _get_app_definition_client(workplace_id)
         try:
-            return await app_definition_client.add_new_app_template(
+            return await app_definition_client.add_new_print_template(
                 app_id=app_id,
                 definition=definition,
-                body_html=body_html,
-                header_html=header_html,
-                footer_html=footer_html,
+                body_html_string=body_html_string,
+                header_html_string=header_html_string,
+                footer_html_string=footer_html_string,
                 version_variable_name=version_variable_name,
             )
         finally:
@@ -568,9 +568,9 @@ def register_definition_tools(mcp: FastMCP):
         workplace_id: str,
         index: int,
         definition: ExternalTemplateDefinition,
-        body_html: str,
-        header_html: str | None = None,
-        footer_html: str | None = None,
+        body_html_string: str,
+        header_html_string: str | None = None,
+        footer_html_string: str | None = None,
         version_variable_name: str | None = None,
     ):
         """Update app template.
@@ -580,32 +580,32 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             index: ASK USER - Template index
             definition: ASK USER - Template definition
-            body_html: ASK USER - Template body HTML
-            header_html: ASK USER - Template header HTML (optional)
+            body_html_string: ASK USER - Template body HTML
+            header_html_string: ASK USER - Template header HTML (optional)
             footer_html: ASK USER - Template footer HTML (optional)
             version_variable_name: App version variable name (optional)
         """
         app_definition_client = _get_app_definition_client(workplace_id)
         try:
-            return await app_definition_client.update_app_template(
+            return await app_definition_client.update_print_template(
                 app_id=app_id,
                 index=index,
                 definition=definition,
-                body_html=body_html,
-                header_html=header_html,
-                footer_html=footer_html,
+                body_html_string=body_html_string,
+                header_html_string=header_html_string,
+                footer_html_string=footer_html_string,
                 version_variable_name=version_variable_name,
             )
         finally:
             await app_definition_client.close()
 
     @mcp.tool()
-    async def get_app_templates(
+    async def get_print_templates(
         app_id: str,
         workplace_id: str,
         version_variable_name: str | None = None,
     ):
-        """Get app templates.
+        """Get print templates.
 
         Args:
             app_id: ASK USER - App identifier
@@ -614,7 +614,7 @@ def register_definition_tools(mcp: FastMCP):
         """
         app_definition_client = _get_app_definition_client(workplace_id)
         try:
-            return await app_definition_client.get_app_templates(
+            return await app_definition_client.get_print_templates(
                 app_id=app_id,
                 version_variable_name=version_variable_name,
             )
@@ -664,6 +664,34 @@ def register_definition_tools(mcp: FastMCP):
             return await app_definition_client.create_new_app_version(
                 app_id=app_id,
                 version_name=version_name,
+            )
+        finally:
+            await app_definition_client.close()
+
+    @mcp.tool()
+    async def get_print_template_html_content(
+        app_id: str,
+        workplace_id: str,
+        body_file_id: str,
+        header_file_id: str | None = None,
+        footer_file_id: str | None = None,
+    ):
+        """Get print template HTML content.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            body_file_id: ASK USER - Body file identifier
+            header_file_id: ASK USER - Header file identifier (optional)
+            footer_file_id: ASK USER - Footer file identifier (optional)
+        """
+        app_definition_client = _get_app_definition_client(workplace_id)
+        try:
+            return await app_definition_client.get_print_template_content(
+                app_id=app_id,
+                body_file_id=body_file_id,
+                header_file_id=header_file_id,
+                footer_file_id=footer_file_id,
             )
         finally:
             await app_definition_client.close()
