@@ -3,14 +3,25 @@ Context utilities for API key authentication
 """
 
 import logging
+import os
 
 from dotenv import load_dotenv
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
 
+from src.utils.constants import SERVER_ENV
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+def get_api_key() -> str | None:
+    return os.getenv("CLAPPIA_API_KEY")
+
+
+def is_local_mode() -> bool:
+    return SERVER_ENV.is_local()
 
 
 def get_auth_token() -> str:

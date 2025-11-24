@@ -6,3 +6,4 @@ __pycache__/
 .vscode/
 *.pem
 *.tar
+.cursor/

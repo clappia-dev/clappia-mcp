@@ -12,6 +12,7 @@ class Environment(str, Enum):
     DEV = "dev"
     QA = "qa"
     PROD = "prod"
+    LOCAL = "local"
 
     @classmethod
     def from_string(cls, value: str) -> "Environment":
@@ -34,3 +35,6 @@ class Environment(str, Enum):
 
     def is_production(self) -> bool:
         return self == Environment.PROD
+
+    def is_local(self) -> bool:
+        return self == Environment.LOCAL

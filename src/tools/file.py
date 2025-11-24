@@ -1,25 +1,10 @@
 import logging
 
-from clappia_api_tools import (
-    FileManagementAuthTokenClient,
-)
 from mcp.server.fastmcp import FastMCP
 
-from src.utils.constants import (
-    FILE_MANAGEMENT_API_BASE_URL,
-)
-from src.utils.context import get_auth_token
+from src.utils.client import get_file_management_client
 
 logger = logging.getLogger(__name__)
-
-
-def _get_file_management_client(workplace_id: str) -> FileManagementAuthTokenClient:
-    auth_token = get_auth_token()
-    return FileManagementAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=FILE_MANAGEMENT_API_BASE_URL,
-    )
 
 
 def register_file_management_tools(mcp: FastMCP):
@@ -36,9 +21,9 @@ def register_file_management_tools(mcp: FastMCP):
             file_id: ASK USER - File identifier
             workplace_id: ASK USER - Workplace identifier
         """
-        file_management_client = _get_file_management_client(workplace_id)
+        file_management_client = get_file_management_client(workplace_id)
         try:
-            return await file_management_client.get_attached_file_url(
+            return await file_management_client.get_attached_file_file_url(
                 app_id=app_id, file_id=file_id
             )
         finally:
@@ -57,9 +42,9 @@ def register_file_management_tools(mcp: FastMCP):
             file_id: ASK USER - File identifier
             workplace_id: ASK USER - Workplace identifier
         """
-        file_management_client = _get_file_management_client(workplace_id)
+        file_management_client = get_file_management_client(workplace_id)
         try:
-            return await file_management_client.get_attached_file_url(
+            return await file_management_client.get_image_viewer_file_url(
                 app_id=app_id, file_id=file_id
             )
         finally:
@@ -78,9 +63,9 @@ def register_file_management_tools(mcp: FastMCP):
             file_id: ASK USER - File identifier
             workplace_id: ASK USER - Workplace identifier
         """
-        file_management_client = _get_file_management_client(workplace_id)
+        file_management_client = get_file_management_client(workplace_id)
         try:
-            return await file_management_client.get_attached_file_url(
+            return await file_management_client.get_pdf_viewer_file_url(
                 app_id=app_id, file_id=file_id
             )
         finally:
@@ -99,9 +84,9 @@ def register_file_management_tools(mcp: FastMCP):
             file_id: ASK USER - File identifier
             workplace_id: ASK USER - Workplace identifier
         """
-        file_management_client = _get_file_management_client(workplace_id)
+        file_management_client = get_file_management_client(workplace_id)
         try:
-            return await file_management_client.get_attached_file_url(
+            return await file_management_client.get_video_viewer_file_url(
                 app_id=app_id, file_id=file_id
             )
         finally:

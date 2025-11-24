@@ -6,7 +6,6 @@ Handles all workflow-related operations with clean Pydantic models
 import logging
 from typing import Literal, Union
 
-from clappia_api_tools import WorkflowDefinitionAuthTokenClient
 from clappia_api_tools.models import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
@@ -28,8 +27,7 @@ from clappia_api_tools.models import (
 )
 from mcp.server.fastmcp import FastMCP
 
-from src.utils.constants import WORKFLOW_DEFINITION_API_BASE_URL
-from src.utils.context import get_auth_token
+from src.utils.client import get_workflow_definition_client
 
 WorkflowStepRequestUnion = Union[
     UpsertAiWorkflowStepRequest,
@@ -54,15 +52,6 @@ WorkflowStepRequestUnion = Union[
 logger = logging.getLogger(__name__)
 
 
-def _get_workflow_definition_client(
-    workplace_id: str,
-) -> WorkflowDefinitionAuthTokenClient:
-    auth_token = get_auth_token()
-    return WorkflowDefinitionAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=WORKFLOW_DEFINITION_API_BASE_URL,
-    )
 
 
 def register_workflow_tools(mcp: FastMCP):
@@ -84,7 +73,7 @@ def register_workflow_tools(mcp: FastMCP):
             version_variable_name: App version variable name (optional)
         """
 
-        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        workflow_definition_client = get_workflow_definition_client(workplace_id)
         try:
             return await workflow_definition_client.get_workflow(
                 app_id=app_id,
@@ -115,7 +104,7 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name: Parent step variable name if nested step (optional)
             version_variable_name: App version variable name (optional)
         """
-        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        workflow_definition_client = get_workflow_definition_client(workplace_id)
         try:
             return await workflow_definition_client.add(
                 app_id=app_id,
@@ -147,7 +136,7 @@ def register_workflow_tools(mcp: FastMCP):
             request: ASK USER - Workflow step definition request object with updated configuration
             version_variable_name: App version variable name (optional)
         """
-        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        workflow_definition_client = get_workflow_definition_client(workplace_id)
         try:
             return await workflow_definition_client.update(
                 app_id=app_id,
@@ -178,7 +167,7 @@ def register_workflow_tools(mcp: FastMCP):
             parent_step_variable_name: ASK USER - Variable name of new parent step
             version_variable_name: App version variable name (optional)
         """
-        workflow_definition_client = _get_workflow_definition_client(workplace_id)
+        workflow_definition_client = get_workflow_definition_client(workplace_id)
         try:
             return await workflow_definition_client.reorder_step(
                 app_id=app_id,

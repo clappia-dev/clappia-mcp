@@ -5,7 +5,6 @@ Handles all submission management operations with clean Pydantic models
 
 import logging
 
-from clappia_api_tools import SubmissionAuthTokenClient
 from clappia_api_tools.models import (
     CreateSubmissionRequest,
     EditSubmissionRequest,
@@ -17,19 +16,9 @@ from clappia_api_tools.models import (
 )
 from mcp.server.fastmcp import FastMCP
 
-from src.utils.constants import SUBMISSIONS_API_BASE_URL
-from src.utils.context import get_auth_token
+from src.utils.client import get_submission_client
 
 logger = logging.getLogger(__name__)
-
-
-def _get_submission_client(workplace_id: str) -> SubmissionAuthTokenClient:
-    auth_token = get_auth_token()
-    return SubmissionAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=SUBMISSIONS_API_BASE_URL,
-    )
 
 
 def register_submission_tools(mcp: FastMCP):
@@ -48,7 +37,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - GetSubmissionsRequest object with filters, pagination, sorting, and field selection
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.get_submissions(
                 app_id=app_id,
@@ -70,7 +59,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - GetSubmissionsAggregationRequest object with aggregation config, grouping, and filters
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.get_submissions_aggregation(
                 app_id=app_id,
@@ -92,7 +81,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - CreateSubmissionRequest object with field values and submission metadata
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.create_submission(
                 app_id=app_id,
@@ -114,7 +103,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - EditSubmissionRequest object with submission ID and updated field values
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.edit_submission(
                 app_id=app_id,
@@ -136,7 +125,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - UpdateSubmissionStatusRequest object with submission ID and new status
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.update_status(
                 app_id=app_id,
@@ -158,7 +147,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - GetSubmissionsInExcelRequest object with filters and export configuration
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.get_submissions_in_excel(
                 app_id=app_id,
@@ -180,7 +169,7 @@ def register_submission_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             request: ASK USER - UpdateSubmissionOwnersRequest object with submission ID and new owner email addresses
         """
-        submission_client = _get_submission_client(workplace_id)
+        submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.update_owners(
                 app_id=app_id,

@@ -6,7 +6,6 @@ Handles all analytics-related operations with clean Pydantic models
 import logging
 from typing import Union
 
-from clappia_api_tools import AnalyticsAuthTokenClient
 from clappia_api_tools.models import (
     UpsertBarChartDefinitionRequest,
     UpsertDataTableChartDefinitionRequest,
@@ -19,8 +18,7 @@ from clappia_api_tools.models import (
 )
 from mcp.server.fastmcp import FastMCP
 
-from src.utils.constants import ANALYTICS_API_BASE_URL
-from src.utils.context import get_auth_token
+from src.utils.client import get_analytics_client
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +33,6 @@ ChartDefinitionRequestUnion = Union[
     UpsertMapChartDefinitionRequest,
     UpsertGanttChartDefinitionRequest,
 ]
-
-
-def _get_analytics_client(workplace_id: str) -> AnalyticsAuthTokenClient:
-    auth_token = get_auth_token()
-    return AnalyticsAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=ANALYTICS_API_BASE_URL,
-    )
 
 
 def register_analytics_tools(mcp: FastMCP):
@@ -68,7 +57,7 @@ def register_analytics_tools(mcp: FastMCP):
             request: ASK USER - Chart definition request object (type determines chart type)
             version_variable_name: App version variable name (optional)
         """
-        analytics_client = _get_analytics_client(workplace_id)
+        analytics_client = get_analytics_client(workplace_id)
         try:
             return await analytics_client.add(
                 app_id, chart_index, chart_title, request, version_variable_name
@@ -93,7 +82,7 @@ def register_analytics_tools(mcp: FastMCP):
             request: ASK USER - Chart definition request object with updated configuration
             version_variable_name: App version variable name (optional)
         """
-        analytics_client = _get_analytics_client(workplace_id)
+        analytics_client = get_analytics_client(workplace_id)
         try:
             return await analytics_client.update(
                 app_id, chart_index, request, version_variable_name
@@ -118,7 +107,7 @@ def register_analytics_tools(mcp: FastMCP):
             target_index: ASK USER - New position index for chart
             version_variable_name: App version variable name (optional)
         """
-        analytics_client = _get_analytics_client(workplace_id)
+        analytics_client = get_analytics_client(workplace_id)
         try:
             return await analytics_client.reorder_chart(
                 app_id=app_id,
@@ -140,7 +129,7 @@ def register_analytics_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_variable_name: App version variable name (optional)
         """
-        analytics_client = _get_analytics_client(workplace_id)
+        analytics_client = get_analytics_client(workplace_id)
         try:
             return await analytics_client.get_charts(
                 app_id=app_id, version_variable_name=version_variable_name

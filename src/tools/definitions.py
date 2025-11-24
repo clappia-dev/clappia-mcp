@@ -6,10 +6,6 @@ Handles all app definition-related operations with clean Pydantic models
 import logging
 from typing import Union
 
-from clappia_api_tools import (
-    AppDefinitionAuthTokenClient,
-    FileManagementAuthTokenClient,
-)
 from clappia_api_tools.models import (
     AddPageBreakRequest,
     ExternalPageDefinition,
@@ -66,11 +62,7 @@ from clappia_api_tools.models.definition import ExternalTemplateDefinition
 from mcp.server.fastmcp import FastMCP
 from pydantic import EmailStr
 
-from src.utils.constants import (
-    APP_DEFINITION_API_BASE_URL,
-    FILE_MANAGEMENT_API_BASE_URL,
-)
-from src.utils.context import get_auth_token
+from src.utils.client import get_app_definition_client
 
 FieldRequestUnion = Union[
     UpsertFieldTextRequest,
@@ -123,19 +115,6 @@ FieldRequestUnion = Union[
 logger = logging.getLogger(__name__)
 
 
-def _get_app_definition_client(workplace_id: str) -> AppDefinitionAuthTokenClient:
-    auth_token = get_auth_token()
-    file_management_client = FileManagementAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=FILE_MANAGEMENT_API_BASE_URL,
-    )
-    return AppDefinitionAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=APP_DEFINITION_API_BASE_URL,
-        file_management_client=file_management_client,
-    )
 
 
 def register_definition_tools(mcp: FastMCP):
@@ -158,7 +137,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Section definition request object
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.add_section(
                 app_id=app_id,
@@ -189,7 +168,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Section definition request object with updated configuration
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_section(
                 app_id=app_id,
@@ -226,7 +205,7 @@ def register_definition_tools(mcp: FastMCP):
             target_page_index: ASK USER - New page index after move
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.reorder_section(
                 app_id=app_id,
@@ -264,7 +243,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Field definition request object (type determines field type)
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.add_field(
                 app_id=app_id,
@@ -295,7 +274,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Field definition request object with updated configuration
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_field(
                 app_id=app_id,
@@ -331,7 +310,7 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.reorder_field(
                 app_id=app_id,
@@ -361,7 +340,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Page break definition request object
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.add_page_break(
                 app_id=app_id,
@@ -386,7 +365,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - Page break definition request object with updated configuration
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_page(
                 app_id=app_id,
@@ -409,7 +388,7 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.get_definition(
                 app_id=app_id,
@@ -435,7 +414,7 @@ def register_definition_tools(mcp: FastMCP):
             pages: ASK USER - List of page definitions containing sections and fields
             description: App description (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.create_app(
                 name=name,
@@ -461,7 +440,7 @@ def register_definition_tools(mcp: FastMCP):
             request: ASK USER - App metadata request object with updated fields
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_app_metadata(
                 app_id=app_id,
@@ -478,7 +457,7 @@ def register_definition_tools(mcp: FastMCP):
         Args:
             app_id: ASK USER - App identifier
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.get_app_versions(app_id=app_id)
         finally:
@@ -499,7 +478,7 @@ def register_definition_tools(mcp: FastMCP):
             initial_version_name: ASK USER - Current version name
             new_version_name: ASK USER - New version name
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_app_version(
                 app_id=app_id,
@@ -520,7 +499,7 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_variable_name: ASK USER - Version name to set as live
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_live_version(
                 app_id=app_id, version_variable_name=version_variable_name
@@ -549,7 +528,7 @@ def register_definition_tools(mcp: FastMCP):
             footer_html_string: ASK USER - Template footer HTML (optional)
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.add_new_print_template(
                 app_id=app_id,
@@ -585,7 +564,7 @@ def register_definition_tools(mcp: FastMCP):
             footer_html: ASK USER - Template footer HTML (optional)
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_print_template(
                 app_id=app_id,
@@ -612,7 +591,7 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.get_print_templates(
                 app_id=app_id,
@@ -626,6 +605,7 @@ def register_definition_tools(mcp: FastMCP):
         app_id: str,
         workplace_id: str,
         icon_public_url: str,
+        file_name: str,
         version_variable_name: str | None = None,
     ):
         """Update app icon.
@@ -634,13 +614,15 @@ def register_definition_tools(mcp: FastMCP):
             app_id: ASK USER - App identifier
             workplace_id: ASK USER - Workplace identifier
             icon_public_url: ASK USER - App icon public URL
+            file_name: ASK USER - File name
             version_variable_name: App version variable name (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.update_app_icon(
                 app_id=app_id,
                 icon_public_url=icon_public_url,
+                file_name=file_name,
                 version_variable_name=version_variable_name,
             )
         finally:
@@ -659,7 +641,7 @@ def register_definition_tools(mcp: FastMCP):
             workplace_id: ASK USER - Workplace identifier
             version_name: ASK USER - Unique name for the new version
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.create_new_app_version(
                 app_id=app_id,
@@ -685,7 +667,7 @@ def register_definition_tools(mcp: FastMCP):
             header_file_id: ASK USER - Header file identifier (optional)
             footer_file_id: ASK USER - Footer file identifier (optional)
         """
-        app_definition_client = _get_app_definition_client(workplace_id)
+        app_definition_client = get_app_definition_client(workplace_id)
         try:
             return await app_definition_client.get_print_template_content(
                 app_id=app_id,

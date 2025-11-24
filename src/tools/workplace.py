@@ -6,7 +6,6 @@ Handles all workplace user management operations with clean Pydantic models
 import logging
 from typing import Literal
 
-from clappia_api_tools import WorkplaceAuthTokenClient
 from clappia_api_tools.models.request import (
     AddUserToWorkplaceRequest,
     UpdateWorkplaceUserAttributesRequest,
@@ -16,19 +15,9 @@ from clappia_api_tools.models.workplace import Permission
 from mcp.server.fastmcp import FastMCP
 from pydantic import EmailStr
 
-from src.utils.constants import WORKPLACE_API_BASE_URL
-from src.utils.context import get_auth_token
+from src.utils.client import get_workplace_client
 
 logger = logging.getLogger(__name__)
-
-
-def _get_workplace_client(workplace_id: str) -> WorkplaceAuthTokenClient:
-    auth_token = get_auth_token()
-    return WorkplaceAuthTokenClient(
-        auth_token=auth_token,
-        workplace_id=workplace_id,
-        base_url=WORKPLACE_API_BASE_URL,
-    )
 
 
 def register_workplace_tools(mcp: FastMCP):
@@ -64,7 +53,7 @@ def register_workplace_tools(mcp: FastMCP):
             attributes=attributes or {},
         )
 
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.add_user_to_workplace(request)
         finally:
@@ -92,7 +81,7 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
 
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.update_workplace_user_details(request)
         finally:
@@ -120,7 +109,7 @@ def register_workplace_tools(mcp: FastMCP):
             phone_number=phone_number,
         )
 
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.update_workplace_user_attributes(request)
         finally:
@@ -141,7 +130,7 @@ def register_workplace_tools(mcp: FastMCP):
             email_address: User email (required if phone_number not provided)
             phone_number: User phone number (required if email_address not provided)
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.update_workplace_user_role(
                 email_address=email_address,
@@ -166,7 +155,7 @@ def register_workplace_tools(mcp: FastMCP):
             email_address: User email (required if phone_number not provided)
             phone_number: User phone number (required if email_address not provided)
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.update_workplace_user_groups(
                 email_address=email_address,
@@ -193,7 +182,7 @@ def register_workplace_tools(mcp: FastMCP):
             email_address: User email (required if phone_number not provided)
             phone_number: User phone number (required if email_address not provided)
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.add_user_to_app(
                 app_id=app_id,
@@ -211,7 +200,7 @@ def register_workplace_tools(mcp: FastMCP):
         Args:
             workplace_id: ASK USER - Workplace identifier
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.get_workplace_apps()
         finally:
@@ -230,7 +219,7 @@ def register_workplace_tools(mcp: FastMCP):
             email_address: User email (required if phone_number not provided)
             phone_number: User phone number (required if email_address not provided)
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.get_workplace_user_apps(
                 email_address=email_address,
@@ -252,7 +241,7 @@ def register_workplace_tools(mcp: FastMCP):
             page_size: Number of users per page (default: 50)
             token: Pagination token for next page (optional)
         """
-        workplace_client = _get_workplace_client(workplace_id)
+        workplace_client = get_workplace_client(workplace_id)
         try:
             return await workplace_client.get_workplace_users(
                 page_size=page_size,
