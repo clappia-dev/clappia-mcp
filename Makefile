@@ -162,7 +162,7 @@ deploy-dev: ## Deploy to DEV environment
 		--allow-unauthenticated \
 		--memory 8Gi \
 		--cpu 2 \
-		--timeout 300 \
+		--timeout 60 \
 		--min-instances 0 \
 		--max-instances 2 \
 		--port 8080 \
@@ -184,7 +184,7 @@ deploy-qa: ## Deploy to QA environment
 		--allow-unauthenticated \
 		--memory 8Gi \
 		--cpu 2 \
-		--timeout 300 \
+		--timeout 60 \
 		--min-instances 0 \
 		--max-instances 2 \
 		--port 8080 \
@@ -206,7 +206,7 @@ deploy-prod: ## Deploy to PROD environment
 		--allow-unauthenticated \
 		--memory 8Gi \
 		--cpu 2 \
-		--timeout 300 \
+		--timeout 60 \
 		--min-instances 0 \
 		--max-instances 2 \
 		--port 8080 \

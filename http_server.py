@@ -5,6 +5,7 @@ import sys
 import uvicorn
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import AnyHttpUrl
 from starlette.applications import Starlette
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -30,11 +31,17 @@ AUDIENCE = jwt_config["audience"]
 
 mcp_app = FastMCP(
     "clappia-mcp-server",
+    stateless_http=True, 
     token_verifier=JWTTokenVerifier(),
     auth=AuthSettings(
         issuer_url=AnyHttpUrl(ISSUER),
         resource_server_url=AnyHttpUrl(AUDIENCE),
         required_scopes=["mcp:tools"],
+    ),
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=["mcp.clappia.com"],
+        allowed_origins=["https://claude.ai"],
     ),
 )
 

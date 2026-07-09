@@ -4,10 +4,14 @@ Handles all submission management operations with clean Pydantic models
 """
 
 import logging
+import json
+import time
+import sys
 
 from clappia_api_tools.models import (
     CreateSubmissionRequest,
     EditSubmissionRequest,
+    GetSubmissionRequest,
     GetSubmissionsAggregationRequest,
     GetSubmissionsInExcelRequest,
     GetSubmissionsRequest,
@@ -39,10 +43,18 @@ def register_submission_tools(mcp: FastMCP):
         """
         submission_client = get_submission_client(workplace_id)
         try:
-            return await submission_client.get_submissions(
+            logger.info(f"[get_submissions] Calling API: app={app_id}, page_size={request.page_size}, last_id={request.last_submission_id}, fields={request.fields}")
+            
+            result = await submission_client.get_submissions(
                 app_id=app_id,
                 request=request,
             )
+            logger.info(f"[get_submissions] Result type: {type(result).__name__}")
+
+            # Force fully plain Python types — handles nested Pydantic models too
+            result_plain = json.loads(result.model_dump_json())
+            logger.info(f"[get_submissions] Converted OK, returning")
+            return result_plain
         finally:
             await submission_client.close()
 
@@ -62,6 +74,28 @@ def register_submission_tools(mcp: FastMCP):
         submission_client = get_submission_client(workplace_id)
         try:
             return await submission_client.get_submissions_aggregation(
+                app_id=app_id,
+                request=request,
+            )
+        finally:
+            await submission_client.close()
+
+    @mcp.tool()
+    async def get_submission(
+        app_id: str,
+        workplace_id: str,
+        request: GetSubmissionRequest,
+    ):
+        """Get a single submission by ID.
+
+        Args:
+            app_id: ASK USER - App identifier
+            workplace_id: ASK USER - Workplace identifier
+            request: ASK USER - GetSubmissionRequest object with submission ID
+        """
+        submission_client = get_submission_client(workplace_id)
+        try:
+            return await submission_client.get_submission(
                 app_id=app_id,
                 request=request,
             )
