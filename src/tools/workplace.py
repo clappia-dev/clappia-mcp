@@ -15,7 +15,7 @@ from clappia_api_tools.models.workplace import Permission
 from mcp.server.fastmcp import FastMCP
 from pydantic import EmailStr
 
-from src.utils.client import get_workplace_client
+from src.utils.client import get_app_user_client, get_workplace_client
 
 logger = logging.getLogger(__name__)
 
@@ -182,16 +182,16 @@ def register_workplace_tools(mcp: FastMCP):
             email_address: User email (required if phone_number not provided)
             phone_number: User phone number (required if email_address not provided)
         """
-        workplace_client = get_workplace_client(workplace_id)
+        app_user_client = get_app_user_client(workplace_id)
         try:
-            return await workplace_client.add_user_to_app(
+            return await app_user_client.add_user_to_app(
                 app_id=app_id,
                 permissions=permissions,
                 email_address=email_address,
                 phone_number=phone_number,
             )
         finally:
-            await workplace_client.close()
+            await app_user_client.close()
 
     @mcp.tool()
     async def get_workplace_apps(workplace_id: str):

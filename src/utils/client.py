@@ -7,6 +7,8 @@ from clappia_api_tools import (
     AnalyticsAuthTokenClient,
     AppDefinitionAPIKeyClient,
     AppDefinitionAuthTokenClient,
+    AppUserAPIKeyClient,
+    AppUserAuthTokenClient,
     FileManagementAPIKeyClient,
     FileManagementAuthTokenClient,
     SubmissionAPIKeyClient,
@@ -20,6 +22,7 @@ from clappia_api_tools import (
 from src.utils.constants import (
     ANALYTICS_API_BASE_URL,
     APP_DEFINITION_API_BASE_URL,
+    APP_USER_API_BASE_URL,
     FILE_MANAGEMENT_API_BASE_URL,
     SUBMISSIONS_API_BASE_URL,
     WORKFLOW_DEFINITION_API_BASE_URL,
@@ -136,6 +139,26 @@ def get_workplace_client(workplace_id: str):
             auth_token=auth_token,
             workplace_id=workplace_id,
             base_url=WORKPLACE_API_BASE_URL,
+        )
+
+
+def get_app_user_client(workplace_id: str):
+    if is_local_mode():
+        api_key = get_api_key()
+        if not api_key:
+            raise ValueError(
+                "CLAPPIA_API_KEY environment variable is required for local mode"
+            )
+        return AppUserAPIKeyClient(
+            api_key=api_key,
+            base_url=APP_USER_API_BASE_URL,
+        )
+    else:
+        auth_token = get_auth_token()
+        return AppUserAuthTokenClient(
+            auth_token=auth_token,
+            workplace_id=workplace_id,
+            base_url=APP_USER_API_BASE_URL,
         )
 
 

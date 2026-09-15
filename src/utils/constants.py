@@ -33,6 +33,13 @@ LOCAL_WORKPLACE_API_BASE_URLS = {
     Environment.LOCAL: f"{DEV_API_BASE_URL}/workplace",
 }
 
+LOCAL_APP_USER_API_BASE_URLS = {
+    Environment.DEV: f"{DEV_API_BASE_URL}/app",
+    Environment.QA: f"{QA_API_BASE_URL}/app",
+    Environment.PROD: f"{PROD_API_BASE_URL}/app",
+    Environment.LOCAL: f"{DEV_API_BASE_URL}/app",
+}
+
 LOCAL_WORKFLOW_DEFINITION_API_BASE_URLS = {
     Environment.DEV: f"{DEV_API_BASE_URL}/workflowdefinitionv2",
     Environment.QA: f"{QA_API_BASE_URL}/workflowdefinitionv2",
@@ -70,6 +77,12 @@ WORKPLACE_API_BASE_URLS = {
     Environment.DEV: f"{DEV_API_BASE_URL}/workplace/internal",
     Environment.QA: f"{QA_API_BASE_URL}/workplace/internal",
     Environment.PROD: f"{PROD_API_BASE_URL}/workplace/internal",
+}
+
+APP_USER_API_BASE_URLS = {
+    Environment.DEV: f"{DEV_API_BASE_URL}/app/internal",
+    Environment.QA: f"{QA_API_BASE_URL}/app/internal",
+    Environment.PROD: f"{PROD_API_BASE_URL}/app/internal",
 }
 
 WORKFLOW_DEFINITION_API_BASE_URLS = {
@@ -121,6 +134,9 @@ ANALYTICS_API_BASE_URL = _get_base_url(
 )
 WORKPLACE_API_BASE_URL = _get_base_url(
     WORKPLACE_API_BASE_URLS, LOCAL_WORKPLACE_API_BASE_URLS
+)
+APP_USER_API_BASE_URL = _get_base_url(
+    APP_USER_API_BASE_URLS, LOCAL_APP_USER_API_BASE_URLS
 )
 WORKFLOW_DEFINITION_API_BASE_URL = _get_base_url(
     WORKFLOW_DEFINITION_API_BASE_URLS, LOCAL_WORKFLOW_DEFINITION_API_BASE_URLS
